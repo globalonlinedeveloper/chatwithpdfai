@@ -35,9 +35,11 @@ A **pay-per-document** AI chat product for PDFs. Drop a PDF, ask anything, get c
 | Email | Hostinger SMTP via Nodemailer | `support@chatwithpdfai.com` mailbox |
 | Payment | **Razorpay** (deferred) | India-first, UPI/netbanking native, INR |
 | Auth | Custom bcrypt + session cookies (deferred) | No third-party dependency |
-| AI / LLM | TBD (OpenAI or Anthropic) | User has API key |
-| File storage | TBD (Hostinger disk or S3) | TBD |
-| Vector search | TBD (pgvector, Pinecone, Qdrant) | TBD |
+| AI / LLM | **Smart router across OpenAI + Anthropic + Gemini** | Routes per request to cheapest capable model; max profit margin |
+| Embedding model | OpenAI `text-embedding-3-small` (1536-dim, $0.02/M tokens) | Cheapest mainstream; good quality |
+| Vector store | **MariaDB 11.8 native `VECTOR` type + `VEC_DISTANCE_COSINE`** | No external service; confirmed working on Hostinger MariaDB 11.8.6 |
+| File storage | **Hostinger disk** (7 TB available with current plan) | PDF binaries on disk; metadata + embeddings in MySQL |
+| OCR | Tesseract first-pass, vision LLM (Gemini Pro) fallback | Free local OCR for clean scans; LLM for hard cases |
 
 ---
 
@@ -68,19 +70,23 @@ A **pay-per-document** AI chat product for PDFs. Drop a PDF, ask anything, get c
 Phases are ordered by user's directive: **product features first, auth + payment last.**
 
 ### 🟦 Phase 1 — Product MVP (build now)
-The actual chat-with-PDF product. No auth gating yet — anyone can use it freely while we build.
+The actual chat-with-PDF product. Build behind a feature flag so we can test without exposing publicly until auth+payment land.
 
 | Feature | Status | Notes |
 | --- | --- | --- |
-| PDF upload | ⬜ Planned | Storage location TBD (Hostinger disk vs S3) |
-| PDF text extraction | ⬜ Planned | `pdf-parse` or similar; OCR for scanned via Tesseract or cloud OCR |
-| Chunking + embeddings | ⬜ Planned | Need vector store choice |
-| AI chat (single PDF) | ⬜ Planned | RAG pipeline → LLM call → cited response |
-| Multi-PDF chat | ⬜ Planned | After single-PDF works |
-| Citation linking (click answer → see source page) | ⬜ Planned | Crucial for the "cited answers" promise |
-| Chat history persistence | ⬜ Planned | Likely a `conversations` + `messages` table |
-| Library / "my docs" view | ⬜ Planned | List of uploaded PDFs |
-| Document viewer | ⬜ Planned | `document.html` exists as mockup |
+| PDF upload endpoint | ⬜ Planned | Multipart POST → save to `~/domains/chatwithpdfai.com/uploads/<user_id>/<uuid>.pdf`; row in `pdf_documents` |
+| PDF text extraction | ⬜ Planned | `pdf-parse` library; populate `pdf_pages.text` per page |
+| OCR fallback for scanned pages | ⬜ Planned | Tesseract first; if confidence low → Gemini Pro Vision call |
+| Per-page embeddings | ⬜ Planned | OpenAI `text-embedding-3-small`; store as `VECTOR(1536)` in `pdf_pages.embedding` |
+| `lib/llm/router.js` smart routing | ⬜ Planned | Multi-provider with cost-based selection; see Architecture section |
+| `llm_usage` cost tracking | ⬜ Planned | Every LLM call logged with provider/model/tokens/cost |
+| AI chat (single PDF) | ⬜ Planned | RAG: top-k vector search → LLM call → cited response |
+| Multi-PDF chat | ⬜ Planned | After single-PDF; combines pages from multiple `pdf_documents` |
+| Citation linking | ⬜ Planned | Click answer → jump to source page in PDF viewer |
+| Chat history persistence | ⬜ Planned | `chat_conversations` + `chat_messages` tables |
+| Library / "my docs" view | ⬜ Planned | `library.html` mockup exists |
+| Document viewer | ⬜ Planned | `document.html` mockup exists |
+| Credit-cost preview before send | ⬜ Planned | UI shows "this query will use ~X credits" before user hits send |
 
 ### 🟨 Phase 2 — Operational features
 Email templates, admin tools, monitoring.
@@ -175,17 +181,106 @@ Stuff that matters after launch.
 | 2026-05-28 | hPanel Environment Variables, not `.env` files on server | Hostinger wipes `.env` files on every deploy |
 | 2026-05-28 | `outputFileTracingIncludes` in `next.config.js` for server deps | Hostinger prunes `node_modules` after build; explicit trace keeps mysql2/nodemailer/etc. |
 | 2026-05-28 | Public GitHub repo | User chose; means no auth needed for Hostinger to pull on deploy |
+| 2026-05-28 | LLM = smart router across OpenAI + Anthropic + Gemini | Maximize profit by routing each query to cheapest capable provider; user explicitly asked for "always maintain maximum profits percentage" |
+| 2026-05-28 | Embedding = OpenAI `text-embedding-3-small` | Cheapest mainstream model with good quality; ~₹0.04 per 50-page PDF |
+| 2026-05-28 | Vector store = MariaDB 11.8 native `VECTOR` type | No external service needed; confirmed `VEC_DISTANCE_*` functions work on Hostinger's 11.8.6 |
+| 2026-05-28 | File storage = Hostinger disk (PDFs); MySQL (metadata + embeddings) | PDF binaries are too large for MySQL BLOB; Hostinger 7TB disk is free with plan |
+| 2026-05-28 | OCR = Tesseract first-pass, Gemini Pro Vision fallback | Free OCR for clean scans; LLM for hard cases (keeps margin) |
+| 2026-05-28 | Embedding chunking = per-page (one embedding per page) | Simpler implementation; trivial citation; long pages split with shared page_number |
+| 2026-05-28 | **No free tier** — every action costs credits | User explicit: "No free, we need to maintain maximum profits percentage" |
+| 2026-05-28 | Multi-PDF chat: charge credits proportional to LLM tokens consumed | User explicit: "based on LLM provider only we need to charge credits accordingly" |
+| 2026-05-28 | Target gross margin = 70% on LLM costs | User pays ~3.3× our raw provider cost in credits |
 
 ---
 
 ## Open questions
 
-- Which LLM provider? (User has OpenAI or Anthropic API key.)
-- Vector store choice: pgvector (extend MariaDB? not natively supported) vs Pinecone vs Qdrant vs in-memory for MVP?
-- File storage: Hostinger disk (7TB available, simple) vs S3 (durable, costs money)?
-- Free tier behavior: how many free uploads/queries before paywall?
-- Multi-PDF chat: max docs per conversation?
-- Embedding strategy: per-page chunks vs semantic chunks?
+(none right now — all major architecture decisions resolved 2026-05-28; see **Decisions made** below)
+
+---
+
+## Architecture — LLM Smart Router
+
+**Goal:** route every LLM call to the cheapest provider+model that can handle the task, while maintaining maximum profit margin on credits.
+
+### Routing decision tree
+
+```
+Request enters → classify by:
+  1. Has images / scanned pages?     →  needs vision model
+  2. Single PDF or multi-PDF?         →  multi-PDF needs longer context window
+  3. Estimated input tokens?          →  must fit in chosen model's context
+  4. User's plan tier?                →  premium tiers can opt into higher-quality
+  ↓
+Pick cheapest model satisfying all constraints
+  ↓
+Call provider; if rate-limited / errors → fallback to next-cheapest
+  ↓
+Record actual cost in `llm_usage` table → deduct credits with markup
+```
+
+### Provider/model cost matrix (per 1M tokens; approx, verify before launch)
+
+| Provider | Model | Vision | Input $/M | Output $/M | Use case |
+| --- | --- | --- | --- | --- | --- |
+| Google | `gemini-2.5-flash` | ✅ | ~$0.075 | ~$0.30 | **Default for text + vision** — cheapest capable |
+| Anthropic | `claude-haiku-4-5` | ✅ | ~$0.25 | ~$1.25 | Fallback when Gemini rate-limited |
+| OpenAI | `gpt-4o-mini` | ✅ | ~$0.15 | ~$0.60 | Fallback #2 |
+| Google | `gemini-2.5-pro` | ✅ | ~$1.25 | ~$5 | Complex multi-doc reasoning |
+| Anthropic | `claude-sonnet-4-6` | ✅ | ~$3 | ~$15 | Premium tier; long-form analysis |
+| OpenAI | `gpt-4o` | ✅ | ~$2.50 | ~$10 | Premium fallback |
+
+### Credit pricing model
+
+- Track actual provider cost per query in `llm_usage` table (provider, model, input_tokens, output_tokens, cost_inr)
+- Set **target gross margin = 70%** (i.e., user pays ~3.3× our cost in credits)
+- Convert cost → credits at fixed rate: 1 credit = ₹2 of LLM spend at our cost (so 1 credit ≈ ₹6.66 retail = our ₹3.99–₹7.98 per-document range)
+- Multi-PDF queries cost more credits proportional to combined token count
+- Vision/OCR queries cost more credits (vision tokens are pricier)
+- Display "this query will cost X credits" before sending to user
+
+### `lib/llm/router.js` responsibility
+
+1. Accept `{ task: 'chat'|'embed'|'ocr', pdfs: [...], messages: [...], userTier: 'free|paid' }`
+2. Classify task constraints (vision needed? token estimate? multi-doc?)
+3. Pick provider+model
+4. Call provider SDK
+5. Log to `llm_usage`
+6. Return response + computed credit cost
+7. On error → exponential backoff → fallback provider
+
+---
+
+## Embedding strategy
+
+**Decided:** **Per-page** embeddings.
+
+- One embedding per PDF page → simple, easy to cite ("answer from page 5")
+- Stored in MariaDB as `VECTOR(1536)` column on a `pdf_pages` table
+- Retrieval: `ORDER BY VEC_DISTANCE_COSINE(embedding, query_embedding) LIMIT 5`
+- If a page has too much text for one embedding (>8K tokens), the page is split into 2-3 chunks but all chunks share the same `page_number` for clean citation
+
+### Storage layout
+
+```sql
+pdf_documents     (id, user_id, original_filename, disk_path, page_count, status, created_at)
+pdf_pages         (id, document_id, page_number, text, embedding VECTOR(1536), created_at, INDEX vec_idx USING HNSW)
+chat_conversations (id, user_id, primary_document_id, title, created_at)
+chat_messages     (id, conversation_id, role, content, cited_page_ids JSON, credits_used, llm_provider, llm_model, created_at)
+llm_usage         (id, user_id, conversation_id, provider, model, input_tokens, output_tokens, cost_inr, credits_charged, created_at)
+```
+
+### File storage layout (Hostinger disk)
+
+```
+~/domains/chatwithpdfai.com/uploads/
+  └── <user_id>/
+      └── <document_uuid>.pdf
+```
+
+- Path stored in `pdf_documents.disk_path`
+- Permissions: 600 (user-read only)
+- Daily backup via Hostinger (already covered by hosting plan)
 
 ---
 
