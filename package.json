@@ -1,20 +1,21 @@
 {
   "name": "chatwithpdfai",
   "version": "1.0.0",
-  "description": "CHATWITHPDFAI.COM — static marketing + app site served via Express on Hostinger Node.js",
-  "main": "server.js",
+  "description": "CHATWITHPDFAI.COM — Static site served via Next.js on Hostinger",
+  "private": true,
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "compression": "^1.7.4"
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
-  "private": true,
   "author": "Rajasekar Selvam",
   "license": "UNLICENSED",
   "repository": {
