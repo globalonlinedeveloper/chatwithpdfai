@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sub-processor changes & why we publish a public list — CHATWITHPDFAI</title>
+  <meta name="description" content="Three new vendors. Two retired. Why this list is one of the most-read pages on our site." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Sub-processor changes & why we publish a public list">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Sub-processor changes & why we publish a public list","category":"Security","date":"Feb 01, 2026","readTime":"6 min read","lede":"Three new vendors. Two retired. Why this list is one of the most-read pages on our site.","author":{"name":"Dana Pham","role":"CEO · co-founder","initials":"DP"},"backHref":"../blog.html","backLabel":"Back to blog"},"sections":[{"body":["Our public sub-processor list at /legal/sub-processors is one of the most-read pages on the site. That surprises people. It's a table of vendors. Why would anyone read it?","Answer: every enterprise prospect runs a vendor risk review. Every compliance officer asks who touches their data. Publishing the list isn't just a GDPR requirement — it's a trust artifact."]},{"h2":"What changed in this quarter","body":[{"ol":["**Added Anthropic** as a fallback AI inference provider. Already used OpenAI; added Anthropic for high-availability and to reduce single-vendor risk.","**Added Postmark** for transactional email (was an in-house SES setup; Postmark gives us better deliverability monitoring).","**Added Linear** for engineering project tracking. No customer data flows there — confirmed via internal data-flow audit.","**Retired Mailchimp** (was used for marketing emails; consolidated to Postmark).","**Retired Datadog** (was used for monitoring; consolidated to a self-hosted stack)."]}]},{"h2":"How we evaluate vendors","body":["Every new vendor goes through:",{"ul":["**SOC 2 / ISO 27001 attestation** review","**Data flow mapping** — exactly which fields are sent, where stored, how long retained","**DPA review** — must accept our DPA or sign their own that meets our bar","**Incident history** — any breaches in the last 24 months, what they did about it","**Independent reference** — at least one existing customer we can talk to"]}]},{"h2":"What we don't do","body":["We do not use cookie-based ad-tracking pixels. We do not use Facebook Pixel, Google Ads pixel, or any cross-site tracking. The marketing site uses self-hosted PostHog for product analytics; the app uses none.","We do not sell, rent, or share customer data with anyone outside this list."]}],"related":[{"title":"Our 2026 SOC 2 Type II is signed","tag":"Security","href":"soc-2-2026.html"},{"title":"Why we'll never sell a subscription","tag":"Manifesto","href":"no-subscription.html"},{"title":"How we got citation accuracy to 99.6%","tag":"Engineering","href":"citation-accuracy.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

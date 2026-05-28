@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSO setup — CHATWITHPDFAI</title>
+  <meta name="description" content="Single sign-on via SAML or OIDC, available on Chamber plan and above." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <link rel="stylesheet" href="../print.css" media="print" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="SSO setup">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"SSO setup","category":"Billing","date":"Updated May 2026","readTime":"6 min read","lede":"Single sign-on via SAML or OIDC, available on Chamber plan and above.","backHref":"index.html","backLabel":"Help center"},"sections":[{"h2":"Supported providers","body":["SAML 2.0 (Okta, Azure AD, Google Workspace, OneLogin, Ping, JumpCloud, custom IdPs) and OIDC (Google, Microsoft, Auth0). On the Chamber plan."]},{"h2":"Configuration","body":["Account → Team & seats → **SSO** → **Configure**. We provide your SP metadata (entity ID, ACS URL). Your IdP admin maps your CHATWITHPDFAI configuration and provides their metadata (IdP entity ID, SSO URL, certificate)."]},{"h2":"User provisioning","body":["By default, users are provisioned just-in-time when they sign in via SSO. For SCIM-based provisioning, contact sales@chatwithpdfai.com — included with Chamber Enterprise."]},{"h2":"Domain capture","body":["Once SSO is verified, you can enforce **domain capture**: anyone signing up with an `@yourdomain.com` email is automatically added to your workspace and required to use SSO. Prevents shadow accounts."]},{"h2":"Troubleshooting","body":[{"ul":["**'Invalid signature'** — check your IdP certificate matches what we have on file","**'No such user'** — JIT provisioning is off; have an admin invite the user first","**Redirect loop** — usually a clock-skew issue on the IdP side; check NTP"]}]}],"related":[{"title":"Team & seats","tag":"Help","href":"team.html"},{"title":"Privacy basics","tag":"Help","href":"privacy.html"},{"title":"Security policy","tag":"Legal","href":"../legal/security.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

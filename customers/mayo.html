@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mayo Clinic · bedside translation — CHATWITHPDFAI</title>
+  <meta name="description" content="Dr. Aanya Patel uses CHATWITHPDFAI to translate consent forms with the original verbatim in a footnote — the only tool she trusts at the bedside." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Mayo Clinic · bedside translation">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Mayo Clinic · bedside translation","category":"Customer story","date":"May 02, 2026","readTime":"8 min read","lede":"Dr. Aanya Patel uses CHATWITHPDFAI to translate consent forms with the original verbatim in a footnote — the only tool she trusts at the bedside.","author":{"name":"Iris Chen","role":"Customer success","initials":"IC"},"backHref":"index.html","backLabel":"All customers"},"sections":[{"body":["Dr. Aanya Patel is a hospitalist at Mayo Clinic. She admits 8-12 patients per shift, half of whom speak a primary language other than English. Every admission requires informed consent in the patient's preferred language."]},{"h2":"The problem","body":["Traditional translation tools paraphrase. For consent forms, that's not acceptable. The treating physician needs to know exactly what the patient agreed to — verbatim, in the patient's language, with the English original auditable in seconds.",{"quote":"The translated consent form quotes the original Spanish in a footnote. It is the only product I trust at the bedside.","cite":"Dr. Aanya Patel · Hospitalist"}]},{"h2":"The solution","body":["Mayo's IT runs the Chamber plan with a signed BAA. Each consent form is translated by CHATWITHPDFAI with two outputs side-by-side: the translated version for the patient, and the original sentence quoted verbatim as a footnote for the physician.",{"stats":[["BAA","Signed · HIPAA aligned"],["70+","Languages"],["100%","Verbatim citation"]]}]},{"h2":"The workflow","body":[{"ol":["Upload the standard English consent form to the team folder","Translate to the patient's preferred language","The translated document includes English-original footnotes for every paragraph","Patient signs; physician verifies; PDF archived to the EHR with both versions"]}]},{"h2":"Why it works in healthcare","body":[{"ul":["**HIPAA alignment + BAA** — required for any tool that touches PHI","**Verbatim citations, not paraphrases** — physicians can audit translations in one click","**EU residency option** — Mayo's European partner sites elect this for GDPR compliance","**Audit logs** — every access to a patient document is logged for HIPAA"]}]},{"h2":"Beyond consent","body":["Mayo's team has expanded usage to clinical trial protocol summaries, medication instruction sheets, and translated discharge instructions. The same trust model — translated for the patient, verbatim for the clinician — applies to all of them."]}],"related":[{"title":"Latham & Watkins · MSA redlines","tag":"Customer story","href":"latham.html"},{"title":"Arkham Capital · 11-min memos","tag":"Customer story","href":"arkham.html"},{"title":"For healthcare","tag":"Use case","href":"../use-cases/healthcare.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

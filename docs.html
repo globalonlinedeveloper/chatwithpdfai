@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Documentation — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    .docs-grid { display: grid; grid-template-columns: 240px 1fr 280px; gap: 36px; }
+    .docs-side { position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
+    .docs-side a { display: block; padding: 6px 0; font-size: 13px; color: var(--text-3); border-left: 2px solid transparent; padding-left: 14px; }
+    .docs-side a:hover, .docs-side a.active { color: var(--text); border-left-color: var(--violet); }
+    .docs-side .grp { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-4); margin: 22px 0 8px; padding-left: 14px; }
+    .docs-side .grp:first-child { margin-top: 0; }
+    .code-block { background: #0a0c20; border: 1px solid var(--stroke-2); border-radius: var(--r); padding: 16px 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; color: #e9e5ff; overflow-x: auto; white-space: pre; }
+    .ep { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; background: var(--glass-2); border: 1px solid var(--stroke-2); border-radius: 6px; font-family: var(--mono); font-size: 12.5px; margin: 0 0 14px; }
+    .ep .verb { padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; }
+    .verb-post { background: var(--green); color: #0a0c20; }
+    .verb-get { background: var(--blue); color: #0a0c20; }
+    .verb-del { background: #ff7e7e; color: #0a0c20; }
+    @media (max-width: 1100px) { .docs-grid { grid-template-columns: 220px 1fr; } .docs-grid > aside:last-child { display: none; } }
+    @media (max-width: 760px) { .docs-grid { grid-template-columns: 1fr; } .docs-grid > aside { display: none; } }
+  </style>
+</head>
+<body data-screen-label="API Documentation">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    function Section({ id, title, children }) {
+      return <section id={id} style={{ marginBottom: 56, scrollMarginTop: 100 }}>
+        <h2 style={{ fontSize: 28, fontWeight: 600, margin: "0 0 18px", letterSpacing: "-0.02em" }}>{title}</h2>
+        {children}
+      </section>;
+    }
+    function Code({ children, lang }) {
+      return <pre className="code-block" style={{ margin: "12px 0" }}>{children}</pre>;
+    }
+    function Endpoint({ verb, path, desc }) {
+      const cls = verb === "POST" ? "verb-post" : verb === "DELETE" ? "verb-del" : "verb-get";
+      return (
+        <div style={{ margin: "20px 0 12px" }}>
+          <div className="ep"><span className={`verb ${cls}`}>{verb}</span><span>{path}</span></div>
+          {desc && <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "4px 0 8px" }}>{desc}</p>}
+        </div>
+      );
+    }
+    function ParamTable({ rows }) {
+      return (
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, margin: "8px 0 16px" }}>
+          <thead>
+            <tr><th style={{ textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--stroke-2)", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Param</th><th style={{ textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--stroke-2)", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Type</th><th style={{ textAlign: "left", padding: "8px 10px", borderBottom: "1px solid var(--stroke-2)", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-3)" }}>Description</th></tr>
+          </thead>
+          <tbody>{rows.map((r, i) => (
+            <tr key={i}><td style={{ padding: "8px 10px", borderBottom: "1px solid var(--stroke-1)", fontFamily: "var(--mono)", color: "var(--violet-2)" }}>{r[0]}</td><td style={{ padding: "8px 10px", borderBottom: "1px solid var(--stroke-1)", fontFamily: "var(--mono)", color: "var(--text-3)" }}>{r[1]}</td><td style={{ padding: "8px 10px", borderBottom: "1px solid var(--stroke-1)", color: "var(--text-2)" }}>{r[2]}</td></tr>
+          ))}</tbody>
+        </table>
+      );
+    }
+
+    function App() {
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Reference · v3" title={<>API <span className="iris">documentation</span></>} lede="REST + streaming. Deterministic citations. SDKs for TypeScript, Python, Go. Per-document billing maps 1:1 to your customers." />
+          <section style={{ padding: "0 0 100px" }}>
+            <div className="spread">
+              <div className="docs-grid">
+                <aside className="docs-side">
+                  <div className="grp">Getting started</div>
+                  <a href="#install" className="active">Install & authenticate</a>
+                  <a href="#quickstart">Quickstart</a>
+                  <a href="#errors">Errors & rate limits</a>
+                  <div className="grp">Resources</div>
+                  <a href="#documents">Documents</a>
+                  <a href="#chat">Chat</a>
+                  <a href="#citations">Citations</a>
+                  <a href="#webhooks">Webhooks</a>
+                  <div className="grp">SDKs</div>
+                  <a href="#sdk-ts">TypeScript</a>
+                  <a href="#sdk-py">Python</a>
+                  <a href="#sdk-go">Go</a>
+                </aside>
+
+                <div className="prose" style={{ maxWidth: "none" }}>
+                  <Section id="install" title="Install & authenticate">
+                    <p>The API is REST-over-HTTPS with JSON request and response bodies. Base URL:</p>
+                    <Code>https://api.chatwithpdfai.com/v3</Code>
+                    <p>Authenticate by setting the <code>Authorization</code> header. Get your API key from the <a href="account.html">Account → API keys</a> page. Keys are scoped per workspace; revoke any time.</p>
+                    <Code>{`curl https://api.chatwithpdfai.com/v3/documents \\
+  -H "Authorization: Bearer cwpa_live_a1b2c3d4..."`}</Code>
+                  </Section>
+
+                  <Section id="quickstart" title="Quickstart">
+                    <p>Upload a PDF, ask a question, get a cited answer — in three calls.</p>
+                    <Code>{`# 1. Upload
+curl https://api.chatwithpdfai.com/v3/documents \\
+  -H "Authorization: Bearer $CWPA_KEY" \\
+  -F "file=@contract.pdf" \\
+  -F "folder=Active Cases"
+# → { "id": "doc_8z2k1a", "status": "ready", "credits_used": 1 }
+
+# 2. Ask
+curl https://api.chatwithpdfai.com/v3/chat \\
+  -H "Authorization: Bearer $CWPA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"document_id":"doc_8z2k1a","question":"What is the indemnification cap?"}'
+
+# 3. Response (truncated)
+{
+  "answer": "The cap is 2x annual fees, with carve-outs for IP, confidentiality, and gross negligence.",
+  "citations": [{"page": 47, "paragraph": 3, "section": "§ 12.3", "verified": true}],
+  "latency_ms": 1412
+}`}</Code>
+                  </Section>
+
+                  <Section id="errors" title="Errors & rate limits">
+                    <p>Errors are standard HTTP status codes with a JSON body.</p>
+                    <table>
+                      <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+                      <tbody>
+                        <tr><td><code>400</code></td><td>Bad request — invalid body</td></tr>
+                        <tr><td><code>401</code></td><td>Missing or invalid API key</td></tr>
+                        <tr><td><code>402</code></td><td>Out of credits — buy more in the dashboard</td></tr>
+                        <tr><td><code>404</code></td><td>Document or resource not found</td></tr>
+                        <tr><td><code>413</code></td><td>Document too large (max 250 MB / 2,000 pages)</td></tr>
+                        <tr><td><code>429</code></td><td>Rate-limited — see <code>X-RateLimit-Reset</code></td></tr>
+                        <tr><td><code>5xx</code></td><td>Our problem — retry with exponential backoff</td></tr>
+                      </tbody>
+                    </table>
+                    <p>Rate limit: <strong>600 requests/min</strong> with a burst of 60. Higher limits available — email <code>sales@chatwithpdfai.com</code>.</p>
+                  </Section>
+
+                  <Section id="documents" title="Documents">
+                    <Endpoint verb="POST" path="/v3/documents" desc="Upload a PDF. Consumes one credit. OCR runs automatically." />
+                    <ParamTable rows={[
+                      ["file", "multipart", "The PDF file. Required."],
+                      ["folder", "string", "Folder to file under. Default: 'Inbox'."],
+                      ["summary", "boolean", "Generate auto-summary on ingest. Default: true."],
+                    ]} />
+
+                    <Endpoint verb="GET" path="/v3/documents" desc="List documents in the workspace." />
+                    <Endpoint verb="GET" path="/v3/documents/:id" desc="Get document metadata + auto-summary." />
+                    <Endpoint verb="DELETE" path="/v3/documents/:id" desc="Hard-delete. Receipt emailed; backups purged within 24h." />
+                  </Section>
+
+                  <Section id="chat" title="Chat">
+                    <Endpoint verb="POST" path="/v3/chat" desc="Ask a question against one or more documents." />
+                    <ParamTable rows={[
+                      ["document_id", "string", "Required, OR document_ids for multi-doc chat."],
+                      ["question", "string", "Required. Plain language."],
+                      ["language", "string", "Optional. ISO 639-1 — answers in this language."],
+                      ["stream", "boolean", "Optional. Server-sent events with chunked tokens."],
+                    ]} />
+                    <p>For streaming, set <code>Accept: text/event-stream</code> and parse SSE events: <code>token</code>, <code>citation</code>, <code>done</code>.</p>
+                  </Section>
+
+                  <Section id="citations" title="Citations">
+                    <p>Every chat response returns a <code>citations</code> array. Each citation includes:</p>
+                    <Code>{`{
+  "page": 47,
+  "paragraph": 3,
+  "section": "§ 12.3",
+  "verified": true,
+  "confidence": 0.97,
+  "quote": "two (2) times the fees paid in the twelve (12) months"
+}`}</Code>
+                    <p>Citations with <code>verified: true</code> passed our retrieval-rerank-ground pipeline. The <code>confidence</code> score is calibrated against held-out evals — &lt;0.7 indicates the model couldn't fully ground the claim.</p>
+                  </Section>
+
+                  <Section id="webhooks" title="Webhooks">
+                    <p>Subscribe to events at <a href="account.html">Account → API keys → Webhooks</a>. Events are signed with HMAC-SHA256 in the <code>X-CWPA-Signature</code> header.</p>
+                    <table>
+                      <thead><tr><th>Event</th><th>Fires when</th></tr></thead>
+                      <tbody>
+                        <tr><td><code>document.ready</code></td><td>OCR + indexing complete</td></tr>
+                        <tr><td><code>summary.ready</code></td><td>Auto-summary generated</td></tr>
+                        <tr><td><code>citation.verified</code></td><td>A citation passed our grounding eval</td></tr>
+                        <tr><td><code>credits.low</code></td><td>Workspace below 10% threshold</td></tr>
+                      </tbody>
+                    </table>
+                  </Section>
+
+                  <Section id="sdk-ts" title="TypeScript SDK">
+                    <Code>{`npm install @chatwithpdfai/sdk
+
+import { Chatwithpdfai } from "@chatwithpdfai/sdk";
+const cw = new Chatwithpdfai({ apiKey: process.env.CWPA_KEY });
+
+const doc = await cw.documents.upload({ file: pdfBuffer });
+const answer = await cw.chat.ask({
+  documentId: doc.id,
+  question: "What's the indemnification cap?",
+});
+console.log(answer.text, answer.citations);`}</Code>
+                  </Section>
+
+                  <Section id="sdk-py" title="Python SDK">
+                    <Code>{`pip install chatwithpdfai
+
+from chatwithpdfai import Chatwithpdfai
+cw = Chatwithpdfai(api_key=os.environ["CWPA_KEY"])
+
+doc = cw.documents.upload(file=open("contract.pdf", "rb"))
+answer = cw.chat.ask(
+  document_id=doc.id,
+  question="What's the indemnification cap?",
+)
+print(answer.text, answer.citations)`}</Code>
+                  </Section>
+
+                  <Section id="sdk-go" title="Go SDK">
+                    <Code>{`go get github.com/chatwithpdfai/sdk-go
+
+import "github.com/chatwithpdfai/sdk-go"
+
+cw := chatwithpdfai.New(os.Getenv("CWPA_KEY"))
+doc, _ := cw.Documents.Upload(ctx, "contract.pdf")
+ans, _ := cw.Chat.Ask(ctx, doc.ID, "What's the indemnification cap?")
+fmt.Println(ans.Text, ans.Citations)`}</Code>
+                  </Section>
+                </div>
+
+                <aside className="docs-side">
+                  <div className="glass" style={{ padding: 16, borderRadius: "var(--r-lg)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 10 }}>Try it</div>
+                    <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: "0 0 12px", lineHeight: 1.5 }}>Spin up a sandbox key with 10 test credits.</p>
+                    <a href="auth/signup.html" className="btn btn-iris btn-sm" style={{ width: "100%", justifyContent: "center" }}>Create sandbox key →</a>
+                  </div>
+                  <div className="glass" style={{ padding: 16, borderRadius: "var(--r-lg)", marginTop: 12 }}>
+                    <div className="eyebrow" style={{ marginBottom: 10 }}>Resources</div>
+                    <a href="#" style={{ fontSize: 12.5, padding: "5px 0", color: "var(--text-2)", display: "block" }}>OpenAPI 3.1 spec →</a>
+                    <a href="#" style={{ fontSize: 12.5, padding: "5px 0", color: "var(--text-2)", display: "block" }}>Postman collection →</a>
+                    <a href="changelog.html" style={{ fontSize: 12.5, padding: "5px 0", color: "var(--text-2)", display: "block" }}>API changelog →</a>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

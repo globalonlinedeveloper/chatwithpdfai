@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sample documents — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Sample documents">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const SAMPLES = [
+      { tag: "Legal", name: "Master Service Agreement", pages: 213, desc: "A 200+ page B2B contract with classic clauses: indemnification, termination, governing law, IP, confidentiality. Great for trying clause-diff against a template.", q: "What's the indemnification cap?", grad: "linear-gradient(135deg, rgba(183,106,255,0.18), rgba(78,163,255,0.1))" },
+      { tag: "Legal", name: "Kass v. North American Research", pages: 89, desc: "Securities fraud opinion at the motion-to-dismiss stage. Practice scienter analysis, safe harbor, PSLRA pleading standards.", q: "Why was the safe harbor defense rejected?", grad: "linear-gradient(135deg, rgba(183,106,255,0.18), rgba(78,163,255,0.1))" },
+      { tag: "Finance", name: "NVIDIA Q3 2026 10-Q", pages: 89, desc: "A real SEC quarterly filing. Test footnote diffing, segment analysis, MD&A language deltas, and forward-looking statement detection.", q: "What changed since Q2?", grad: "linear-gradient(135deg, rgba(126,255,157,0.18), rgba(78,163,255,0.1))" },
+      { tag: "Research", name: "Attention Is All You Need", pages: 15, desc: "The original transformer paper. Great for testing comparative-paper analysis, methodology extraction, and citation graph queries.", q: "Summarize the attention mechanism in 3 bullets.", grad: "linear-gradient(135deg, rgba(255,126,197,0.18), rgba(183,106,255,0.1))" },
+      { tag: "Medical", name: "ATLAS-2 Phase III Trial Protocol", pages: 220, desc: "A clinical trial protocol with inclusion criteria, endpoints, statistical analysis plan. Test clinical Q&A grounding and HIPAA-ready workflows.", q: "What are the inclusion criteria?", grad: "linear-gradient(135deg, rgba(126,255,157,0.18), rgba(183,106,255,0.1))" },
+      { tag: "Education", name: "Robbins Pathology — Chapter 12", pages: 56, desc: "Medical textbook chapter on cell injury and apoptosis. Test flashcard generation, plain-English translation, and step-by-step explanations.", q: "Generate flashcards on apoptosis.", grad: "linear-gradient(135deg, rgba(255,126,197,0.18), rgba(78,163,255,0.1))" },
+    ];
+    function App() {
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Try without uploading" title={<>Sample documents <span className="iris">to play with.</span></>} lede="Pick any of these and start chatting in 5 seconds. We host them so you don't have to upload anything. Free, no card." align="center" />
+          <section style={{ padding: "0 0 80px" }}>
+            <div className="spread">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }} className="samp-grid">
+                {SAMPLES.map(s => (
+                  <a key={s.name} href="app.html" className="glass hover-glow" style={{ padding: 0, borderRadius: "var(--r-xl)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                    <div style={{ aspectRatio: "1.4", background: s.grad, padding: 20, position: "relative", borderBottom: "1px solid var(--stroke-1)" }}>
+                      <span className="pill" style={{ padding: "3px 9px", fontSize: 10, position: "absolute", top: 14, left: 14 }}>{s.tag}</span>
+                      <div className="mono" style={{ position: "absolute", top: 18, right: 16, fontSize: 10, color: "rgba(255,255,255,0.55)", letterSpacing: "0.1em" }}>{s.pages} pp</div>
+                      <div style={{ position: "absolute", inset: "50% 24px 22px 24px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                        {[80, 64, 76, 50, 88, 60].map((w, i) => (
+                          <div key={i} style={{ height: 4, marginBottom: 5, background: `rgba(255,255,255,${0.18 - i * 0.02})`, width: `${w}%`, borderRadius: 2 }}></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
+                      <h3 style={{ fontSize: 15, fontWeight: 600, margin: "0 0 8px", lineHeight: 1.3 }}>{s.name}</h3>
+                      <p style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.55, margin: 0, flex: 1 }}>{s.desc}</p>
+                      <div className="glass" style={{ marginTop: 14, padding: "8px 12px", borderRadius: "var(--r)", fontSize: 12, fontStyle: "italic", color: "var(--text-2)", borderLeft: "2px solid var(--violet)" }}>
+                        "{s.q}"
+                      </div>
+                      <div className="mono" style={{ fontSize: 10.5, color: "var(--violet-2)", letterSpacing: "0.12em", marginTop: 14 }}>TRY THIS DOCUMENT →</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <style>{`@media (max-width: 900px) { .samp-grid { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 560px) { .samp-grid { grid-template-columns: 1fr !important; } }`}</style>
+
+              <div className="glass glass-iris-border" style={{ marginTop: 32, padding: "28px 32px", borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                <h3 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 8px", letterSpacing: "-0.02em" }}>Ready to upload your own?</h3>
+                <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "0 0 18px" }}>3 documents free, no card. Credits never expire.</p>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  <a href="auth/signup.html" className="btn btn-iris">Sign up free →</a>
+                  <a href="pricing.html" className="btn btn-glass">See pricing</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

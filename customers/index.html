@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customers — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Customers">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel">
+    const STORIES = [
+      { slug: "latham", logo: "L&W", title: "Latham associates redline 200-page MSAs in 10 min", category: "Legal", stat: "600 hr saved / quarter", featured: true, quote: "We use it as a junior associate that never sleeps.", who: "Daniel R. · Senior Associate" },
+      { slug: "arkham", logo: "ARK", title: "Arkham turns 10-K drops into Slack memos in 11 min", category: "Finance", stat: "100% of footnotes surfaced", quote: "The diff view across two consecutive 10-Qs is the feature I'd pay alone for.", who: "Maya K. · Equity Research" },
+      { slug: "mayo", logo: "MAY", title: "Mayo Clinic translates consent at the bedside", category: "Healthcare", stat: "BAA · HIPAA · 70+ languages", quote: "It is the only product I trust at the bedside.", who: "Dr. Aanya P. · Hospitalist" },
+    ];
+    const LOGOS = ["LATHAM", "ARKHAM CAPITAL", "MAYO CLINIC", "STANFORD GSB", "MERIDIAN LEGAL", "GOLDMAN RESEARCH", "WESTLAW", "COLUMBIA P&S"];
+
+    function App() {
+      const featured = STORIES.find(s => s.featured);
+      const rest = STORIES.filter(s => !s.featured);
+      return (
+        <PageShell active="customers">
+          <PageHeader eyebrow="Customers" title={<>Built by us. <span className="iris">Trusted by them.</span></>} lede="Real teams using CHATWITHPDFAI to read documents faster, with citations a partner will sign off on." />
+          <section style={{ padding: "0 0 30px" }}>
+            <div className="spread">
+              <div className="eyebrow" style={{ marginBottom: 18 }}>Read by professionals at</div>
+              <div className="glass" style={{ padding: "24px 28px", borderRadius: "var(--r-lg)", display: "flex", gap: 36, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+                {LOGOS.map(l => <span key={l} className="mono" style={{ fontSize: 12, color: "var(--text-3)", letterSpacing: "0.14em", fontWeight: 500 }}>{l}</span>)}
+              </div>
+            </div>
+          </section>
+          <section style={{ padding: "40px 0 60px" }}>
+            <div className="spread">
+              {featured && (
+                <a href={`${featured.slug}.html`} className="glass hover-glow" style={{ display: "block", padding: 0, borderRadius: "var(--r-xl)", overflow: "hidden", marginBottom: 32 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", minHeight: 340 }} className="feat-cust">
+                    <div style={{ padding: "44px 40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "center" }}>
+                        <span className="pill" style={{ padding: "3px 10px", fontSize: 10.5 }}>FEATURED · {featured.category.toUpperCase()}</span>
+                      </div>
+                      <h2 style={{ fontSize: 38, fontWeight: 600, letterSpacing: "-0.025em", margin: "0 0 18px", lineHeight: 1.05 }}>{featured.title}</h2>
+                      <p className="iris" style={{ fontSize: 22, fontStyle: "italic", margin: "0 0 22px", lineHeight: 1.4, fontWeight: 400 }}>"{featured.quote}"</p>
+                      <div className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.08em" }}>{featured.who.toUpperCase()}</div>
+                      <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 14 }}>
+                        <span className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.12em" }}>{featured.stat.toUpperCase()}</span>
+                        <span className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.1em" }}>READ STORY →</span>
+                      </div>
+                    </div>
+                    <div style={{ background: "linear-gradient(135deg, oklch(0.35 0.18 280 / 0.55), oklch(0.28 0.14 200 / 0.4))", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", inset: 30, border: "1px dashed rgba(255,255,255,0.18)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+                        <div className="iris mono" style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, letterSpacing: "-0.03em" }}>10<span style={{ fontSize: 32 }}>min</span></div>
+                        <div className="mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", letterSpacing: "0.14em", textAlign: "center" }}>FIRST-PASS REDLINE · vs 4-6 HOURS</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }} className="cust-grid">
+                {rest.map(s => (
+                  <a key={s.slug} href={`${s.slug}.html`} className="glass hover-glow" style={{ padding: "30px 28px", borderRadius: "var(--r-xl)", display: "flex", flexDirection: "column", gap: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span className="pill" style={{ padding: "3px 10px", fontSize: 10.5 }}>{s.category.toUpperCase()}</span>
+                      <span className="mono" style={{ fontSize: 10, color: "var(--violet-2)", letterSpacing: "0.1em" }}>{s.stat.toUpperCase()}</span>
+                    </div>
+                    <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em", margin: "8px 0 8px", lineHeight: 1.15 }}>{s.title}</h3>
+                    <p style={{ fontSize: 14.5, color: "var(--text-2)", fontStyle: "italic", lineHeight: 1.5, margin: 0, flex: 1 }}>"{s.quote}"</p>
+                    <div className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.08em" }}>{s.who.toUpperCase()}</div>
+                  </a>
+                ))}
+              </div>
+              <style>{`@media (max-width: 880px) { .cust-grid, .feat-cust { grid-template-columns: 1fr !important; } }`}</style>
+              <div className="glass glass-iris-border" style={{ marginTop: 32, padding: "28px 32px", borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                <h3 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 8px", letterSpacing: "-0.02em" }}>Want to be a case study?</h3>
+                <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "0 0 16px" }}>We're always happy to share what teams build. Reach out — we'll write the story.</p>
+                <a href="../contact.html" className="btn btn-iris">Tell us your story →</a>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

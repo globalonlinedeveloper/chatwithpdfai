@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-PDF chat — CHATWITHPDFAI</title>
+  <meta name="description" content="Ask one question across a whole folder of documents — with citations to which doc said what." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Multi-PDF chat">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Multi-PDF chat","category":"Features","date":"Updated May 2026","readTime":"6 min read","lede":"Ask one question across a whole folder of documents — with citations to which doc said what.","backHref":"index.html","backLabel":"Help center"},"sections":[{"h2":"Turning it on","body":["In the workspace, click the folder header in the sidebar and choose **Multi-PDF chat**. Or use the URL shortcut: `/folder/<folder-name>`. You'll see all documents in that folder loaded as context."]},{"h2":"Asking questions","body":["Multi-PDF chat works exactly like single-doc chat — but answers cite which document each claim came from. Example:",{"code":"What are the indemnification caps across all of our active contracts?\n\n→ 2× annual fees in MSA-Acme [doc: Acme MSA, p.47]\n→ 1× annual fees in MSA-Helix [doc: Helix MSA, p.32]\n→ Uncapped (with carve-outs) in Aria SOW [doc: Aria SOW, p.8]"}]},{"h2":"How many documents can I include?","body":["No hard limit — we've tested up to 200 documents in a single Thread. Latency increases with document count; 40-60 is the sweet spot for sub-2-second responses."]},{"h2":"Threads — saved searches","body":["Save a multi-doc question as a **Thread**. When you add new documents to the folder, we re-run the saved question and email you the diff. Useful for tracking a deal room, a research bundle, or quarterly filings."]}],"related":[{"title":"Getting started","tag":"Help","href":"getting-started.html"},{"title":"Folders & organization","tag":"Help","href":"folders.html"},{"title":"Citations explained","tag":"Help","href":"citations.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

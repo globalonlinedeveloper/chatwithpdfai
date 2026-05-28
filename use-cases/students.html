@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For students — CHATWITHPDFAI</title>
+  <meta name="description" content="Drop in a chapter. Get a one-page summary, definitions in plain English, and 20 flashcards ready for the next exam. Translate, quote, and cite without losing the original." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For students">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For students","eyebrow":"For students","h1a":"From textbook","h1b":"to A+ in a Sunday.","lede":"Drop in a chapter. Get a one-page summary, definitions in plain English, and 20 flashcards ready for the next exam. Translate, quote, and cite without losing the original.","cta":"Start free — 3 docs →","accent":"var(--blue)","docLabel":"ROBBINS PATHOLOGY · CH 12","sampleQ":"Make me flashcards on apoptosis.","sampleA":"Generated **5 flashcards** covering the two main pathways (intrinsic / mitochondrial, extrinsic / death-receptor), key regulators (Bcl-2, caspases), and the morphological hallmarks.","sampleCite":"p. 412, §4.2","suggestions":["Quiz me on this chapter","Translate to plain English","Compare to necrosis"],"audienceName":"students","audienceShort":"studying","workflowLede":"Three steps from textbook to exam-ready material.","kpis":[["73%","Time saved · first-pass reading"],["20+","Flashcards per chapter"],["70+","Languages"]],"workflows":[{"t":"Drop the chapter (or the whole textbook)","d":"Up to 2,000 pages per document. Scanned, encrypted, or PDF — handled the same way."},{"t":"Ask for what you need","d":"Summary, flashcards, worked examples, plain-English translations of dense passages. Every answer footnoted."},{"t":"Export to your study app","d":"Anki, Notion, Obsidian, or Markdown. Take it to your study session ready to go."}],"quote":"I dropped in 600 pages of Robbins Pathology and chatted through boards prep. It is the only study partner that has read everything I have.","quoteAuthor":"Iris L.","quoteInitials":"IL","quoteRole":"MS3 · Columbia P&S","features":[{"t":"Auto-flashcards","d":"One-click conversion of any chapter into a study deck. Export to Anki with cloze deletions."},{"t":"Plain-English mode","d":"Translate dense passages into something readable, without losing the citation back to the original sentence."},{"t":"Quizzing mode","d":"Pick a topic, get adaptive multiple-choice questions with answer explanations grounded in the source."},{"t":"Student pricing","d":"Reader pack is $5 for 50 documents. Credits never expire — perfect for semester-by-semester use."}],"ctaTitle":"Read smarter. Sleep more.","ctaSub":"Pay per textbook. Credits never expire."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

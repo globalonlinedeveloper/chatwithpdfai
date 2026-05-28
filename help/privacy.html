@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy & security — CHATWITHPDFAI</title>
+  <meta name="description" content="Plain-English answers to the privacy questions you should be asking." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Privacy & security">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Privacy & security","category":"Privacy","date":"Updated May 2026","readTime":"5 min read","lede":"Plain-English answers to the privacy questions you should be asking.","backHref":"index.html","backLabel":"Help center"},"sections":[{"h2":"Do you train AI models on my documents?","body":["No. Not us, not OpenAI, not Anthropic, not anyone. This is contractual at every layer of our stack."]},{"h2":"Where are my documents stored?","body":["AWS us-east-1 by default. Encrypted at rest with AES-256, in transit with TLS 1.3. Enterprise customers (Chamber) can elect EU residency (eu-west-1)."]},{"h2":"What happens when I delete a document?","body":["The document is removed from your workspace immediately. Hard-deletion propagates to encrypted backups within 24 hours. We email you a deletion receipt with the timestamp."]},{"h2":"Can I delete my account?","body":["Yes. Account → Danger zone → Delete account. All your documents and chat history are removed within 24 hours; backups purged within 30 days. You get a deletion receipt."]},{"h2":"GDPR / CCPA rights","body":["You can request access, correction, deletion, export, and restriction at [privacy@chatwithpdfai.com](mailto:privacy@chatwithpdfai.com). We respond within 30 days."]},{"h2":"Where is the full policy?","body":["[Privacy Policy](../legal/privacy.html), [Security policy](../legal/security.html), [Sub-processor list](../legal/sub-processors.html), [DPA](../legal/dpa.html)."]}],"related":[{"title":"Privacy Policy","tag":"Legal","href":"../legal/privacy.html"},{"title":"Security policy","tag":"Legal","href":"../legal/security.html"},{"title":"Sub-processors","tag":"Legal","href":"../legal/sub-processors.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Security — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <link rel="stylesheet" href="../print.css" media="print" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Security policy">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../long-form.jsx"></script>
+  <script type="text/babel">
+    const SECTIONS = [
+      { id: "overview", title: "Overview", body: [
+        "Documents you upload to CHATWITHPDFAI are often privileged — contracts, clinical records, financial filings, M&A diligence. We treat them that way.",
+        "This page is the detailed companion to the security claims on our landing page. If you need attestations or are running enterprise diligence, email `security@chatwithpdfai.com` and we'll share our SOC 2 Type II report and pentest summary under NDA.",
+      ]},
+      { id: "encryption", title: "Encryption", body: [
+        { ul: [
+          "**In transit:** TLS 1.3 with HSTS preloaded. No TLS 1.0/1.1 supported.",
+          "**At rest:** AES-256-GCM, customer-data keys rotated quarterly via AWS KMS.",
+          "**Backups:** Encrypted with separate KMS keys; replicated to a second region.",
+          "**Secret management:** AWS Secrets Manager + 1Password Business; no secrets in source.",
+        ]},
+      ]},
+      { id: "isolation", title: "Tenant isolation", body: [
+        "Every workspace gets its own logical tenant ID. All data queries are scoped by tenant at the application layer and double-checked at the storage layer. We do regression tests on every release to prove that cross-tenant reads are impossible.",
+      ]},
+      { id: "ai", title: "AI vendor controls", body: [
+        "We use AI inference from OpenAI and Anthropic. We have **zero-retention** contracts with both: prompts and outputs are not stored beyond the inference call. Neither vendor trains models on our traffic.",
+        "We send only the document text needed to answer the current question — we do not bulk-upload your library to any model vendor.",
+      ]},
+      { id: "access", title: "Access control", body: [
+        { ul: [
+          "Production access is gated by SSO + hardware-key MFA",
+          "Just-in-time access via short-lived role assumption (max 4 hours)",
+          "All production access is logged and reviewed monthly",
+          "Least privilege by default; engineers cannot read customer data without an approved ticket",
+        ]},
+      ]},
+      { id: "compliance", title: "Compliance & audits", body: [
+        { table: { headers: ["Standard", "Status", "Refreshed"], rows: [
+          ["SOC 2 Type II", "Active", "Annual (last: Apr 2026)"],
+          ["ISO 27001:2022", "Active", "Annual (last: Mar 2026)"],
+          ["HIPAA alignment", "Active (BAA available)", "Continuous"],
+          ["GDPR / UK GDPR", "Active", "Continuous"],
+          ["CCPA / CPRA", "Active", "Continuous"],
+          ["Penetration test", "Passed", "Biannual (last: Mar 2026, NCC Group)"],
+        ]} },
+      ]},
+      { id: "incidents", title: "Incident response", body: [
+        "We follow a written incident response runbook. On confirmed customer-impacting incidents:",
+        { ul: [
+          "Page on-call within 5 minutes",
+          "Initial customer comms within 1 hour for high severity",
+          "Detailed postmortem published within 7 business days",
+          "GDPR breach notification within 72 hours where applicable",
+        ]},
+        "Past incident reports are mirrored on our status page (`status.chatwithpdfai.com`).",
+      ]},
+      { id: "vuln", title: "Vulnerability disclosure", body: [
+        "We welcome security research. Report vulnerabilities to `security@chatwithpdfai.com` with a description and proof of concept. We acknowledge within 1 business day and patch high-severity issues within 7 days. Hall of Fame: chatwithpdfai.com/security/hall-of-fame.",
+        "PGP key (Fingerprint: `B3D4 1F9E 0A12 …`): fetch from `chatwithpdfai.com/pgp.asc`.",
+      ]},
+    ];
+    function App() {
+      return <LongFormPage
+        eyebrow="Legal · Security"
+        title="Security policy"
+        lede="The bar is the bar. Lawyers, doctors, and analysts brought us here."
+        lastUpdated="May 22, 2026"
+        sections={SECTIONS}
+      />;
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

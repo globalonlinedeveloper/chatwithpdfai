@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For healthcare — CHATWITHPDFAI</title>
+  <meta name="description" content="Chat with a clinical trial PDF and the latest guideline at the same time. HIPAA-aligned workspaces, BAA available. Translate consent forms with the original verbatim in a footnote." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For healthcare">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For healthcare","eyebrow":"For healthcare","h1a":"Faster decisions","h1b":"at the bedside.","lede":"Chat with a clinical trial PDF and the latest guideline at the same time. HIPAA-aligned workspaces, BAA available. Translate consent forms with the original verbatim in a footnote.","cta":"Talk to sales →","accent":"var(--green)","docLabel":"ATLAS-2 · PHASE III PROTOCOL","sampleQ":"Inclusion criteria for this trial?","sampleA":"Adults 18-75 with confirmed **HER2+ metastatic breast cancer**, prior trastuzumab exposure, ECOG performance status 0-1, and adequate organ function (specified ranges on p. 23-24).","sampleCite":"§ 4.1 · p. 22","suggestions":["Compare to ASCO guideline","Translate consent","Generate patient summary"],"audienceName":"clinicians","audienceShort":"the clinic","workflowLede":"From protocol to point-of-care without losing precision.","kpis":[["HIPAA","Aligned · BAA available"],["100%","Citation grounding"],["70+","Languages · consent"]],"workflows":[{"t":"Upload protocols and guidelines","d":"Clinical trial PDFs, hospital guidelines, package inserts. All encrypted, all isolated to your workspace."},{"t":"Cross-reference at the bedside","d":"Chat with the protocol and the standard-of-care guideline simultaneously. Surface conflicts before they become decisions."},{"t":"Translate consent","d":"Generate a patient-friendly version of consent forms, with the original verbatim quoted in a footnote — never paraphrased."}],"quote":"The translated consent form quotes the original Spanish in a footnote. It is the only product I trust at the bedside.","quoteAuthor":"Dr. Aanya P.","quoteInitials":"AP","quoteRole":"Hospitalist · Mayo Clinic","features":[{"t":"BAA + HIPAA alignment","d":"Available on Practice and Chamber plans. Per-tenant data isolation; documents purged within 24h of delete."},{"t":"Guideline cross-reference","d":"Multi-doc chat across protocol + guideline + insert. Conflicts highlighted automatically."},{"t":"Verbatim citations","d":"We quote the original sentence in the citation, never a paraphrase. Crucial when translating consent or medication instructions."},{"t":"Audit logs","d":"Every access to a document is logged. Chamber plan includes SSO, SAML, and exportable audit logs."}],"ctaTitle":"Privileged documents, treated as such.","ctaSub":"BAA available. EU residency optional. Chamber pricing available — talk to sales."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

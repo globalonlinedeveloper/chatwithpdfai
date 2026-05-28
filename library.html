@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Library — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Library">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const DOCS = [
+      { id: "kass", name: "Kass v. North American Research.pdf", folder: "Active Cases", pages: 89, type: "Legal", date: "2 days ago", chats: 12, starred: true },
+      { id: "msa-acme", name: "MSA — Acme ↔ Helix Labs.pdf", folder: "Active Cases", pages: 213, type: "Contract", date: "3 days ago", chats: 28, starred: true },
+      { id: "nvda-10q", name: "Q3-earnings-NVDA-2026.pdf", folder: "Due Diligence", pages: 89, type: "SEC filing", date: "Yesterday", chats: 7 },
+      { id: "hipaa", name: "HIPAA Compliance Audit.pdf", folder: "Due Diligence", pages: 156, type: "Compliance", date: "Mar 14", chats: 4 },
+      { id: "atlas", name: "ATLAS-2 Phase III Protocol.pdf", folder: "Reading List", pages: 220, type: "Clinical trial", date: "Mar 04", chats: 9 },
+      { id: "vaswani", name: "Attention Is All You Need.pdf", folder: "Reading List", pages: 15, type: "Research paper", date: "Feb 28", chats: 22, starred: true },
+      { id: "robbins", name: "Robbins Pathology — Ch 12.pdf", folder: "Reading List", pages: 56, type: "Textbook", date: "Feb 24", chats: 18 },
+      { id: "meso", name: "Mesopotamian Trade Networks.pdf", folder: "Reading List", pages: 128, type: "Research paper", date: "Mar 09", chats: 5 },
+      { id: "msa-helix", name: "MSA Template — Firm Standard.pdf", folder: "Active Cases", pages: 198, type: "Contract", date: "Last week", chats: 1 },
+      { id: "fafsa", name: "FAFSA Application Guide.pdf", folder: "Reading List", pages: 42, type: "Form", date: "Apr 02", chats: 3 },
+      { id: "g7", name: "G7 Communique 2026.pdf", folder: "Trash", pages: 18, type: "Government", date: "Apr 12", chats: 2 },
+      { id: "lease", name: "Office Lease — 548 Market.pdf", folder: "Active Cases", pages: 64, type: "Contract", date: "May 01", chats: 6 },
+    ];
+
+    const FOLDERS = ["All", "Active Cases", "Due Diligence", "Reading List", "Trash"];
+    const TYPES = ["All types", "Contract", "Legal", "SEC filing", "Compliance", "Clinical trial", "Research paper", "Textbook", "Form", "Government"];
+    const SORTS = ["Recent", "A → Z", "Most chatted", "Largest"];
+
+    function App() {
+      const [folder, setFolder] = useState("All");
+      const [type, setType] = useState("All types");
+      const [view, setView] = useState("grid"); // grid | list
+      const [q, setQ] = useState("");
+      const [sort, setSort] = useState("Recent");
+      const [selected, setSelected] = useState(new Set());
+
+      let filtered = DOCS;
+      if (folder !== "All") filtered = filtered.filter(d => d.folder === folder);
+      if (type !== "All types") filtered = filtered.filter(d => d.type === type);
+      if (q) filtered = filtered.filter(d => d.name.toLowerCase().includes(q.toLowerCase()));
+
+      const toggle = (id) => {
+        const next = new Set(selected);
+        next.has(id) ? next.delete(id) : next.add(id);
+        setSelected(next);
+      };
+
+      return (
+        <PageShell>
+          <section style={{ padding: "60px 0 30px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: -100, right: -100, opacity: 0.3 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16, marginBottom: 28 }}>
+                <div>
+                  <div className="section-eyebrow">Library</div>
+                  <h1 className="section-title" style={{ fontSize: 40, margin: "12px 0 0" }}>All documents</h1>
+                  <p style={{ fontSize: 14, color: "var(--text-3)", margin: "8px 0 0" }}>{DOCS.length} documents · 47 credits remaining</p>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <a href="account.html" className="btn btn-glass">⚙ Settings</a>
+                  <a href="app.html" className="btn btn-iris">+ Upload PDF</a>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 28, alignItems: "start" }} className="lib-grid">
+                {/* Sidebar */}
+                <aside className="glass" style={{ padding: 14, borderRadius: "var(--r-lg)" }}>
+                  <div className="eyebrow" style={{ padding: "0 6px 8px" }}>Folders</div>
+                  {FOLDERS.map(f => {
+                    const count = f === "All" ? DOCS.length : DOCS.filter(d => d.folder === f).length;
+                    return (
+                      <button key={f} onClick={() => setFolder(f)} style={{
+                        display: "flex", width: "100%", padding: "8px 12px",
+                        background: folder === f ? "var(--glass-2)" : "transparent",
+                        border: "none", borderLeft: folder === f ? "2px solid var(--violet)" : "2px solid transparent",
+                        color: folder === f ? "var(--text)" : "var(--text-3)",
+                        fontSize: 13, fontFamily: "var(--sans)", cursor: "pointer",
+                        justifyContent: "space-between", marginBottom: 2, fontWeight: folder === f ? 500 : 400,
+                      }}>
+                        <span>{f}</span>
+                        <span className="mono" style={{ fontSize: 10.5 }}>{count}</span>
+                      </button>
+                    );
+                  })}
+                  <div className="eyebrow" style={{ padding: "16px 6px 8px" }}>Tags</div>
+                  {["⭐ Starred", "🔗 Shared", "📌 Pinned"].map(t => (
+                    <div key={t} style={{ padding: "7px 12px", fontSize: 13, color: "var(--text-3)", cursor: "pointer" }}>{t}</div>
+                  ))}
+                </aside>
+
+                {/* Main */}
+                <div>
+                  {/* Toolbar */}
+                  <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="glass" style={{ flex: 1, minWidth: 220, padding: "8px 14px", borderRadius: "var(--r-pill)", display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ color: "var(--text-3)" }}>⌕</span>
+                      <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search documents…" style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--text)", fontSize: 13.5 }} />
+                    </div>
+                    <select value={type} onChange={e => setType(e.target.value)} className="input" style={{ width: "auto", padding: "8px 14px", borderRadius: "var(--r-pill)", fontSize: 13 }}>
+                      {TYPES.map(t => <option key={t}>{t}</option>)}
+                    </select>
+                    <select value={sort} onChange={e => setSort(e.target.value)} className="input" style={{ width: "auto", padding: "8px 14px", borderRadius: "var(--r-pill)", fontSize: 13 }}>
+                      {SORTS.map(t => <option key={t}>Sort: {t}</option>)}
+                    </select>
+                    <div className="glass" style={{ display: "flex", padding: 3, borderRadius: "var(--r-pill)" }}>
+                      <button onClick={() => setView("grid")} className={view === "grid" ? "btn btn-iris btn-sm" : "btn btn-ghost btn-sm"} style={{ padding: "5px 10px", borderRadius: "var(--r-pill)" }}>⊞</button>
+                      <button onClick={() => setView("list")} className={view === "list" ? "btn btn-iris btn-sm" : "btn btn-ghost btn-sm"} style={{ padding: "5px 10px", borderRadius: "var(--r-pill)" }}>≡</button>
+                    </div>
+                  </div>
+
+                  {selected.size > 0 && (
+                    <div className="glass" style={{ padding: "10px 14px", borderRadius: "var(--r)", marginBottom: 12, display: "flex", alignItems: "center", gap: 10, fontSize: 12.5 }}>
+                      <span className="mono" style={{ color: "var(--violet-2)", letterSpacing: "0.08em" }}>● {selected.size} SELECTED</span>
+                      <div style={{ flex: 1 }}></div>
+                      <button className="btn btn-glass btn-sm">Move to folder</button>
+                      <button className="btn btn-glass btn-sm">Multi-chat</button>
+                      <button className="btn btn-glass btn-sm" style={{ color: "#ff8888" }}>Delete</button>
+                      <button onClick={() => setSelected(new Set())} className="btn btn-ghost btn-sm">Clear</button>
+                    </div>
+                  )}
+
+                  {filtered.length === 0 ? (
+                    <div className="glass" style={{ padding: 60, borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 14, background: "var(--glass-2)", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "var(--violet-2)" }}>⌕</div>
+                      <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>Nothing matches.</h3>
+                      <p style={{ fontSize: 13, color: "var(--text-3)", margin: 0 }}>Try a different search or filter.</p>
+                    </div>
+                  ) : view === "grid" ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }} className="lib-cards">
+                      {filtered.map(d => (
+                        <div key={d.id} className="glass hover-glow" style={{ padding: 0, borderRadius: "var(--r-lg)", overflow: "hidden", cursor: "pointer", border: selected.has(d.id) ? "1px solid var(--violet)" : "1px solid var(--stroke-2)" }}>
+                          <div style={{ aspectRatio: "1.4", background: "linear-gradient(135deg, rgba(183,106,255,0.12), rgba(78,163,255,0.08))", position: "relative", padding: 14, borderBottom: "1px solid var(--stroke-1)" }}>
+                            <div style={{ position: "absolute", top: 10, left: 10 }}>
+                              <input type="checkbox" checked={selected.has(d.id)} onChange={() => toggle(d.id)} onClick={e => e.stopPropagation()} />
+                            </div>
+                            {d.starred && <div style={{ position: "absolute", top: 10, right: 10, fontSize: 14, color: "var(--violet-2)" }}>⭐</div>}
+                            <div style={{ position: "absolute", inset: "40% 14px 18px 14px" }}>
+                              <div style={{ height: 4, background: "rgba(255,255,255,0.16)", borderRadius: 2, marginBottom: 5, width: "70%" }}></div>
+                              <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, marginBottom: 5 }}></div>
+                              <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, marginBottom: 5, width: "85%" }}></div>
+                              <div style={{ height: 4, background: "rgba(255,255,255,0.12)", borderRadius: 2, width: "60%" }}></div>
+                            </div>
+                            <div className="mono" style={{ position: "absolute", bottom: 10, right: 12, fontSize: 10, color: "var(--text-3)", letterSpacing: "0.1em" }}>PDF · {d.pages}pp</div>
+                          </div>
+                          <a href={`document.html?id=${d.id}`} style={{ display: "block", padding: "14px 16px", color: "var(--text)" }}>
+                            <div style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 6, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11 }}>
+                              <span className="pill" style={{ padding: "2px 7px", fontSize: 10 }}>{d.type}</span>
+                              <span className="mono" style={{ color: "var(--text-3)", letterSpacing: "0.06em" }}>{d.chats} chats · {d.date}</span>
+                            </div>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden" }}>
+                      {filtered.map((d, i) => (
+                        <a key={d.id} href={`document.html?id=${d.id}`} style={{ display: "grid", gridTemplateColumns: "24px 1fr 130px 90px 70px 80px", gap: 14, padding: "14px 20px", alignItems: "center", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", color: "var(--text)", fontSize: 13.5 }}>
+                          <input type="checkbox" checked={selected.has(d.id)} onChange={e => { e.stopPropagation(); toggle(d.id); }} onClick={e => e.stopPropagation()} />
+                          <div>
+                            <div style={{ fontWeight: 500, marginBottom: 2, display: "flex", alignItems: "center", gap: 6 }}>{d.starred && "⭐"} {d.name}</div>
+                            <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.06em" }}>{d.folder.toUpperCase()}</div>
+                          </div>
+                          <span className="pill" style={{ padding: "3px 9px", fontSize: 10.5, justifySelf: "start" }}>{d.type}</span>
+                          <span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{d.pages} pp</span>
+                          <span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{d.chats} chats</span>
+                          <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.04em" }}>{d.date}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <style>{`
+                @media (max-width: 880px) { .lib-grid { grid-template-columns: 1fr !important; } .lib-cards { grid-template-columns: repeat(2, 1fr) !important; } }
+                @media (max-width: 560px) { .lib-cards { grid-template-columns: 1fr !important; } }
+              `}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OCR that actually works on bad scans — CHATWITHPDFAI</title>
+  <meta name="description" content="What we learned shipping OCR across 70+ languages and how we benchmark against the long tail of crooked, faxed, photographed documents." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="OCR that actually works on bad scans">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"OCR that actually works on bad scans","category":"Product","date":"Mar 04, 2026","readTime":"8 min read","lede":"What we learned shipping OCR across 70+ languages and how we benchmark against the long tail of crooked, faxed, photographed documents.","author":{"name":"Marcus Yi","role":"CTO · co-founder","initials":"MY"},"backHref":"../blog.html","backLabel":"Back to blog"},"sections":[{"body":["Bad scans are the silent killer of every document AI product. Court filings get photographed under fluorescent lighting. Medical records get faxed three times. Insurance forms get crammed into a smartphone camera at an angle.","Out-of-the-box OCR fails on all of these. Here's the pipeline we built."]},{"h2":"Stage 1: image normalization","body":[{"ul":["**Deskew** — detect text baselines, rotate the image to align them","**Despeckle** — remove fax-style salt-and-pepper noise without losing thin strokes","**Binarize adaptively** — global thresholds fail on shadows and folds; we use local Sauvola windows","**Re-rotate per region** — multi-page PDFs sometimes have pages at different angles"]}]},{"h2":"Stage 2: layout detection","body":["Before character recognition, we detect the layout: text columns, tables, figures, headers, footers, sidebars. This lets us read in the right order (a two-column legal brief should not be read across columns) and preserve table structure for later querying."]},{"h2":"Stage 3: recognition","body":["We use a hybrid: a fast CNN-based recognizer for clean text, and a transformer-based recognizer for difficult regions. The transformer handles dense scripts (Tamil, Khmer, Hebrew) and handwritten signatures.",{"stats":[["70+","Languages"],["3.4s","Median OCR / 100 pp"],["98.2%","Char accuracy · clean"]]}]},{"h2":"Stage 4: post-OCR validation","body":["The most overlooked stage. We run a small language model that flags likely OCR errors based on context — words that look like character substitutions of more common words, numbers that look out of range, dates that look malformed. We surface these as 'low-confidence regions' in the viewer."]}],"related":[{"title":"Multi-PDF chat","tag":"Product","href":"multi-pdf-chat.html"},{"title":"How we got citation accuracy to 99.6%","tag":"Engineering","href":"citation-accuracy.html"},{"title":"Designing for 'I don't know'","tag":"Engineering","href":"designing-for-i-dont-know.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

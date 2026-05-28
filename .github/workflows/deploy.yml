@@ -1,0 +1,81 @@
+# ============================================================
+# CHATWITHPDFAI.COM — Auto-deploy to Hostinger via FTP
+# Trigger: every push to `main` branch
+# ============================================================
+#
+# REQUIRED GitHub repository SECRETS (Settings -> Secrets -> Actions):
+#   FTP_SERVER     e.g. ftp.chatwithpdfai.com  (or the host shown in hPanel -> FTP Accounts)
+#   FTP_USERNAME   e.g. u123456789.chatwithpdfai
+#   FTP_PASSWORD   the FTP password from hPanel
+#   FTP_PORT       usually 21 (FTP) — Hostinger shared hosting does NOT allow SFTP
+#   FTP_REMOTE_DIR usually /public_html/ — final slash required
+#
+# Hostinger FTP credentials live in:
+#   hPanel -> Files -> FTP Accounts
+# ============================================================
+
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:        # allows manual "Run workflow" from GitHub UI
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: FTP deploy to public_html
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # full history so FTP-deploy can diff against previous deploy
+
+      - name: List files to deploy (sanity check)
+        run: |
+          echo "Repo size:"
+          du -sh .
+          echo "Top-level files:"
+          ls -la
+
+      - name: Sync to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:       ${{ secrets.FTP_SERVER }}
+          username:     ${{ secrets.FTP_USERNAME }}
+          password:     ${{ secrets.FTP_PASSWORD }}
+          port:         ${{ secrets.FTP_PORT }}
+          protocol:     ftp
+          server-dir:   ${{ secrets.FTP_REMOTE_DIR }}
+          local-dir:    ./
+          dangerous-clean-slate: false   # incremental sync — only changed files transfer
+          log-level:    standard
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/.DS_Store
+            **/Thumbs.db
+            **/.thumbnail/**
+            **/.vscode/**
+            **/.idea/**
+            **/*.md
+            **/*.log
+            **/.env*
+            **/DEPLOYMENT.md
+            **/README.md
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "Deployment finished at $(date -u) UTC"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Live site: https://chatwithpdfai.com"

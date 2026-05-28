@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workspace — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    #root { height: 100vh; display: flex; flex-direction: column; }
+    @media (max-width: 880px) {
+      .ws-mobile-tabs { display: flex !important; }
+      .ws-pdf-pane, .ws-chat-pane { display: none !important; }
+      .ws-pdf-pane.active, .ws-chat-pane.active { display: flex !important; }
+      .ws-split { flex-direction: column !important; }
+      .ws-split > div { flex: 1 !important; }
+      aside.sidebar { display: none; }
+    }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="App / Workspace">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="app/shell.jsx"></script>
+  <script type="text/babel" src="app/workspace.jsx"></script>
+  <script type="text/babel" src="app/modals.jsx"></script>
+
+  <script type="text/babel">
+    /*EDITMODE-BEGIN*/
+    const TWEAK_DEFAULTS = {
+      "splitRatio": 55,
+      "showAurora": true
+    };
+    /*EDITMODE-END*/
+
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [docId, setDocId] = React.useState("contract");
+      const [credits, setCredits] = React.useState(47);
+      const [highlightId, setHighlightId] = React.useState(null);
+      const [showUpload, setShowUpload] = React.useState(false);
+      const [showShare, setShowShare] = React.useState(false);
+      const [empty, setEmpty] = React.useState(false);
+      const [mobileTab, setMobileTab] = React.useState("pdf");
+
+      React.useEffect(() => {
+        const bg = document.querySelector(".aurora-bg");
+        if (bg) bg.style.display = t.showAurora ? "block" : "none";
+      }, [t.showAurora]);
+
+      const doc = DOCS[docId] || DOCS.contract;
+
+      const handleCite = (cid) => {
+        setHighlightId(null);
+        setTimeout(() => setHighlightId(cid), 30);
+        setMobileTab("pdf");
+      };
+
+      const handleUploadSuccess = () => {
+        setCredits(c => Math.max(0, c - 1));
+        setEmpty(false);
+      };
+
+      return (
+        <>
+          <AppHeader
+            credits={credits}
+            docTitle={doc.short}
+            onUpload={() => setShowUpload(true)}
+            onShare={() => setShowShare(true)}
+          />
+          <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+            <Sidebar active={docId} onPick={(id) => { setDocId(id); setEmpty(false); }} onNew={() => setEmpty(true)} />
+
+            {empty ? (
+              <EmptyWorkspace onUpload={() => setShowUpload(true)} />
+            ) : (
+              <>
+                <div className="ws-mobile-tabs" style={{ display: "none", borderBottom: "1px solid var(--stroke-1)", padding: 6, gap: 4, background: "var(--bg-2)" }}>
+                  <button onClick={() => setMobileTab("pdf")} className={mobileTab === "pdf" ? "btn btn-iris btn-sm" : "btn btn-glass btn-sm"} style={{ flex: 1, justifyContent: "center" }}>PDF</button>
+                  <button onClick={() => setMobileTab("chat")} className={mobileTab === "chat" ? "btn btn-iris btn-sm" : "btn btn-glass btn-sm"} style={{ flex: 1, justifyContent: "center" }}>Chat</button>
+                </div>
+                <div className="ws-split" style={{ display: "flex", flex: 1, minWidth: 0 }}>
+                  <div className={`ws-pdf-pane ${mobileTab === "pdf" ? "active" : ""}`} style={{ flex: t.splitRatio, display: "flex", minWidth: 0 }}>
+                    <PDFViewer doc={doc} highlightId={highlightId} onJump={handleCite} />
+                  </div>
+                  <div className={`ws-chat-pane ${mobileTab === "chat" ? "active" : ""}`} style={{ flex: 100 - t.splitRatio, display: "flex", minWidth: 0 }}>
+                    <ChatPane doc={doc} onCite={handleCite} credits={credits} setCredits={setCredits} />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <UploadModal open={showUpload} onClose={() => setShowUpload(false)} onSuccess={handleUploadSuccess} />
+          <ShareModal open={showShare} onClose={() => setShowShare(false)} doc={doc} />
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="Layout">
+              <TweakSlider label="PDF / Chat split" value={t.splitRatio} onChange={v => setTweak("splitRatio", v)} min={30} max={70} step={5} />
+              <TweakToggle label="Aurora background" value={t.showAurora} onChange={v => setTweak("showAurora", v)} />
+            </TweakSection>
+            <TweakSection title="States">
+              <TweakButton onClick={() => setEmpty(e => !e)}>Toggle empty state</TweakButton>
+              <TweakButton onClick={() => setShowUpload(true)}>Show upload modal</TweakButton>
+              <TweakButton onClick={() => setShowShare(true)}>Show share modal</TweakButton>
+            </TweakSection>
+            <TweakSection title="Navigate">
+              <TweakButton onClick={() => window.location.href = "landing.html"}>← Back to landing</TweakButton>
+              <TweakButton onClick={() => window.location.href = "account.html"}>Account & billing</TweakButton>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

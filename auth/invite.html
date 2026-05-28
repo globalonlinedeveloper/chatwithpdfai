@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accept invite — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Accept invite">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="auth.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+    function App() {
+      const [accepted, setAccepted] = useState(false);
+      if (accepted) {
+        return (
+          <AuthShell title="Welcome to the workspace." lede="Setting up your seat..." footer={<a href="../app.html" style={{ color: "var(--violet-2)" }}>Open workspace →</a>}>
+            <div style={{ padding: "20px 0", textAlign: "center" }}>
+              <div style={{ width: 64, height: 64, borderRadius: 16, background: "var(--grad-iris-2)", margin: "0 auto 18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: "#fff", boxShadow: "0 10px 28px -8px oklch(0.55 0.22 290 / 0.6)" }}>✓</div>
+              <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>You're in.</h3>
+              <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: 0 }}>Redirecting to the Arkham Capital workspace…</p>
+            </div>
+          </AuthShell>
+        );
+      }
+      return (
+        <AuthShell title="You've been invited." lede="Maya Khan added you to a CHATWITHPDFAI workspace." footer={<a href="signin.html" style={{ color: "var(--violet-2)" }}>Already have an account? Sign in →</a>}>
+          <div className="glass" style={{ padding: "16px 18px", borderRadius: "var(--r-lg)", marginBottom: 22 }}>
+            <div className="eyebrow" style={{ marginBottom: 10 }}>You'll be joining</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: "var(--grad-iris-2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>AC</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>Arkham Capital</div>
+                <div style={{ fontSize: 12.5, color: "var(--text-3)" }}>3 members · Practice plan · 347 credits</div>
+              </div>
+              <span className="pill" style={{ padding: "3px 10px", fontSize: 10.5 }}>EDITOR</span>
+            </div>
+          </div>
+
+          <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 22px", lineHeight: 1.55 }}>
+            You'll be able to upload PDFs, chat with documents, and share answers with your team. Credits are shared across the workspace.
+          </p>
+
+          <SocialButtons />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "var(--stroke-1)" }}></div>
+            <span className="eyebrow">or set a password</span>
+            <div style={{ flex: 1, height: 1, background: "var(--stroke-1)" }}></div>
+          </div>
+          <form onSubmit={e => { e.preventDefault(); setAccepted(true); setTimeout(() => window.location.href = "../app.html", 1000); }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <label><div className="eyebrow" style={{ marginBottom: 6 }}>Your name</div><input className="input" placeholder="Iris Lee" required /></label>
+            <label>
+              <div className="eyebrow" style={{ marginBottom: 6 }}>Email</div>
+              <input className="input" type="email" value="iris@arkhamcapital.com" disabled style={{ opacity: 0.6 }} />
+            </label>
+            <label><div className="eyebrow" style={{ marginBottom: 6 }}>Password</div><input className="input" type="password" placeholder="At least 12 characters" minLength={12} required /></label>
+            <button type="submit" className="btn btn-iris" style={{ marginTop: 6, padding: "12px 16px", justifyContent: "center" }}>Accept invite & join →</button>
+            <p style={{ fontSize: 11.5, color: "var(--text-4)", margin: "8px 0 0", lineHeight: 1.5 }}>
+              By accepting you agree to our <a href="../legal/terms.html" style={{ color: "var(--text-3)", textDecoration: "underline" }}>Terms</a> and <a href="../legal/privacy.html" style={{ color: "var(--text-3)", textDecoration: "underline" }}>Privacy Policy</a>.
+            </p>
+          </form>
+        </AuthShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

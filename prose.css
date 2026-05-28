@@ -1,0 +1,139 @@
+/* CHATWITHPDFAI.COM — Content / long-form page styles
+   For legal, blog, docs, etc. — adds prose styles on top of styles.css */
+
+.prose {
+  max-width: 760px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.prose h2 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 56px 0 14px;
+}
+.prose h2:first-child { margin-top: 0; }
+.prose h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 32px 0 10px;
+  letter-spacing: -0.01em;
+}
+.prose p { margin: 0 0 16px; }
+.prose a {
+  color: var(--violet-2);
+  text-decoration: underline;
+  text-decoration-color: rgba(217, 182, 255, 0.4);
+}
+.prose a:hover { text-decoration-color: var(--violet-2); }
+.prose ul, .prose ol { margin: 0 0 16px; padding-left: 22px; }
+.prose li { margin: 0 0 8px; }
+.prose strong { color: var(--text); font-weight: 600; }
+.prose code {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--glass-2);
+  border: 1px solid var(--stroke-2);
+  color: var(--violet-2);
+}
+.prose blockquote {
+  border-left: 2px solid var(--violet);
+  padding: 4px 0 4px 22px;
+  margin: 24px 0;
+  color: var(--text-3);
+  font-style: italic;
+}
+.prose hr {
+  border: none;
+  height: 1px;
+  background: var(--stroke-1);
+  margin: 40px 0;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 14px;
+}
+.prose th, .prose td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--stroke-1);
+}
+.prose th {
+  font-weight: 600;
+  color: var(--text);
+  background: var(--glass-1);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* TOC */
+.toc {
+  position: sticky;
+  top: 100px;
+  padding: 18px 20px;
+}
+.toc-title {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.toc a {
+  display: block;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text-3);
+  border-left: 2px solid transparent;
+  padding-left: 12px;
+  transition: color .15s, border-color .15s;
+}
+.toc a:hover { color: var(--text); border-left-color: var(--violet); }
+
+/* Auth layouts */
+.auth-shell {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  position: relative;
+}
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px 36px;
+  border-radius: var(--r-xl);
+  position: relative;
+  z-index: 2;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.empty-state .icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--glass-2);
+  border: 1px solid var(--stroke-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--violet-2);
+  margin-bottom: 20px;
+}

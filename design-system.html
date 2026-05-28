@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design system — CHATWITHPDFAI (engineering handoff)</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <style>
+    .sys-grid { display: grid; gap: 12px; }
+    .swatch { aspect-ratio: 1.4; border-radius: var(--r-lg); position: relative; overflow: hidden; padding: 14px; }
+    .swatch .lbl { position: absolute; bottom: 12px; left: 14px; right: 14px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.85); text-transform: uppercase; }
+    .sample-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid var(--stroke-1); }
+    .sample-row:first-of-type { border-top: none; }
+    .label { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); min-width: 100px; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Design system">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function Section({ title, anchor, children }) {
+      return (
+        <section id={anchor} style={{ padding: "40px 0", borderTop: "1px solid var(--stroke-1)", scrollMarginTop: 100 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.02em", margin: "0 0 8px" }}>{title}</h2>
+          {children}
+        </section>
+      );
+    }
+
+    function CodeBlock({ children }) {
+      return <pre style={{ background: "#0a0c20", border: "1px solid var(--stroke-2)", borderRadius: "var(--r)", padding: 14, fontSize: 12, color: "#d9b6ff", fontFamily: "var(--mono)", overflowX: "auto", margin: "8px 0" }}>{children}</pre>;
+    }
+
+    function App() {
+      return (
+        <PageShell>
+          <section style={{ padding: "60px 0 30px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: 60, right: -100, opacity: 0.3 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2 }}>
+              <div className="section-eyebrow">Internal · Engineering handoff</div>
+              <h1 className="section-title" style={{ fontSize: "clamp(36px, 5vw, 60px)", margin: "16px 0 14px", maxWidth: 900 }}>
+                The Aurora <span className="iris">design system.</span>
+              </h1>
+              <p className="section-lede">Tokens, components, and patterns. The single source of truth for anyone building on top of CHATWITHPDFAI. Last updated May 23, 2026.</p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <a href="#color" className="btn btn-glass btn-sm">Color</a>
+                <a href="#type" className="btn btn-glass btn-sm">Type</a>
+                <a href="#space" className="btn btn-glass btn-sm">Space & radius</a>
+                <a href="#components" className="btn btn-glass btn-sm">Components</a>
+                <a href="#patterns" className="btn btn-glass btn-sm">Patterns</a>
+                <a href="#a11y" className="btn btn-glass btn-sm">Accessibility</a>
+              </div>
+            </div>
+          </section>
+
+          <div className="spread" style={{ maxWidth: 1080 }}>
+            <Section title="Color" anchor="color">
+              <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 22px", maxWidth: 700 }}>
+                All colors are defined in oklch in <code>styles.css</code> and exposed as CSS custom properties on <code>:root</code>. Iridescence is the brand signal — limit use to 1-2 moments per screen.
+              </p>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Brand</h3>
+              <div className="sys-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
+                {[["Violet", "var(--violet)", "#b76aff"], ["Blue", "var(--blue)", "#4ea3ff"], ["Green", "var(--green)", "#7eff9d"], ["Pink", "var(--pink)", "#ff7ec5"], ["Teal", "var(--teal)", "#4eecd1"]].map(([n, v, hex]) => (
+                  <div key={n} className="swatch" style={{ background: v }}><div className="lbl">{n} · {hex}</div></div>
+                ))}
+              </div>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Surfaces</h3>
+              <div className="sys-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                {[["Bg", "var(--bg)"], ["Bg-2", "var(--bg-2)"], ["Bg-3", "var(--bg-3)"], ["Glass-strong", "var(--glass-strong)"]].map(([n, v]) => (
+                  <div key={n} className="swatch" style={{ background: v, border: "1px solid var(--stroke-2)" }}><div className="lbl">{n}</div></div>
+                ))}
+              </div>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Iridescent gradient</h3>
+              <div className="swatch" style={{ background: "var(--grad-iris)", aspectRatio: 6, marginBottom: 12 }}><div className="lbl">--grad-iris · violet → blue → green</div></div>
+              <div className="swatch" style={{ background: "var(--grad-iris-2)", aspectRatio: 6, marginBottom: 12 }}><div className="lbl">--grad-iris-2 · violet → blue (used in buttons + brand mark)</div></div>
+              <CodeBlock>{`background: var(--grad-iris-2);
+color: #fff;
+box-shadow: 0 10px 30px -8px oklch(0.55 0.22 290 / 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);`}</CodeBlock>
+            </Section>
+
+            <Section title="Type" anchor="type">
+              <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 22px", maxWidth: 700 }}>
+                Inter for UI. JetBrains Mono for labels, citations, eyebrows. The display class adds a fade-to-translucent gradient for hero headlines.
+              </p>
+              <div className="sample-row">
+                <span className="label">Display</span>
+                <div className="display" style={{ fontSize: 56, lineHeight: 1, flex: 1 }}>Aurora <span className="iris">at light speed.</span></div>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>--display · 56px / 1.0 / -0.04em</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">H1</span>
+                <h1 style={{ fontSize: 36, fontWeight: 600, letterSpacing: "-0.025em", margin: 0, flex: 1 }}>Heading one</h1>
+              </div>
+              <div className="sample-row">
+                <span className="label">H2</span>
+                <h2 style={{ fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em", margin: 0, flex: 1 }}>Heading two</h2>
+              </div>
+              <div className="sample-row">
+                <span className="label">Body</span>
+                <p style={{ fontSize: 15, lineHeight: 1.55, margin: 0, color: "var(--text-2)", flex: 1 }}>Body copy — Inter 15px, line-height 1.55. Used for marketing pages and most prose.</p>
+              </div>
+              <div className="sample-row">
+                <span className="label">Small</span>
+                <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: 0, flex: 1 }}>Tertiary body — for metadata, captions.</p>
+              </div>
+              <div className="sample-row">
+                <span className="label">Eyebrow</span>
+                <span className="eyebrow" style={{ flex: 1 }}>SECTION TITLE · USED ABOVE H2</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">Mono</span>
+                <span className="mono" style={{ fontSize: 12, color: "var(--text-2)", flex: 1 }}>JetBrains Mono · citations, IDs, code, latency</span>
+              </div>
+            </Section>
+
+            <Section title="Space, radius, shadow" anchor="space">
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 10px" }}>Radius scale</h3>
+              <div style={{ display: "flex", gap: 12, marginBottom: 22 }}>
+                {[["--r-sm", "8px"], ["--r", "12px"], ["--r-lg", "16px"], ["--r-xl", "24px"], ["--r-pill", "999px"]].map(([n, v]) => (
+                  <div key={n} style={{ flex: 1 }}>
+                    <div className="glass" style={{ aspectRatio: 1, borderRadius: `var(${n})`, marginBottom: 6 }}></div>
+                    <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.06em" }}>{n}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-4)" }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Spacing units</h3>
+              <p style={{ fontSize: 13, color: "var(--text-3)" }}>Use 4-px increments. Common values: <code>8 12 16 20 24 32 40 56 60 80 100 120</code>.</p>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Shadow tokens</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                {[["--shadow-sm", "Subtle hover"], ["--shadow-card", "Lifted cards"], ["--shadow-glow", "Iridescent halo · accents"]].map(([n, d]) => (
+                  <div key={n} className="glass" style={{ padding: 14, borderRadius: "var(--r-lg)", boxShadow: `var(${n})` }}>
+                    <div className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.06em" }}>{n}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 4 }}>{d}</div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Components" anchor="components">
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 10px" }}>Buttons</h3>
+              <div className="sample-row">
+                <span className="label">Primary</span>
+                <button className="btn btn-iris">Try free →</button>
+                <button className="btn btn-iris btn-sm">Small</button>
+                <button className="btn btn-iris btn-lg">Large</button>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>.btn .btn-iris</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">Glass</span>
+                <button className="btn btn-glass">Secondary</button>
+                <button className="btn btn-glass btn-sm">Small</button>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>.btn .btn-glass</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">Ghost</span>
+                <button className="btn btn-ghost">Tertiary</button>
+                <button className="btn btn-ghost btn-sm">Small</button>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>.btn .btn-ghost</span>
+              </div>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Pills, chips & badges</h3>
+              <div className="sample-row">
+                <span className="label">Status pill</span>
+                <span className="pill"><span className="dot"></span>Live</span>
+                <span className="pill" style={{ padding: "4px 10px", fontSize: 11 }}>SOC 2</span>
+                <span className="pill" style={{ color: "var(--green)", border: "1px solid rgba(126,255,157,0.4)", background: "rgba(126,255,157,0.12)" }}>✓ VERIFIED</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">Chips</span>
+                <span className="chip">Suggested follow-up</span>
+                <span className="chip">+ Add</span>
+              </div>
+              <div className="sample-row">
+                <span className="label">Citation</span>
+                <span style={{ fontSize: 14 }}>This text has a citation.<span className="fn">¹ p.47</span></span>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>.fn</span>
+              </div>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Inputs</h3>
+              <div className="sample-row">
+                <span className="label">Text</span>
+                <input className="input" placeholder="Default state" style={{ width: 240 }} />
+                <input className="input" value="With value" readOnly style={{ width: 180 }} />
+              </div>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Cards</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                <div className="glass" style={{ padding: 18, borderRadius: "var(--r-lg)" }}>
+                  <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.1em" }}>STANDARD</div>
+                  <div style={{ marginTop: 8, fontWeight: 600 }}>.glass</div>
+                </div>
+                <div className="glass glass-strong" style={{ padding: 18, borderRadius: "var(--r-lg)" }}>
+                  <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.1em" }}>STRONG</div>
+                  <div style={{ marginTop: 8, fontWeight: 600 }}>.glass.glass-strong</div>
+                </div>
+                <div className="glass glass-iris-border" style={{ padding: 18, borderRadius: "var(--r-lg)" }}>
+                  <div className="mono" style={{ fontSize: 10, color: "var(--violet-2)", letterSpacing: "0.1em" }}>IRIS BORDER</div>
+                  <div style={{ marginTop: 8, fontWeight: 600 }}>.glass.glass-iris-border</div>
+                </div>
+              </div>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "28px 0 10px" }}>Brand mark</h3>
+              <div className="sample-row">
+                <a href="landing.html" className="brand">
+                  <span className="brand-mark">◇</span>
+                  chatwithpdfai<span className="domain">.com</span>
+                </a>
+                <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)" }}>.brand · .brand-mark</span>
+              </div>
+            </Section>
+
+            <Section title="Patterns" anchor="patterns">
+              <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 22px", maxWidth: 700 }}>
+                Compositions used across the site.
+              </p>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Chat message pair</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 540, marginBottom: 22 }}>
+                <div style={{ alignSelf: "flex-end", padding: "8px 12px", background: "var(--grad-iris-2)", borderRadius: "14px 14px 4px 14px", color: "#fff", fontSize: 12.5 }}>What's the indemnification cap?</div>
+                <div className="glass" style={{ padding: "12px 14px", borderRadius: "14px 14px 14px 4px", borderLeft: "2px solid var(--violet)", fontSize: 12.5, lineHeight: 1.55 }}>
+                  <strong style={{ color: "var(--text)" }}>2× annual fees</strong>, with three carve-outs.<span className="fn">¹ p.47</span>
+                </div>
+              </div>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Aurora background</h3>
+              <CodeBlock>{`<div class="aurora-bg"></div>
+<!-- Renders the mesh + grid behind every page.
+     Layered fixed positioning, z-index: -2.
+     Toggleable via Tweaks → showAurora. -->`}</CodeBlock>
+
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "20px 0 10px" }}>Toasts</h3>
+              <CodeBlock>{`window.cwpaToast({
+  kind: "success",       // success | error | info | warning
+  title: "Saved",
+  body: "Your changes are live",
+  duration: 4200          // optional, ms
+});`}</CodeBlock>
+              <div style={{ display: "flex", gap: 8 }}>
+                {["success", "info", "warning", "error"].map(k => (
+                  <button key={k} onClick={() => window.cwpaToast?.({ kind: k, title: k[0].toUpperCase() + k.slice(1), body: "Sample toast" })} className="btn btn-glass btn-sm">{k}</button>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Accessibility" anchor="a11y">
+              <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 16px", maxWidth: 700 }}>
+                Every page imports <code>a11y.css</code> and includes a <code>.skip-link</code> as the first child of <code>&lt;body&gt;</code>. Honors <code>prefers-reduced-motion</code> and <code>prefers-contrast</code>.
+              </p>
+              <ul style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.7, paddingLeft: 20 }}>
+                <li>Focus rings: 2px violet outline + 4px halo on all interactive elements (<code>:focus-visible</code>)</li>
+                <li>Touch targets: min 44px on devices ≤720px wide</li>
+                <li>Color contrast: body text ≥4.5:1; large text ≥3:1 across all surfaces</li>
+                <li>Live regions: toasts render in an <code>aria-live</code>-friendly container</li>
+                <li>Keyboard nav: modals trap focus, Esc closes, Tab cycles within</li>
+                <li>Screen readers: <code>.sr-only</code> utility for visually-hidden announcements</li>
+              </ul>
+              <h3 style={{ fontSize: 14, fontWeight: 600, margin: "24px 0 10px" }}>WCAG 2.2 target</h3>
+              <p style={{ fontSize: 14, color: "var(--text-3)" }}>Level AA. Audit run quarterly with axe-core + manual screen-reader testing on NVDA, VoiceOver, JAWS.</p>
+            </Section>
+
+            <Section title="File inventory" anchor="files">
+              <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 16px" }}>What's in the project, in case you're looking.</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr style={{ borderBottom: "1px solid var(--stroke-2)" }}>
+                  <th style={{ textAlign: "left", padding: "10px 12px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 500 }}>Area</th>
+                  <th style={{ textAlign: "left", padding: "10px 12px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 500 }}>Files</th>
+                  <th style={{ textAlign: "right", padding: "10px 12px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.1em", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 500 }}>Count</th>
+                </tr></thead>
+                <tbody>
+                  {[
+                    ["Stylesheets", "styles.css, a11y.css, prose.css, print.css", 4],
+                    ["Shared components", "chrome.jsx, article.jsx, long-form.jsx, tweaks-panel.jsx, design-canvas.jsx", "5+"],
+                    ["Landing & marketing", "landing.html, pricing.html, manifesto.html, customers/, vs/, partners.html, ...", "15+"],
+                    ["Product / app", "app.html, library.html, document.html, flashcards.html, compare.html, search.html, ...", "10+"],
+                    ["Auth & account", "auth/*.html, account.html, two-factor.html, checkout.html, invoice.html", "8+"],
+                    ["Legal & support", "legal/*.html, help/*.html, contact.html, status.html", "16+"],
+                    ["Content", "blog/*.html, customers/*.html, changelog.html, press.html", "14+"],
+                    ["Error pages", "404.html, 403.html, 500.html, maintenance.html, offline.html", 5],
+                    ["Emails", "emails/*.html + preview gallery", 6],
+                    ["Infrastructure", "favicon.svg, og-image.svg, robots.txt, sitemap.xml, manifest.json, sw.js", 6],
+                  ].map(([a, f, n]) => (
+                    <tr key={a} style={{ borderBottom: "1px solid var(--stroke-1)" }}>
+                      <td style={{ padding: "12px 12px", fontWeight: 500, color: "var(--text)" }}>{a}</td>
+                      <td style={{ padding: "12px 12px", color: "var(--text-3)", fontFamily: "var(--mono)", fontSize: 11.5 }}>{f}</td>
+                      <td style={{ padding: "12px 12px", textAlign: "right", color: "var(--violet-2)", fontFamily: "var(--mono)" }}>{n}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
+
+            <div className="glass glass-iris-border" style={{ padding: "28px 32px", borderRadius: "var(--r-xl)", textAlign: "center", margin: "40px 0 80px" }}>
+              <h3 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 8px" }}>Engineering handoff is complete.</h3>
+              <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "0 0 16px" }}>This is the canonical reference for everything built. If a screen isn't here, it doesn't exist yet.</p>
+              <a href="contact.html" className="btn btn-iris">Talk to the design team</a>
+            </div>
+          </div>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

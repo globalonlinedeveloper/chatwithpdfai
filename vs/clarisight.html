@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vs. Clarisight — CHATWITHPDFAI</title>
+  <meta name="description" content="How CHATWITHPDFAI compares to Clarisight: pay-per-document vs. subscription, paragraph-level citations, multi-PDF chat, and 70+ languages." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="vs Clarisight">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel">
+    const ROWS = [
+      { f: "Pricing model", us: { v: "Pay-per-document", win: true }, them: { v: "$29/mo subscription" } },
+      { f: "Credit expiry", us: { v: "Never expire", win: true }, them: { v: "Use it or lose it monthly" } },
+      { f: "Free tier", us: { v: "3 documents, no card", win: true }, them: { v: "14-day trial, card required" } },
+      { f: "Cancellation friction", us: { v: "Nothing to cancel", win: true }, them: { v: "Email + 3-step form" } },
+      { f: "Citation depth", us: { v: "Page + paragraph", win: true }, them: { v: "Page only" } },
+      { f: "Citation accuracy (their disclosed)", us: { v: "99.6%", win: true }, them: { v: "~94%" } },
+      { f: "Multi-PDF chat", us: { v: "Unlimited", win: true }, them: { v: "5 docs · Pro plan only" } },
+      { f: "OCR for scanned PDFs", us: { v: "Included", win: true }, them: { v: "Paid add-on" } },
+      { f: "70+ languages", us: { v: true, win: true }, them: { v: "12 languages" } },
+      { f: "Trains on your files", us: { v: "Never", win: true }, them: { v: "Opt-out only" } },
+      { f: "API access", us: { v: "All paid plans", win: true }, them: { v: "Pro plan only" } },
+      { f: "Deterministic citations (API)", us: { v: true, win: true }, them: { v: false } },
+      { f: "HIPAA / BAA", us: { v: "Chamber plan", win: true }, them: { v: "Enterprise only · $1k+/mo" } },
+      { f: "SOC 2 Type II", us: { v: true }, them: { v: true } },
+      { f: "Custom data residency", us: { v: "Chamber plan" }, them: { v: "Enterprise only" } },
+      { f: "Open changelog", us: { v: true, win: true }, them: { v: false } },
+      { f: "Public sub-processor list", us: { v: true, win: true }, them: { v: false } },
+    ];
+
+    function cell(v) {
+      if (v === true) return <span style={{ color: "var(--green)", fontSize: 16 }}>✓</span>;
+      if (v === false) return <span style={{ color: "#ff7e7e", fontSize: 16 }}>—</span>;
+      return <span style={{ fontSize: 12.5 }}>{v}</span>;
+    }
+
+    function App() {
+      return (
+        <PageShell>
+          <section style={{ padding: "60px 0 40px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: 60, right: -100, opacity: 0.3 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+              <div className="section-eyebrow" style={{ justifyContent: "center" }}>Comparison · independent</div>
+              <h1 className="section-title" style={{ fontSize: "clamp(40px, 5.5vw, 64px)", margin: "16px auto 18px", maxWidth: 880 }}>
+                CHATWITHPDFAI <span style={{ opacity: 0.55 }}>vs.</span> <span className="iris">Clarisight.</span>
+              </h1>
+              <p className="section-lede" style={{ margin: "0 auto", maxWidth: 620 }}>
+                Both products chat with PDFs. Here's where they're identical and where they're different. Last refreshed against public documentation: May 22, 2026.
+              </p>
+            </div>
+          </section>
+
+          {/* TL;DR */}
+          <section style={{ padding: "20px 0 40px" }}>
+            <div className="spread">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }} className="vs-tldr">
+                <div className="glass glass-iris-border" style={{ padding: "26px 28px", borderRadius: "var(--r-xl)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <span className="brand-mark">◇</span>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }} className="iris">CHATWITHPDFAI</h3>
+                  </div>
+                  <p style={{ fontSize: 14, color: "var(--text-2)", margin: "0 0 14px", lineHeight: 1.55 }}>
+                    Pay-per-document. Credits never expire. Paragraph-level citations on every answer.
+                  </p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-2)" }}>
+                    {["Better for bursty workflows", "Better for compliance-heavy verticals", "Better for solo + small teams", "Better citation accuracy"].map(b => (
+                      <li key={b} style={{ padding: "4px 0", display: "flex", gap: 8 }}><span style={{ color: "var(--green)" }}>✓</span>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="glass" style={{ padding: "26px 28px", borderRadius: "var(--r-xl)", opacity: 0.95 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: 7, background: "var(--glass-2)", border: "1px solid var(--stroke-2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "var(--text-2)" }}>C</div>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Clarisight</h3>
+                  </div>
+                  <p style={{ fontSize: 14, color: "var(--text-2)", margin: "0 0 14px", lineHeight: 1.55 }}>
+                    Monthly subscription. Page-level citations. Established with strong enterprise sales.
+                  </p>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-2)" }}>
+                    {["Better for ultra-heavy daily users", "Better for centralized procurement", "Better if you've already standardized on it"].map(b => (
+                      <li key={b} style={{ padding: "4px 0", display: "flex", gap: 8 }}><span style={{ color: "var(--violet-2)" }}>·</span>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <style>{`@media (max-width: 760px) { .vs-tldr { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+
+          {/* Full table */}
+          <section style={{ padding: "20px 0 40px" }}>
+            <div className="spread">
+              <div className="section-eyebrow">Feature by feature</div>
+              <h2 className="section-title" style={{ fontSize: 34, margin: "12px 0 24px" }}>17 things <span className="iris">we checked.</span></h2>
+              <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden" }}>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                    <thead>
+                      <tr style={{ background: "rgba(0,0,0,0.2)" }}>
+                        <th style={{ textAlign: "left", padding: "14px 18px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.14em", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 500 }}>Capability</th>
+                        <th style={{ textAlign: "center", padding: "14px 18px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", fontWeight: 500, color: "var(--violet-2)", background: "linear-gradient(180deg, rgba(183,106,255,0.15), transparent)" }}>CHATWITHPDFAI</th>
+                        <th style={{ textAlign: "center", padding: "14px 18px", fontFamily: "var(--mono)", fontSize: 10.5, letterSpacing: "0.14em", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 500 }}>Clarisight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ROWS.map((r, i) => (
+                        <tr key={r.f} style={{ borderTop: "1px solid var(--stroke-1)" }}>
+                          <td style={{ padding: "14px 18px", fontSize: 13, color: "var(--text)", fontWeight: 500 }}>{r.f}</td>
+                          <td style={{ padding: "14px 18px", textAlign: "center", color: r.us.win ? "var(--green)" : "var(--text-2)", fontWeight: r.us.win ? 600 : 400, background: "rgba(183,106,255,0.04)" }}>{cell(r.us.v)}{r.us.win && <span style={{ marginLeft: 6, color: "var(--green)" }}>★</span>}</td>
+                          <td style={{ padding: "14px 18px", textAlign: "center", color: "var(--text-3)" }}>{cell(r.them.v)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="mono" style={{ marginTop: 12, fontSize: 10, color: "var(--text-4)", letterSpacing: "0.1em" }}>
+                † COMPILED FROM PUBLIC PRICING + DOCS PAGES. ★ = INDEPENDENT WIN. CORRECTIONS: COMPARE@CHATWITHPDFAI.COM
+              </div>
+            </div>
+          </section>
+
+          {/* Migration CTA */}
+          <section style={{ padding: "40px 0 100px" }}>
+            <div className="spread">
+              <div className="glass glass-iris-border" style={{ padding: "32px 36px", borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                <h3 style={{ fontSize: 24, fontWeight: 600, margin: "0 0 8px", letterSpacing: "-0.02em" }}>Coming from Clarisight?</h3>
+                <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 18px" }}>We'll match your remaining months as bonus credits and import your folder structure in one click. No-friction switch.</p>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  <a href="../auth/signup.html" className="btn btn-iris btn-lg">Sign up free →</a>
+                  <a href="../contact.html" className="btn btn-glass btn-lg">Talk to migration team</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

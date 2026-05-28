@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Usage analytics — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Usage analytics">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+    // Generate fake daily series
+    const DAILY = Array.from({ length: 30 }, (_, i) => ({ d: i, docs: Math.floor(8 + 12 * Math.sin(i / 4) + Math.random() * 8), questions: Math.floor(28 + 30 * Math.sin(i / 5 + 1) + Math.random() * 20) }));
+    const MEMBERS = [
+      { name: "Maya Khan", init: "MK", color: "var(--violet)", docs: 142, q: 487, last: "2m ago" },
+      { name: "Theo Sato", init: "TS", color: "var(--blue)", docs: 89, q: 312, last: "1h ago" },
+      { name: "Iris Lee", init: "IL", color: "var(--green)", docs: 64, q: 198, last: "Yesterday" },
+    ];
+    const TYPES = [
+      { l: "Contracts", v: 38, c: "var(--violet)" },
+      { l: "SEC filings", v: 24, c: "var(--blue)" },
+      { l: "Research papers", v: 18, c: "var(--green)" },
+      { l: "Compliance", v: 12, c: "#ffbd2e" },
+      { l: "Other", v: 8, c: "var(--text-3)" },
+    ];
+
+    function App() {
+      const [range, setRange] = useState("30d");
+      const totalDocs = DAILY.reduce((s, d) => s + d.docs, 0);
+      const totalQ = DAILY.reduce((s, d) => s + d.questions, 0);
+      return (
+        <PageShell>
+          <section style={{ padding: "40px 0 80px" }}>
+            <div className="spread">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16, marginBottom: 22 }}>
+                <div>
+                  <a href="account.html" className="btn btn-glass btn-sm" style={{ marginBottom: 12 }}>← Account</a>
+                  <h1 style={{ fontSize: 28, fontWeight: 600, margin: 0, letterSpacing: "-0.02em" }}>Usage & analytics</h1>
+                  <p style={{ fontSize: 13, color: "var(--text-3)", margin: "6px 0 0" }}>Workspace: Arkham Capital · 3 seats · 347 credits remaining</p>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <div className="glass" style={{ padding: 3, borderRadius: "var(--r-pill)", display: "flex" }}>
+                    {[["7d", "7 days"], ["30d", "30 days"], ["90d", "90 days"]].map(([k, l]) => (
+                      <button key={k} onClick={() => setRange(k)} className={range === k ? "btn btn-iris btn-sm" : "btn btn-ghost btn-sm"} style={{ borderRadius: "var(--r-pill)" }}>{l}</button>
+                    ))}
+                  </div>
+                  <button className="btn btn-glass btn-sm">↓ Export CSV</button>
+                </div>
+              </div>
+
+              {/* KPI cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }} className="ana-kpi">
+                {[
+                  ["Documents read", totalDocs, "+12.4%", "var(--violet)"],
+                  ["Questions asked", totalQ.toLocaleString(), "+8.1%", "var(--blue)"],
+                  ["Credits spent", totalDocs, "−2.0%", "var(--green)"],
+                  ["Avg latency", "1.4s", "−0.2s", "#ffbd2e"],
+                ].map(([l, n, ch, c]) => (
+                  <div key={l} className="glass" style={{ padding: "20px 22px", borderRadius: "var(--r-lg)" }}>
+                    <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>{l}</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                      <span style={{ fontSize: 30, fontWeight: 600, color: c, letterSpacing: "-0.02em" }}>{n}</span>
+                      <span className="mono" style={{ fontSize: 11, color: ch.startsWith("+") ? "var(--green)" : "#ff8888", fontWeight: 500 }}>{ch}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 760px) { .ana-kpi { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
+
+              {/* Chart */}
+              <div className="glass" style={{ padding: "26px 30px", borderRadius: "var(--r-xl)", marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom: 4 }}>Activity · daily</div>
+                    <p style={{ fontSize: 13, color: "var(--text-3)", margin: 0 }}>Documents read and questions asked, last 30 days.</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 16, fontSize: 11.5, color: "var(--text-3)" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, background: "var(--violet)", borderRadius: 2 }}></span>Docs</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, background: "var(--blue)", borderRadius: 2 }}></span>Questions</span>
+                  </div>
+                </div>
+                <Chart data={DAILY} />
+              </div>
+
+              {/* Two-column lower */}
+              <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16 }} className="ana-lower">
+                <div className="glass" style={{ padding: "24px 26px", borderRadius: "var(--r-lg)" }}>
+                  <div className="eyebrow" style={{ marginBottom: 14 }}>Top users · this period</div>
+                  {MEMBERS.map((m, i) => (
+                    <div key={m.name} style={{ display: "grid", gridTemplateColumns: "32px 1fr 80px 80px 80px", gap: 14, alignItems: "center", padding: "12px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none" }}>
+                      <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--grad-iris-2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 10.5, fontWeight: 600 }}>{m.init}</div>
+                      <div>
+                        <div style={{ fontSize: 13.5, fontWeight: 500 }}>{m.name}</div>
+                        <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.06em", marginTop: 2 }}>ACTIVE {m.last.toUpperCase()}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div className="mono" style={{ fontSize: 14, color: "var(--text)" }}>{m.docs}</div>
+                        <div className="mono" style={{ fontSize: 9.5, color: "var(--text-3)", letterSpacing: "0.08em" }}>DOCS</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div className="mono" style={{ fontSize: 14, color: "var(--text)" }}>{m.q}</div>
+                        <div className="mono" style={{ fontSize: 9.5, color: "var(--text-3)", letterSpacing: "0.08em" }}>QUESTIONS</div>
+                      </div>
+                      <div style={{ background: "var(--glass-2)", height: 6, borderRadius: 3, overflow: "hidden" }}><div style={{ width: `${(m.docs / 142) * 100}%`, height: "100%", background: m.color, borderRadius: 3 }}></div></div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="glass" style={{ padding: "24px 26px", borderRadius: "var(--r-lg)" }}>
+                  <div className="eyebrow" style={{ marginBottom: 14 }}>By document type</div>
+                  <div style={{ display: "flex", gap: 4, height: 14, borderRadius: 999, overflow: "hidden", marginBottom: 18 }}>
+                    {TYPES.map(t => <div key={t.l} style={{ width: `${t.v}%`, background: t.c }} title={`${t.l}: ${t.v}%`}></div>)}
+                  </div>
+                  {TYPES.map(t => (
+                    <div key={t.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderTop: "1px solid var(--stroke-1)", fontSize: 13 }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ width: 9, height: 9, background: t.c, borderRadius: 2 }}></span>
+                        <span>{t.l}</span>
+                      </span>
+                      <span className="mono" style={{ color: "var(--text-3)" }}>{t.v}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <style>{`@media (max-width: 880px) { .ana-lower { grid-template-columns: 1fr !important; } }`}</style>
+
+              {/* Credits forecast */}
+              <div className="glass glass-iris-border" style={{ marginTop: 16, padding: "22px 26px", borderRadius: "var(--r-lg)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 6 }}>Credit forecast</div>
+                  <p style={{ fontSize: 14, margin: 0, color: "var(--text)" }}>At this pace, you'll run out of credits in <strong className="iris" style={{ fontWeight: 600 }}>~48 days</strong>. Buy a Practice pack now to lock in the price.</p>
+                </div>
+                <a href="pricing.html" className="btn btn-iris">+ Buy credits</a>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+
+    function Chart({ data }) {
+      const W = 100, H = 36;
+      const maxQ = Math.max(...data.map(d => d.questions));
+      const maxD = Math.max(...data.map(d => d.docs));
+      return (
+        <div style={{ position: "relative", height: 200 }}>
+          {/* gridlines */}
+          {[0, 0.25, 0.5, 0.75, 1].map(p => <div key={p} style={{ position: "absolute", left: 0, right: 0, top: `${p * 100}%`, height: 1, background: "rgba(255,255,255,0.04)" }}></div>)}
+          {/* bars/lines */}
+          <svg viewBox={`0 0 ${data.length * 4} 100`} preserveAspectRatio="none" style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}>
+            <defs>
+              <linearGradient id="qgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#4ea3ff" stopOpacity="0.5"/>
+                <stop offset="100%" stopColor="#4ea3ff" stopOpacity="0"/>
+              </linearGradient>
+              <linearGradient id="dgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#b76aff" stopOpacity="0.5"/>
+                <stop offset="100%" stopColor="#b76aff" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            {/* questions area */}
+            <path d={`M 0,100 ${data.map((d, i) => `L ${i * 4 + 2},${100 - (d.questions / maxQ) * 100}`).join(" ")} L ${data.length * 4 - 2},100 Z`} fill="url(#qgrad)" />
+            <path d={`M 0,${100 - (data[0].questions / maxQ) * 100} ${data.map((d, i) => `L ${i * 4 + 2},${100 - (d.questions / maxQ) * 100}`).join(" ")}`} stroke="#4ea3ff" strokeWidth="0.7" fill="none" />
+            {/* docs bars */}
+            {data.map((d, i) => (
+              <rect key={i} x={i * 4 + 0.6} y={100 - (d.docs / maxD) * 60} width="2.8" height={(d.docs / maxD) * 60} fill="#b76aff" opacity="0.75" rx="0.4"></rect>
+            ))}
+          </svg>
+          {/* x-axis labels */}
+          <div style={{ position: "absolute", bottom: -22, left: 0, right: 0, display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "var(--text-4)", fontFamily: "var(--mono)", letterSpacing: "0.06em" }}>
+            <span>30 DAYS AGO</span><span>15</span><span>TODAY</span>
+          </div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

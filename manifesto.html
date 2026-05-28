@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manifesto — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Manifesto">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const PRINCIPLES = [
+      { n: "01", t: "Pay per document. Never per month.", d: "Subscriptions punish the months you don't use them. Credits never expire — read 50 documents this week or 50 next year, the price is the same." },
+      { n: "02", t: "Every answer must be footnoted.", d: "We don't ship an answer we can't cite. If we can't ground a claim, we say so. The false-citation rate in our last audit was 0.4%, and we publish that number every quarter." },
+      { n: "03", t: "We do not train on your files.", d: "Not us, not OpenAI, not Anthropic, not anyone. This is contractual at every layer — and it's the reason lawyers, doctors, and analysts trust us with privileged documents." },
+      { n: "04", t: "Speed is a feature.", d: "Median time to first cited answer: 1.4 seconds. Median 10-K to memo: 11 minutes. We're obsessive about the latency tail, because thinking time is human time." },
+      { n: "05", t: "Privacy is a default, not a tier.", d: "Encryption, isolation, no-training, and one-click deletion are the same on the free tier as they are on Chamber. The bar is the bar." },
+      { n: "06", t: "Show our work.", d: "Open status page, public sub-processor list, published incident postmortems, SOC 2 report available on request. If you trust us with the document, you can trust us with the source code review." },
+    ];
+    function App() {
+      return (
+        <PageShell>
+          <section style={{ padding: "80px 0 40px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: 80, left: "30%", opacity: 0.4 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+              <div className="section-eyebrow" style={{ justifyContent: "center" }}>Manifesto</div>
+              <h1 className="display" style={{ fontSize: "clamp(40px, 6vw, 78px)", margin: "20px auto 28px", maxWidth: 900 }}>
+                We're building the <span className="iris">research assistant</span><br/>that should already exist.
+              </h1>
+              <p style={{ fontSize: 18, color: "var(--text-3)", maxWidth: 640, margin: "0 auto", lineHeight: 1.55 }}>
+                Six principles. Posted in the office. Pinned to every release. If we ever break one, you should call us on it.
+              </p>
+            </div>
+          </section>
+
+          <section style={{ padding: "20px 0 100px" }}>
+            <div className="spread">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }} className="man-grid">
+                {PRINCIPLES.map(p => (
+                  <div key={p.n} className="glass hover-glow" style={{ padding: "30px 28px", borderRadius: "var(--r-xl)", minHeight: 220, display: "flex", flexDirection: "column" }}>
+                    <div className="mono iris" style={{ fontSize: 14, letterSpacing: "0.16em", marginBottom: 18, fontWeight: 700 }}>№ {p.n}</div>
+                    <h3 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", margin: "0 0 14px", lineHeight: 1.15, color: "var(--text)" }}>{p.t}</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: "var(--text-3)", lineHeight: 1.6 }}>{p.d}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="glass glass-iris-border" style={{ marginTop: 36, padding: "40px 36px", borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                <p className="iris" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700, marginBottom: 16 }}>Signed</p>
+                <p style={{ fontSize: 18, fontStyle: "italic", color: "var(--text-2)", maxWidth: 580, margin: "0 auto", lineHeight: 1.55 }}>
+                  "If a document deserves the time it takes to read, it deserves an assistant that takes that document seriously."
+                </p>
+                <div className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 16, textTransform: "uppercase" }}>
+                  THE FOUNDERS · CHATWITHPDFAI · 2026
+                </div>
+              </div>
+
+              <style>{`@media (max-width: 860px) { .man-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

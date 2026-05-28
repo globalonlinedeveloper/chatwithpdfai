@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Access denied — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="403">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    function App() {
+      return (
+        <PageShell>
+          <section style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 24px" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, #ff7e7e, transparent 60%)", top: "20%", right: "20%", opacity: 0.3 }}></div>
+            <div style={{ textAlign: "center", maxWidth: 560, position: "relative", zIndex: 2 }}>
+              <div className="mono" style={{ fontSize: 11, color: "#ff8888", letterSpacing: "0.16em", marginBottom: 12, textTransform: "uppercase" }}>Error · 403 · Forbidden</div>
+              <h1 className="display" style={{ fontSize: "clamp(80px, 14vw, 180px)", margin: "8px 0", lineHeight: 0.9 }}>4<span className="iris">0</span>3</h1>
+              <h2 style={{ fontSize: 24, fontWeight: 600, margin: "12px 0 12px", letterSpacing: "-0.02em" }}>You don't have access to this.</h2>
+              <p style={{ fontSize: 15, color: "var(--text-3)", lineHeight: 1.6, margin: "0 0 28px" }}>
+                The page or document exists, but your account isn't on the access list. If you think this is a mistake, ask whoever shared it to grant you access — or sign in to a different workspace.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 30 }}>
+                <a href="landing.html" className="btn btn-iris">← Back to landing</a>
+                <a href="auth/signin.html" className="btn btn-glass">Switch account</a>
+                <a href="contact.html" className="btn btn-ghost">Request access</a>
+              </div>
+              <div className="glass" style={{ padding: 18, borderRadius: "var(--r-lg)", textAlign: "left", fontSize: 12.5, color: "var(--text-3)" }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>Common causes</div>
+                <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
+                  <li>You're signed into a different workspace than the one that owns this resource</li>
+                  <li>Your role (Viewer / Editor) doesn't include this action</li>
+                  <li>The document was deleted or moved to Trash</li>
+                  <li>The shared link was revoked by its owner</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

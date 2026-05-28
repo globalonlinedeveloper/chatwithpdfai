@@ -1,0 +1,20 @@
+{
+  "name": "CHATWITHPDFAI",
+  "short_name": "ChatPDF AI",
+  "description": "Read every PDF at light speed. AI chat with cited answers.",
+  "start_url": "/landing.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050614",
+  "theme_color": "#050614",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "shortcuts": [
+    { "name": "Open workspace", "url": "/app.html", "description": "Jump straight to your chat workspace" },
+    { "name": "Library", "url": "/library.html", "description": "Browse uploaded documents" },
+    { "name": "Pricing", "url": "/pricing.html", "description": "Buy credit packs" }
+  ]
+}

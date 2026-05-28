@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Careers — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Careers">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const ROLES = [
+      { team: "Engineering", title: "Senior ML Engineer · Retrieval", loc: "SF or Remote", type: "Full-time" },
+      { team: "Engineering", title: "Senior Backend Engineer · Ingest pipeline", loc: "SF or Remote", type: "Full-time" },
+      { team: "Engineering", title: "Staff Engineer · Inference platform", loc: "SF only", type: "Full-time" },
+      { team: "Engineering", title: "Senior Frontend Engineer · Workspace", loc: "SF or Remote", type: "Full-time" },
+      { team: "Engineering", title: "Site Reliability Engineer", loc: "SF or Remote", type: "Full-time" },
+      { team: "Design", title: "Senior Product Designer · Workspace", loc: "SF or Remote", type: "Full-time" },
+      { team: "Design", title: "Brand Designer", loc: "SF or Remote", type: "Contract → FTE" },
+      { team: "Go-to-market", title: "Enterprise Account Executive · Legal", loc: "SF, NY, London", type: "Full-time" },
+      { team: "Go-to-market", title: "Customer Success Engineer", loc: "Remote (US)", type: "Full-time" },
+      { team: "Go-to-market", title: "Content Strategist", loc: "Remote", type: "Full-time" },
+      { team: "Operations", title: "Head of Finance", loc: "SF only", type: "Full-time" },
+      { team: "Operations", title: "Security Engineer", loc: "SF or Remote", type: "Full-time" },
+    ];
+
+    const PRINCIPLES = [
+      ["Write the document first", "Major decisions begin with a written 6-pager. Meetings are for discussion, not transmission."],
+      ["Calibrated honesty", "We tell users when we don't know. We tell each other when something isn't working. Both are hard. Both matter."],
+      ["Ship the value, not the meeting", "We measure outputs, not hours. Async by default. Heads-down time is sacred."],
+      ["Read what you ship", "Engineers use the product daily. Designers spend Fridays in the workspace. Sales reads the docs. Everyone reads."],
+    ];
+
+    function App() {
+      const [team, setTeam] = React.useState("All");
+      const teams = ["All", ...Array.from(new Set(ROLES.map(r => r.team)))];
+      const filtered = team === "All" ? ROLES : ROLES.filter(r => r.team === team);
+      return (
+        <PageShell active="careers">
+          <PageHeader eyebrow="Careers" title={<>Build the research assistant <span className="iris">we want to use.</span></>} lede="Small team, big bets, sane hours. 23 people in San Francisco and remote. Engineering, design, GTM, operations." align="center" />
+
+          <section style={{ padding: "30px 0 60px" }}>
+            <div className="spread">
+              {/* Stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 40 }} className="careers-stats">
+                {[["23", "People"], ["12", "Open roles"], ["$220M", "Total raised"], ["100%", "Insurance covered"]].map(([n, l]) => (
+                  <div key={l} className="glass" style={{ padding: "22px 24px", borderRadius: "var(--r-lg)" }}>
+                    <div className="iris" style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.02em" }}>{n}</div>
+                    <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 6, textTransform: "uppercase" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 880px) { .careers-stats { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
+
+              {/* Principles */}
+              <div className="section-eyebrow">How we work</div>
+              <h2 className="section-title" style={{ fontSize: 36, margin: "12px 0 32px" }}>Four operating <span className="iris">principles.</span></h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14, marginBottom: 60 }} className="careers-prin">
+                {PRINCIPLES.map(([t, d], i) => (
+                  <div key={t} className="glass" style={{ padding: "24px 26px", borderRadius: "var(--r-lg)" }}>
+                    <div className="mono iris" style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 700, marginBottom: 10 }}>№ 0{i + 1}</div>
+                    <h3 style={{ fontSize: 17, fontWeight: 600, margin: "0 0 6px" }}>{t}</h3>
+                    <p style={{ margin: 0, fontSize: 13.5, color: "var(--text-3)", lineHeight: 1.55 }}>{d}</p>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 760px) { .careers-prin { grid-template-columns: 1fr !important; } }`}</style>
+
+              {/* Benefits */}
+              <div className="section-eyebrow">Benefits</div>
+              <h2 className="section-title" style={{ fontSize: 36, margin: "12px 0 24px" }}>What you get.</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 60 }} className="careers-ben">
+                {[
+                  ["💸", "Above-market salary + equity"],
+                  ["🏥", "Top-tier health, dental, vision · 100% covered"],
+                  ["🌴", "Unlimited PTO with a 3-week floor"],
+                  ["🏠", "Remote-friendly · SF HQ optional"],
+                  ["⏱", "4-day work week (Fridays for reading + research)"],
+                  ["📚", "$2,000 annual learning budget"],
+                  ["🍼", "16-week parental leave"],
+                  ["🧑‍💻", "Hardware + home office stipend"],
+                  ["💼", "401(k) with 4% match"],
+                ].map(([g, l]) => (
+                  <div key={l} className="glass" style={{ padding: "14px 18px", borderRadius: "var(--r)", display: "flex", gap: 12, alignItems: "center" }}>
+                    <span style={{ fontSize: 22 }}>{g}</span>
+                    <span style={{ fontSize: 13.5, color: "var(--text-2)" }}>{l}</span>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 760px) { .careers-ben { grid-template-columns: 1fr !important; } }`}</style>
+
+              {/* Open roles */}
+              <div className="section-eyebrow">Open roles</div>
+              <h2 className="section-title" style={{ fontSize: 36, margin: "12px 0 24px" }}>{ROLES.length} open positions.</h2>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
+                {teams.map(t => (
+                  <button key={t} onClick={() => setTeam(t)} className={team === t ? "btn btn-iris btn-sm" : "btn btn-glass btn-sm"}>{t}</button>
+                ))}
+              </div>
+              <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden" }}>
+                {filtered.map((r, i) => (
+                  <a key={r.title} href="contact.html" style={{ display: "grid", gridTemplateColumns: "1fr 130px 130px 100px", gap: 14, padding: "18px 24px", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", alignItems: "center", color: "var(--text)", fontSize: 14 }}>
+                    <div>
+                      <div style={{ fontWeight: 500 }}>{r.title}</div>
+                      <div className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.06em", marginTop: 2 }}>{r.team.toUpperCase()}</div>
+                    </div>
+                    <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{r.loc}</span>
+                    <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{r.type}</span>
+                    <span className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.1em", textAlign: "right" }}>APPLY →</span>
+                  </a>
+                ))}
+              </div>
+              <div className="glass glass-iris-border" style={{ marginTop: 32, padding: "26px 30px", borderRadius: "var(--r-xl)", textAlign: "center" }}>
+                <h3 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 6px" }}>Don't see your role?</h3>
+                <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: "0 0 16px" }}>If you'd be excellent at CHATWITHPDFAI, tell us. We'll find a fit.</p>
+                <a href="mailto:careers@chatwithpdfai.com" className="btn btn-iris">careers@chatwithpdfai.com</a>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

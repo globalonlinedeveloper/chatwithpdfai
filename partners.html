@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Partners — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Partners">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+    const TIERS = [
+      { name: "Affiliate", who: "Independent creators · newsletters · YouTubers", commission: "20%", duration: "12 months", payout: "$50 min, monthly", featured: false },
+      { name: "Reseller", who: "Consultants · IT shops · agencies", commission: "25%", duration: "Lifetime of customer", payout: "$100 min, monthly", featured: true },
+      { name: "Strategic", who: "Bar associations, professional bodies, large firms", commission: "Custom", duration: "Custom", payout: "Net 30 invoice", featured: false },
+    ];
+    function App() {
+      const [calcCustomers, setCalcCustomers] = useState(50);
+      const calcAvg = 29; // avg Practice
+      const calcRate = 0.25;
+      const annual = (calcCustomers * calcAvg * 12 * calcRate);
+      return (
+        <PageShell>
+          {/* Hero */}
+          <section style={{ padding: "60px 0 40px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--green), transparent 60%)", top: 60, left: -100, opacity: 0.35 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+              <div className="section-eyebrow" style={{ justifyContent: "center" }}>Partner program</div>
+              <h1 className="section-title" style={{ fontSize: "clamp(42px, 5.5vw, 68px)", margin: "16px auto 18px", maxWidth: 880 }}>
+                Send us readers.<br/><span className="iris">We send you a check.</span>
+              </h1>
+              <p className="section-lede" style={{ margin: "0 auto 28px", maxWidth: 580 }}>
+                Up to 25% recurring commission for the lifetime of the customer. No floors, no caps, no exclusivity. Monthly payouts, transparent dashboard.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <a href="auth/signup.html" className="btn btn-iris btn-lg">Become a partner →</a>
+                <a href="contact.html" className="btn btn-glass btn-lg">Talk to us</a>
+              </div>
+              <div style={{ marginTop: 36, display: "flex", justifyContent: "center", gap: 36, flexWrap: "wrap" }}>
+                {[["$420K", "Paid out in 2026"], ["1,200+", "Active partners"], ["48hr", "Payout SLA"]].map(([n, l]) => (
+                  <div key={l} style={{ textAlign: "center" }}>
+                    <div className="iris" style={{ fontSize: 30, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.02em" }}>{n}</div>
+                    <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 6, textTransform: "uppercase" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Tiers */}
+          <section style={{ padding: "40px 0 60px" }}>
+            <div className="spread">
+              <div className="section-eyebrow">Three tracks</div>
+              <h2 className="section-title" style={{ fontSize: 36, margin: "12px 0 28px" }}>Pick the one <span className="iris">that fits.</span></h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }} className="part-tiers">
+                {TIERS.map(t => (
+                  <div key={t.name} className={`glass ${t.featured ? "glass-iris-border" : ""}`} style={{ padding: "30px 26px", borderRadius: "var(--r-xl)", background: t.featured ? "linear-gradient(180deg, rgba(183,106,255,0.10), rgba(78,163,255,0.04))" : "var(--glass-1)", position: "relative" }}>
+                    {t.featured && <span className="pill" style={{ position: "absolute", top: -12, right: 20, padding: "4px 10px", fontSize: 10.5, background: "var(--grad-iris-2)", color: "#fff", border: "none", letterSpacing: "0.06em" }}>MOST POPULAR</span>}
+                    <h3 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 6px" }}>{t.name}</h3>
+                    <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: "0 0 22px", minHeight: 32 }}>{t.who}</p>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 18 }}>
+                      <span className="iris" style={{ fontSize: 48, fontWeight: 600, lineHeight: 0.9, letterSpacing: "-0.03em" }}>{t.commission}</span>
+                      <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.08em" }}>RECURRING</span>
+                    </div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: "0 0 22px" }}>
+                      {[["Duration", t.duration], ["Payout", t.payout], ["Cookie", "90 days"], ["Withdrawal", "Stripe · PayPal · Wire"]].map(([k, v]) => (
+                        <li key={k} style={{ padding: "8px 0", borderTop: "1px solid var(--stroke-1)", display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
+                          <span style={{ color: "var(--text-3)" }}>{k}</span><span style={{ color: "var(--text)", fontWeight: 500 }}>{v}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <a href="auth/signup.html" className={t.featured ? "btn btn-iris" : "btn btn-glass"} style={{ width: "100%", justifyContent: "center" }}>Apply →</a>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 900px) { .part-tiers { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+
+          {/* Calculator */}
+          <section style={{ padding: "40px 0 60px" }}>
+            <div className="spread">
+              <div className="section-eyebrow">Estimate</div>
+              <h2 className="section-title" style={{ fontSize: 34, margin: "12px 0 24px" }}>How much could <span className="iris">you make?</span></h2>
+              <div className="glass" style={{ padding: 32, borderRadius: "var(--r-xl)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 36, alignItems: "center" }} className="part-calc">
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom: 8 }}>Active referred customers</div>
+                    <div className="iris" style={{ fontSize: 60, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em", marginBottom: 18 }}>{calcCustomers}</div>
+                    <input type="range" min={5} max={500} step={5} value={calcCustomers} onChange={e => setCalcCustomers(+e.target.value)} style={{ width: "100%", accentColor: "var(--violet)" }} />
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 11, color: "var(--text-4)", fontFamily: "var(--mono)" }}>
+                      <span>5</span><span>250</span><span>500</span>
+                    </div>
+                    <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 16, lineHeight: 1.5 }}>Assuming the Reseller track (25% recurring) and Practice plan ($29/mo equivalent per customer).</p>
+                  </div>
+                  <div style={{ borderLeft: "1px solid var(--stroke-1)", paddingLeft: 32 }}>
+                    <div className="eyebrow" style={{ marginBottom: 8 }}>Estimated annual commission</div>
+                    <div className="iris" style={{ fontSize: 48, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em", marginBottom: 14 }}>${annual.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                    <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.06em", marginBottom: 14 }}>≈ ${(annual / 12).toFixed(0)}/MO · PAID MONTHLY</div>
+                    <a href="auth/signup.html" className="btn btn-iris" style={{ width: "100%", marginTop: 8, justifyContent: "center" }}>Apply to be a partner →</a>
+                  </div>
+                </div>
+                <style>{`@media (max-width: 760px) { .part-calc { grid-template-columns: 1fr !important; } .part-calc > div:last-child { border-left: none !important; padding-left: 0 !important; border-top: 1px solid var(--stroke-1); padding-top: 24px !important; } }`}</style>
+              </div>
+            </div>
+          </section>
+
+          {/* How it works */}
+          <section style={{ padding: "40px 0 80px" }}>
+            <div className="spread">
+              <div className="section-eyebrow">How it works</div>
+              <h2 className="section-title" style={{ fontSize: 34, margin: "12px 0 24px" }}>From signup to <span className="iris">first payout.</span></h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }} className="part-steps">
+                {[
+                  { n: "01", t: "Apply", d: "Tell us about your audience. Most applications approved in under 24 hours." },
+                  { n: "02", t: "Get your link", d: "Unique referral URL + a code your audience can use in checkout." },
+                  { n: "03", t: "Refer", d: "Share with your audience however you like. Newsletter, video, blog post." },
+                  { n: "04", t: "Get paid", d: "Monthly payouts via Stripe, PayPal, or wire. Transparent dashboard tracks every conversion." },
+                ].map(s => (
+                  <div key={s.n} className="glass hover-glow" style={{ padding: "22px 22px", borderRadius: "var(--r-lg)" }}>
+                    <div className="mono iris" style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 700, marginBottom: 12 }}>STEP {s.n}</div>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 6px" }}>{s.t}</h3>
+                    <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: 0, lineHeight: 1.55 }}>{s.d}</p>
+                  </div>
+                ))}
+              </div>
+              <style>{`@media (max-width: 900px) { .part-steps { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 500px) { .part-steps { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

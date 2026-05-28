@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Changelog — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Changelog">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const RELEASES = [
+      { v: "v3.2.1", d: "May 22, 2026", tag: "patch", items: [
+        { t: "fix", b: "Webhook delivery delays under high load — root cause fixed in queue partition logic." },
+        { t: "fix", b: "Citation chips occasionally rendered on a stale page after fast navigation." },
+        { t: "polish", b: "PDF viewer zoom controls now snap to 25% increments." },
+      ]},
+      { v: "v3.2.0", d: "May 15, 2026", tag: "major", featured: true, items: [
+        { t: "new", b: "**Citation accuracy is now 99.6%** in our standard eval suite (up from 99.1%). New retrieve-rerank-ground pipeline shipped under the hood." },
+        { t: "new", b: "**Multi-PDF chat across folders** is generally available. Ask a question once, get answers from every document in a folder." },
+        { t: "new", b: "Clause-diff viewer for legal documents — clause-by-clause changelog with severity rating." },
+        { t: "improved", b: "OCR pass on scanned PDFs is 3× faster and handles rotated pages without manual correction." },
+      ]},
+      { v: "v3.1.4", d: "Apr 28, 2026", tag: "minor", items: [
+        { t: "new", b: "Export chat to Notion in one click (was Markdown-only)." },
+        { t: "improved", b: "Composer now supports Cmd+Enter to send while keeping Enter for newlines in long questions." },
+        { t: "fix", b: "Korean and traditional Chinese characters in citations were occasionally rendered as boxes." },
+      ]},
+      { v: "v3.1.0", d: "Apr 10, 2026", tag: "minor", items: [
+        { t: "new", b: "API: streaming endpoint for chat responses." },
+        { t: "new", b: "API: webhook for `citation.verified` event." },
+        { t: "improved", b: "Auto-summary on upload now offers Executive / Technical / One-paragraph variants." },
+      ]},
+      { v: "v3.0.0", d: "Mar 17, 2026", tag: "major", items: [
+        { t: "new", b: "Aurora design refresh across the entire workspace." },
+        { t: "new", b: "Folders, history, and pinned documents." },
+        { t: "new", b: "Shareable read-only chat links." },
+        { t: "breaking", b: "Legacy v1 API endpoints are deprecated. Migration guide in docs." },
+      ]},
+      { v: "v2.4.2", d: "Feb 02, 2026", tag: "minor", items: [
+        { t: "new", b: "70+ languages supported, including documents that mix scripts." },
+        { t: "improved", b: "First-byte latency reduced to a median of 1.4s." },
+      ]},
+    ];
+    const COLORS = { new: "var(--green)", improved: "var(--blue)", fix: "var(--violet-2)", polish: "var(--text-3)", breaking: "#ff8888" };
+
+    function App() {
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Changelog" title={<>Every release, <span className="iris">in plain English.</span></>} lede="Updated weekly. Subscribe by RSS or email for major changes only." />
+          <section style={{ padding: "0 0 100px" }}>
+            <div className="spread">
+              <div className="glass" style={{ padding: "16px 22px", borderRadius: "var(--r-lg)", marginBottom: 36, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Subscribe to releases</span>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input className="input" type="email" placeholder="you@firm.com" style={{ minWidth: 260, padding: "8px 12px" }} />
+                  <button className="btn btn-iris btn-sm">Subscribe</button>
+                  <a href="#" className="btn btn-glass btn-sm">RSS</a>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
+                {RELEASES.map(r => (
+                  <article key={r.v} className="glass" style={{ padding: "32px 36px", borderRadius: "var(--r-xl)", position: "relative", ...(r.featured ? { background: "linear-gradient(180deg, rgba(183,106,255,0.10), rgba(78,163,255,0.04))", borderColor: "var(--stroke-3)" } : {}) }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22, flexWrap: "wrap", gap: 12 }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+                        <span className="iris mono" style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.01em" }}>{r.v}</span>
+                        <span className="mono" style={{ fontSize: 12, color: "var(--text-3)", letterSpacing: "0.08em" }}>{r.d}</span>
+                      </div>
+                      <span className="pill" style={{ padding: "4px 12px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--mono)" }}>
+                        {r.tag === "major" ? "● Major release" : r.tag === "minor" ? "● Minor release" : "● Patch"}
+                      </span>
+                    </div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                      {r.items.map((it, i) => (
+                        <li key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                          <span className="mono" style={{ fontSize: 10.5, padding: "3px 8px", border: `1px solid ${COLORS[it.t]}`, borderRadius: 4, color: COLORS[it.t], letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0, marginTop: 2 }}>{it.t}</span>
+                          <span style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.55 }} dangerouslySetInnerHTML={{ __html: it.b.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text);font-weight:600">$1</strong>') }}></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account & Billing — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Account">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const [tab, setTab] = useState("profile");
+      const TABS = [
+        { k: "profile", label: "Profile" },
+        { k: "billing", label: "Billing & credits" },
+        { k: "team", label: "Team & seats" },
+        { k: "api", label: "API keys" },
+        { k: "integrations", label: "Integrations" },
+        { k: "security", label: "Security" },
+        { k: "danger", label: "Danger zone" },
+      ];
+      return (
+        <PageShell>
+          <section style={{ padding: "60px 0 100px" }}>
+            <div className="spread">
+              <div style={{ marginBottom: 28 }}>
+                <div className="section-eyebrow">Account</div>
+                <h1 className="section-title" style={{ fontSize: 38, margin: "12px 0 0" }}>Settings</h1>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 32, alignItems: "start" }} className="acct-grid">
+                <aside className="glass" style={{ padding: 10, borderRadius: "var(--r-lg)", position: "sticky", top: 100 }}>
+                  {TABS.map(t => (
+                    <button key={t.k} onClick={() => setTab(t.k)} style={{
+                      display: "block", width: "100%", textAlign: "left",
+                      padding: "10px 14px", borderRadius: "var(--r-sm)",
+                      background: tab === t.k ? "var(--glass-2)" : "transparent",
+                      border: "none",
+                      color: tab === t.k ? "var(--text)" : "var(--text-3)",
+                      fontSize: 13.5,
+                      fontWeight: tab === t.k ? 600 : 400,
+                      cursor: "pointer",
+                      borderLeft: tab === t.k ? "2px solid var(--violet)" : "2px solid transparent",
+                      marginBottom: 2,
+                      fontFamily: "var(--sans)",
+                    }}>{t.label}</button>
+                  ))}
+                </aside>
+                <div>
+                  {tab === "profile" && <ProfilePanel />}
+                  {tab === "billing" && <BillingPanel />}
+                  {tab === "team" && <TeamPanel />}
+                  {tab === "api" && <ApiPanel />}
+                  {tab === "integrations" && <IntegrationsPanel />}
+                  {tab === "security" && <SecurityPanel />}
+                  {tab === "danger" && <DangerPanel />}
+                </div>
+              </div>
+              <style>{`@media (max-width: 880px) { .acct-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+
+    function Panel({ title, lede, children }) {
+      return (
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 600, margin: "0 0 4px", letterSpacing: "-0.02em" }}>{title}</h2>
+          {lede && <p style={{ fontSize: 14, color: "var(--text-3)", margin: "0 0 24px" }}>{lede}</p>}
+          {children}
+        </div>
+      );
+    }
+    function Card({ children, padding = 22 }) {
+      return <div className="glass" style={{ padding, borderRadius: "var(--r-lg)", marginBottom: 14 }}>{children}</div>;
+    }
+    function Row({ label, sub, children }) {
+      return (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "12px 0", borderTop: "1px solid var(--stroke-1)" }}>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 500 }}>{label}</div>
+            {sub && <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>{sub}</div>}
+          </div>
+          <div>{children}</div>
+        </div>
+      );
+    }
+
+    function ProfilePanel() {
+      return (
+        <Panel title="Profile" lede="Your account details. Visible only to you and your teammates.">
+          <Card>
+            <div style={{ display: "flex", gap: 18, alignItems: "center", marginBottom: 4 }}>
+              <div style={{ width: 64, height: 64, borderRadius: 16, background: "var(--grad-iris-2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "#fff", fontWeight: 600 }}>MK</div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>Maya Khan</div>
+                <div style={{ fontSize: 12.5, color: "var(--text-3)" }}>maya@arkhamcapital.com</div>
+              </div>
+              <div style={{ flex: 1 }}></div>
+              <button className="btn btn-glass btn-sm">Change avatar</button>
+            </div>
+          </Card>
+          <Card>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <label><div className="eyebrow" style={{ marginBottom: 6 }}>Full name</div><input className="input" defaultValue="Maya Khan" /></label>
+              <label><div className="eyebrow" style={{ marginBottom: 6 }}>Display email</div><input className="input" defaultValue="maya@arkhamcapital.com" /></label>
+              <label><div className="eyebrow" style={{ marginBottom: 6 }}>Time zone</div><input className="input" defaultValue="America/New_York" /></label>
+              <label><div className="eyebrow" style={{ marginBottom: 6 }}>Default folder for new uploads</div><input className="input" defaultValue="Due Diligence" /></label>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
+              <button className="btn btn-iris">Save changes</button>
+              <button className="btn btn-ghost">Cancel</button>
+            </div>
+          </Card>
+        </Panel>
+      );
+    }
+
+    function BillingPanel() {
+      return (
+        <Panel title="Billing & credits" lede="One credit reads one document. Credits never expire.">
+          <Card>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Current balance</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+              <span className="iris" style={{ fontSize: 56, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em" }}>347</span>
+              <span className="mono" style={{ fontSize: 13, color: "var(--text-3)", letterSpacing: "0.06em" }}>CREDITS REMAINING</span>
+            </div>
+            <div style={{ height: 6, background: "var(--glass-2)", borderRadius: 999, overflow: "hidden", marginTop: 12, marginBottom: 16 }}>
+              <div style={{ width: "70%", height: "100%", background: "var(--grad-iris-2)", borderRadius: 999 }}></div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="landing.html#pricing" className="btn btn-iris">+ Buy credit pack</a>
+              <button className="btn btn-glass">Set auto-refill</button>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="eyebrow" style={{ marginBottom: 14 }}>Payment method</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 0" }}>
+              <div className="glass" style={{ padding: "6px 14px", borderRadius: 6, fontFamily: "var(--mono)", fontWeight: 700, letterSpacing: "0.04em" }}>VISA</div>
+              <span style={{ fontSize: 14 }}>•••• 4242 · expires 09/28</span>
+              <div style={{ flex: 1 }}></div>
+              <button className="btn btn-glass btn-sm">Update</button>
+            </div>
+          </Card>
+
+          <Card padding={0}>
+            <div style={{ padding: "16px 22px 14px", borderBottom: "1px solid var(--stroke-1)" }}>
+              <div className="eyebrow">Receipt history</div>
+            </div>
+            {[
+              ["May 12, 2026", "Practice pack · 400 credits", "$29.00", "Paid"],
+              ["Apr 04, 2026", "Practice pack · 400 credits", "$29.00", "Paid"],
+              ["Mar 02, 2026", "Reader pack · 50 credits", "$5.00", "Paid"],
+            ].map((r, i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr 100px 80px", padding: "12px 22px", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", fontSize: 13.5, alignItems: "center", gap: 14 }}>
+                <span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{r[0]}</span>
+                <span>{r[1]}</span>
+                <span className="mono" style={{ textAlign: "right" }}>{r[2]}</span>
+                <span style={{ color: "var(--green)", fontSize: 11, fontFamily: "var(--mono)", letterSpacing: "0.1em" }}>● {r[3].toUpperCase()}</span>
+                <a href="#" className="btn btn-ghost btn-sm" style={{ padding: "4px 8px" }}>↓ PDF</a>
+              </div>
+            ))}
+          </Card>
+        </Panel>
+      );
+    }
+
+    function TeamPanel() {
+      return (
+        <Panel title="Team & seats" lede="3 of 3 seats used on Practice plan.">
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, alignItems: "center" }}>
+              <div className="eyebrow">Members</div>
+              <button className="btn btn-iris btn-sm">+ Invite member</button>
+            </div>
+            {[
+              ["Maya Khan", "maya@arkhamcapital.com", "Owner", "MK"],
+              ["Theo Sato", "theo@arkhamcapital.com", "Admin", "TS"],
+              ["Iris Lee", "iris@arkhamcapital.com", "Member", "IL"],
+            ].map(([name, email, role, init], i) => (
+              <div key={email} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none" }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--grad-iris-2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#fff", fontWeight: 600 }}>{init}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 500 }}>{name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>{email}</div>
+                </div>
+                <span className="pill" style={{ padding: "3px 9px", fontSize: 10.5 }}>{role}</span>
+                <button className="btn btn-ghost btn-sm">⋯</button>
+              </div>
+            ))}
+          </Card>
+          <Card>
+            <Row label="SSO (SAML / OIDC)" sub="Available on Chamber plan and above"><a href="landing.html#pricing" className="btn btn-glass btn-sm">Upgrade</a></Row>
+            <Row label="Audit log" sub="Last 90 days of workspace activity"><button className="btn btn-glass btn-sm">View →</button></Row>
+            <Row label="Data residency" sub="Currently: US East"><button className="btn btn-glass btn-sm">Change</button></Row>
+          </Card>
+        </Panel>
+      );
+    }
+
+    function ApiPanel() {
+      const [keys, setKeys] = useState([
+        { id: "k_1", label: "Production · server", prefix: "cwpa_live_a1b2", created: "Mar 14", lastUsed: "2m ago" },
+        { id: "k_2", label: "Staging · CI", prefix: "cwpa_test_x9k4", created: "Feb 02", lastUsed: "3h ago" },
+      ]);
+      return (
+        <Panel title="API keys" lede="Programmatic access to your workspace. Per-doc billing maps to your customers.">
+          <Card>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "center" }}>
+              <div className="eyebrow">Active keys</div>
+              <button className="btn btn-iris btn-sm">+ Create key</button>
+            </div>
+            {keys.map((k, i) => (
+              <div key={k.id} style={{ padding: "14px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 4 }}>{k.label}</div>
+                  <div className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>{k.prefix}••••••••••••••••</div>
+                </div>
+                <div style={{ textAlign: "right", fontSize: 11.5, color: "var(--text-3)" }}>
+                  <div>Created {k.created}</div>
+                  <div className="mono" style={{ color: "var(--green)", marginTop: 2 }}>● USED {k.lastUsed.toUpperCase()}</div>
+                </div>
+                <button className="btn btn-ghost btn-sm">Revoke</button>
+              </div>
+            ))}
+          </Card>
+          <Card>
+            <Row label="Webhooks" sub="Receive ocr.completed, summary.ready, citation.verified"><button className="btn btn-glass btn-sm">Configure</button></Row>
+            <Row label="Rate limits" sub="Current: 600 RPM · burst 60"><button className="btn btn-glass btn-sm">Request increase</button></Row>
+            <Row label="API documentation"><a href="docs.html" className="btn btn-glass btn-sm">Open docs →</a></Row>
+          </Card>
+        </Panel>
+      );
+    }
+
+    function IntegrationsPanel() {
+      const items = [
+        { name: "Google Drive", desc: "Import PDFs directly from your Drive", on: true },
+        { name: "Dropbox", desc: "Sync from any folder", on: false },
+        { name: "Slack", desc: "Share answers and citations to channels", on: true },
+        { name: "Notion", desc: "Export chats as Notion pages", on: false },
+        { name: "Obsidian", desc: "Export as markdown with backlinks", on: false },
+        { name: "Anki", desc: "Send flashcards to a deck", on: false },
+        { name: "Zapier", desc: "Wire to 5,000+ other apps", on: false },
+      ];
+      return (
+        <Panel title="Integrations" lede="Bring documents in, send answers out.">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {items.map(it => (
+              <div key={it.name} className="glass" style={{ padding: 18, borderRadius: "var(--r-lg)", display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--glass-2)", border: "1px solid var(--stroke-2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--violet-2)" }}>◇</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>{it.name}</div>
+                  <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{it.desc}</div>
+                </div>
+                <button className={it.on ? "btn btn-glass btn-sm" : "btn btn-iris btn-sm"}>{it.on ? "Connected ✓" : "Connect"}</button>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      );
+    }
+
+    function SecurityPanel() {
+      return (
+        <Panel title="Security" lede="Keep your account locked down.">
+          <Card>
+            <Row label="Password" sub="Last changed 4 months ago"><button className="btn btn-glass btn-sm">Change</button></Row>
+            <Row label="Two-factor authentication" sub="App-based 6-digit codes · ON"><button className="btn btn-glass btn-sm">Manage</button></Row>
+            <Row label="Hardware security key (WebAuthn)" sub="Add a YubiKey or platform passkey"><button className="btn btn-glass btn-sm">Add key</button></Row>
+            <Row label="Active sessions" sub="3 active · 1 device flagged unusual"><button className="btn btn-glass btn-sm">Review</button></Row>
+          </Card>
+          <Card>
+            <div className="eyebrow" style={{ marginBottom: 10 }}>Recent activity</div>
+            {[
+              ["Today, 14:22", "Signed in", "Chrome · New York, NY", "ok"],
+              ["Today, 10:01", "API key created", "Maya Khan", "ok"],
+              ["Yesterday, 22:18", "Signed in", "Safari · iPhone", "ok"],
+              ["May 19, 03:44", "Sign-in blocked", "Tor exit · Frankfurt", "blocked"],
+            ].map(([t, what, where, status], i) => (
+              <div key={i} style={{ display: "flex", padding: "8px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", fontSize: 12.5, alignItems: "center" }}>
+                <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", width: 130 }}>{t}</span>
+                <span style={{ flex: 1 }}>{what}</span>
+                <span style={{ color: "var(--text-3)", marginRight: 14 }}>{where}</span>
+                <span style={{ color: status === "blocked" ? "#ff8888" : "var(--green)", fontFamily: "var(--mono)", fontSize: 10, letterSpacing: "0.1em" }}>● {status.toUpperCase()}</span>
+              </div>
+            ))}
+          </Card>
+        </Panel>
+      );
+    }
+
+    function DangerPanel() {
+      return (
+        <Panel title="Danger zone" lede="Irreversible. Read carefully.">
+          <Card>
+            <Row label="Export everything" sub="Documents, chat history, account data — as a ZIP"><button className="btn btn-glass btn-sm">Request export</button></Row>
+            <Row label="Delete all documents" sub="Keeps your account; clears all uploads & chats"><button className="btn btn-glass btn-sm" style={{ color: "#ff8888", borderColor: "rgba(255,136,136,0.3)" }}>Delete documents</button></Row>
+            <Row label="Delete account" sub="Permanently removes you and all your data within 24 hours"><button className="btn btn-glass btn-sm" style={{ color: "#ff8888", borderColor: "rgba(255,136,136,0.3)" }}>Delete account</button></Row>
+          </Card>
+        </Panel>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

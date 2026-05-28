@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Checkout">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+    const PACKS = {
+      reader:   { name: "Reader",   price: 5,   docs: 50,   per: "$0.10" },
+      practice: { name: "Practice", price: 29,  docs: 400,  per: "$0.07" },
+      chamber:  { name: "Chamber",  price: 119, docs: 2500, per: "$0.05" },
+    };
+
+    function App() {
+      const [packKey, setPackKey] = useState("practice");
+      const [step, setStep] = useState("cart");
+      const [processing, setProcessing] = useState(false);
+      const pack = PACKS[packKey];
+      const subtotal = pack.price;
+      const tax = +(subtotal * 0.0875).toFixed(2);
+      const total = +(subtotal + tax).toFixed(2);
+
+      if (step === "success") return <SuccessPage pack={pack} />;
+
+      const pay = (e) => {
+        e.preventDefault();
+        setProcessing(true);
+        setTimeout(() => setStep("success"), 1400);
+      };
+
+      return (
+        <PageShell minimalFooter>
+          <section style={{ padding: "60px 0 100px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: "10%", left: "10%", opacity: 0.3 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2 }}>
+              <div className="section-eyebrow">Checkout</div>
+              <h1 className="section-title" style={{ fontSize: 40, margin: "12px 0 32px" }}>Buy a <span className="iris">credit pack</span></h1>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 28, alignItems: "start" }} className="co-grid">
+                <div>
+                  <div style={{ marginBottom: 22 }}>
+                    <div className="eyebrow" style={{ marginBottom: 12 }}>1 · Choose your pack</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                      {Object.entries(PACKS).map(([k, p]) => (
+                        <button key={k} onClick={() => setPackKey(k)} className="glass hover-glow" style={{
+                          padding: "20px 18px", textAlign: "left", borderRadius: "var(--r-lg)",
+                          cursor: "pointer",
+                          border: packKey === k ? "1px solid var(--violet)" : "1px solid var(--stroke-2)",
+                          background: packKey === k ? "rgba(183,106,255,0.08)" : "var(--glass-1)",
+                          fontFamily: "var(--sans)",
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                            <strong style={{ fontSize: 14, color: "var(--text)" }}>{p.name}</strong>
+                            <div style={{ width: 16, height: 16, borderRadius: "50%", border: "1.5px solid " + (packKey === k ? "var(--violet)" : "var(--stroke-3)"), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              {packKey === k && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--violet)" }}></div>}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 22, fontWeight: 600 }}>${p.price}</div>
+                          <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.08em", marginTop: 4 }}>{p.docs.toLocaleString()} DOCS · {p.per}/DOC</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <form onSubmit={pay} className="glass" style={{ padding: 28, borderRadius: "var(--r-xl)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 18 }}>2 · Account</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 22 }}>
+                      <label><div className="eyebrow" style={{ marginBottom: 5 }}>Email</div><input className="input" type="email" required defaultValue="maya@arkhamcapital.com" /></label>
+                      <label><div className="eyebrow" style={{ marginBottom: 5 }}>Country</div><select className="input" defaultValue="US"><option>US</option><option>UK</option><option>EU</option><option>CA</option><option>AU</option></select></label>
+                    </div>
+
+                    <div className="eyebrow" style={{ marginBottom: 18 }}>3 · Payment</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      <label>
+                        <div className="eyebrow" style={{ marginBottom: 5 }}>Card number</div>
+                        <div style={{ position: "relative" }}>
+                          <input className="input" placeholder="1234 1234 1234 1234" required style={{ paddingRight: 80 }} />
+                          <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", display: "flex", gap: 4 }}>
+                            {["VISA", "MC", "AMEX"].map(b => <div key={b} className="mono" style={{ fontSize: 9, padding: "2px 5px", border: "1px solid var(--stroke-2)", borderRadius: 3, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.04em" }}>{b}</div>)}
+                          </div>
+                        </div>
+                      </label>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                        <label><div className="eyebrow" style={{ marginBottom: 5 }}>Expiry</div><input className="input" placeholder="MM / YY" required /></label>
+                        <label><div className="eyebrow" style={{ marginBottom: 5 }}>CVC</div><input className="input" placeholder="123" required /></label>
+                        <label><div className="eyebrow" style={{ marginBottom: 5 }}>ZIP / Postal</div><input className="input" placeholder="94104" required /></label>
+                      </div>
+                    </div>
+
+                    <div className="glass" style={{ marginTop: 20, padding: "12px 14px", borderRadius: "var(--r)", display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: "var(--text-3)" }}>
+                      <span>🔒</span>
+                      <span>Secured by Stripe · PCI DSS Level 1 · we never see your card number</span>
+                    </div>
+
+                    <button type="submit" disabled={processing} className="btn btn-iris" style={{ width: "100%", marginTop: 20, padding: "14px 16px", justifyContent: "center", fontSize: 15 }}>
+                      {processing ? "Processing…" : `Pay $${total.toFixed(2)} →`}
+                    </button>
+                    <p style={{ fontSize: 11.5, color: "var(--text-4)", textAlign: "center", margin: "12px 0 0", lineHeight: 1.5 }}>
+                      One-time charge. No subscription. Credits never expire. Refundable within 30 days.
+                    </p>
+                  </form>
+                </div>
+
+                {/* Summary */}
+                <aside className="glass" style={{ padding: 26, borderRadius: "var(--r-xl)", position: "sticky", top: 100 }}>
+                  <div className="eyebrow" style={{ marginBottom: 16 }}>Order summary</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                    <span style={{ fontWeight: 600 }}>{pack.name} pack</span>
+                    <span className="mono">${pack.price.toFixed(2)}</span>
+                  </div>
+                  <div className="mono" style={{ fontSize: 10.5, color: "var(--violet-2)", letterSpacing: "0.1em", marginBottom: 18 }}>
+                    ◉ {pack.docs.toLocaleString()} DOCUMENTS · NO EXPIRY
+                  </div>
+                  <div style={{ borderTop: "1px solid var(--stroke-1)", paddingTop: 14, marginTop: 14 }}>
+                    <Row label="Subtotal" v={`$${subtotal.toFixed(2)}`} />
+                    <Row label="Tax (8.75%)" v={`$${tax.toFixed(2)}`} />
+                    <div style={{ height: 1, background: "var(--stroke-1)", margin: "10px 0" }}></div>
+                    <Row label={<strong>Total</strong>} v={<strong className="iris" style={{ fontSize: 22, fontWeight: 600 }}>${total.toFixed(2)}</strong>} />
+                  </div>
+
+                  <div style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--stroke-1)" }}>
+                    <input className="input" placeholder="Promo code" style={{ fontSize: 12, padding: "8px 12px", marginBottom: 8 }} />
+                    <button className="btn btn-glass btn-sm" style={{ width: "100%", justifyContent: "center" }}>Apply</button>
+                  </div>
+
+                  <div style={{ marginTop: 24, fontSize: 11.5, color: "var(--text-3)", lineHeight: 1.55 }}>
+                    By completing payment you agree to our <a href="legal/terms.html" style={{ color: "var(--violet-2)", textDecoration: "underline" }}>Terms</a>.
+                  </div>
+                </aside>
+              </div>
+              <style>{`@media (max-width: 900px) { .co-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+
+    function Row({ label, v }) {
+      return <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, padding: "5px 0", color: "var(--text-2)" }}><span>{label}</span><span>{v}</span></div>;
+    }
+
+    function SuccessPage({ pack }) {
+      return (
+        <PageShell minimalFooter>
+          <section style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 32, position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--green), transparent 60%)", top: "20%", left: "30%", opacity: 0.4 }}></div>
+            <div className="glass glass-iris-border" style={{ padding: 44, borderRadius: "var(--r-xl)", maxWidth: 520, textAlign: "center", position: "relative", zIndex: 2 }}>
+              <div style={{ width: 72, height: 72, borderRadius: 18, background: "var(--grad-iris-2)", margin: "0 auto 22px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, color: "#fff", boxShadow: "0 12px 30px -10px oklch(0.55 0.22 290 / 0.7)" }}>✓</div>
+              <div className="mono" style={{ fontSize: 11, color: "var(--green)", letterSpacing: "0.16em", marginBottom: 10 }}>● PAYMENT CONFIRMED</div>
+              <h1 className="display" style={{ fontSize: 36, margin: "0 0 12px", lineHeight: 1.05 }}>You're set.<br/><span className="iris">{pack.docs.toLocaleString()} credits added.</span></h1>
+              <p style={{ fontSize: 15, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 24px" }}>
+                Receipt sent to your inbox. Credits never expire. Time to read some documents.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <a href="app.html" className="btn btn-iris">Open workspace →</a>
+                <a href="account.html" className="btn btn-glass">View receipt</a>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

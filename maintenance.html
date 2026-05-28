@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>We're down for maintenance — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Maintenance">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel">
+    function App() {
+      const [remaining, setRemaining] = React.useState(20 * 60); // 20 min
+      React.useEffect(() => {
+        const id = setInterval(() => setRemaining(r => Math.max(0, r - 1)), 1000);
+        return () => clearInterval(id);
+      }, []);
+      const m = Math.floor(remaining / 60), s = remaining % 60;
+      return (
+        <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div className="glass glass-iris-border" style={{
+            maxWidth: 520, padding: 44, borderRadius: "var(--r-xl)", textAlign: "center", position: "relative", zIndex: 2,
+            boxShadow: "var(--shadow-card), 0 30px 60px -20px oklch(0.4 0.2 290 / 0.5)",
+          }}>
+            <a href="landing.html" className="brand" style={{ display: "inline-flex", marginBottom: 28 }}>
+              <span className="brand-mark">◇</span>
+              chatwithpdfai<span className="domain">.com</span>
+            </a>
+            <div className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.16em", marginBottom: 14, textTransform: "uppercase" }}>● Scheduled maintenance</div>
+            <h1 className="display" style={{ fontSize: 38, margin: "0 0 16px", lineHeight: 1 }}>
+              We're upgrading <span className="iris">the workspace.</span>
+            </h1>
+            <p style={{ fontSize: 15, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 28px" }}>
+              Rolling out a faster citation engine. Your documents and credits are safe — we'll be back shortly.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 26 }}>
+              {[String(m).padStart(2,"0"), String(s).padStart(2,"0")].map((v, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <div className="serif" style={{ fontSize: 44, color: "var(--text-4)" }}>:</div>}
+                  <div className="glass" style={{ padding: "14px 22px", borderRadius: "var(--r)", minWidth: 80 }}>
+                    <div className="iris mono" style={{ fontSize: 36, fontWeight: 700, lineHeight: 1 }}>{v}</div>
+                    <div className="mono" style={{ fontSize: 9.5, color: "var(--text-3)", letterSpacing: "0.14em", marginTop: 4 }}>{i === 0 ? "MIN" : "SEC"}</div>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+              <a href="https://twitter.com/chatwithpdfai" className="btn btn-glass btn-sm">Follow updates</a>
+              <a href="status.html" className="btn btn-ghost btn-sm">Status page →</a>
+            </div>
+          </div>
+        </main>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

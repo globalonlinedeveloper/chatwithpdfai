@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Search">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState } = React;
+    const RESULTS = {
+      documents: [
+        { name: "MSA — Acme ↔ Helix Labs.pdf", folder: "Active Cases", snippet: "...the aggregate liability of either Party shall not exceed two (2) times the fees paid in the twelve (12) months preceding the claim, **except for claims arising from intellectual property infringement**...", page: 47, type: "Contract", href: "document.html" },
+        { name: "MSA Template — Firm Standard.pdf", folder: "Active Cases", snippet: "...standard **indemnification** cap of 1× annual fees, with no carve-outs except for gross negligence or willful misconduct...", page: 31, type: "Template", href: "document.html" },
+        { name: "Q3-earnings-NVDA-2026.pdf", folder: "Due Diligence", snippet: "...NVIDIA's **indemnification** obligations to customers under existing data center contracts are capped at 12 months of fees paid...", page: 64, type: "SEC filing", href: "document.html" },
+      ],
+      chats: [
+        { q: "What's the indemnification cap?", a: "The cap is **2× annual fees**, with three carve-outs.", doc: "MSA — Acme ↔ Helix Labs", when: "Today, 3:24 PM" },
+        { q: "Compare the indemnification clauses across our active deals", a: "Three contracts have differing caps. The Acme MSA at **2× fees** is the highest...", doc: "Multi-doc", when: "Yesterday" },
+        { q: "Is the indemnification carve-out for IP enforceable in Delaware?", a: "Per the document, the carve-out is structured around statutory IP infringement claims and is generally enforceable...", doc: "Kass v. North Am.", when: "May 14" },
+      ],
+      help: [
+        { t: "Understanding citations", snippet: "Every claim in an answer is footnoted to a specific page and paragraph...", href: "help/citations.html" },
+        { t: "Multi-PDF chat", snippet: "Ask one question across a whole folder of documents — with citations to which doc said what.", href: "help/multi-pdf-chat.html" },
+        { t: "Compare two documents", snippet: "Diff two contracts. Get a clause-by-clause changelog with severity ratings.", href: "compare.html" },
+      ],
+      pages: [
+        { t: "Pricing — Pay per document", href: "pricing.html" },
+        { t: "API documentation", href: "docs.html" },
+        { t: "Customer story — Latham & Watkins", href: "customers/latham.html" },
+      ],
+    };
+
+    function App() {
+      const [q, setQ] = useState("indemnification");
+      const [filter, setFilter] = useState("all");
+      const total = RESULTS.documents.length + RESULTS.chats.length + RESULTS.help.length + RESULTS.pages.length;
+
+      return (
+        <PageShell>
+          <section style={{ padding: "40px 0 30px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: -100, right: 50, opacity: 0.3 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2 }}>
+              <div className="section-eyebrow">Search</div>
+              <h1 className="section-title" style={{ fontSize: 36, margin: "12px 0 22px" }}>
+                Results for <span className="iris">"{q}"</span>
+              </h1>
+              {/* Search box */}
+              <div className="glass" style={{ padding: 10, borderRadius: "var(--r-pill)", display: "flex", gap: 10, maxWidth: 720, alignItems: "center", marginBottom: 18 }}>
+                <span style={{ fontSize: 16, paddingLeft: 14, color: "var(--text-3)" }}>⌕</span>
+                <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search documents, chats, help…" autoFocus style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--text)", fontSize: 14.5, padding: "10px 0" }} />
+                <kbd className="mono" style={{ fontSize: 10, padding: "4px 8px", background: "var(--glass-2)", border: "1px solid var(--stroke-2)", borderRadius: 4, color: "var(--text-3)" }}>⌘K</kbd>
+              </div>
+              <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 22px" }}>{total} results across your workspace · 1.4s</p>
+
+              {/* Filter tabs */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap", borderBottom: "1px solid var(--stroke-1)", paddingBottom: 14 }}>
+                {[
+                  { k: "all", l: "All", n: total },
+                  { k: "documents", l: "Documents", n: RESULTS.documents.length },
+                  { k: "chats", l: "Chat history", n: RESULTS.chats.length },
+                  { k: "help", l: "Help center", n: RESULTS.help.length },
+                  { k: "pages", l: "Pages", n: RESULTS.pages.length },
+                ].map(t => (
+                  <button key={t.k} onClick={() => setFilter(t.k)} style={{ padding: "8px 14px", borderRadius: "var(--r-pill)", background: filter === t.k ? "var(--grad-iris-2)" : "var(--glass-1)", border: filter === t.k ? "none" : "1px solid var(--stroke-2)", color: filter === t.k ? "#fff" : "var(--text-2)", fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "var(--sans)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {t.l} <span className="mono" style={{ fontSize: 10, opacity: 0.8 }}>{t.n}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Results */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+                {(filter === "all" || filter === "documents") && RESULTS.documents.length > 0 && (
+                  <Group title="Documents" sub="In your workspace">
+                    {RESULTS.documents.map(r => (
+                      <a key={r.name} href={r.href} className="glass hover-glow" style={{ padding: "18px 22px", borderRadius: "var(--r-lg)", display: "block" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+                          <div style={{ width: 36, height: 46, background: "rgba(255,255,255,0.04)", border: "1px solid var(--stroke-2)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span className="mono" style={{ fontSize: 9, color: "var(--text-3)", letterSpacing: "0.1em" }}>PDF</span></div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+                              <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>{r.name}</div>
+                              <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.06em", flexShrink: 0 }}>P.{r.page}</div>
+                            </div>
+                            <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 3, textTransform: "uppercase" }}>{r.folder} · {r.type}</div>
+                            <p style={{ fontSize: 13.5, color: "var(--text-2)", lineHeight: 1.55, margin: "10px 0 0" }} dangerouslySetInnerHTML={{ __html: r.snippet.replace(/\*\*(.*?)\*\*/g, '<mark style="background:linear-gradient(120deg,rgba(183,106,255,0.3),rgba(78,163,255,0.3));padding:1px 4px;border-radius:3px;color:var(--text);font-weight:500">$1</mark>') }}></p>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </Group>
+                )}
+
+                {(filter === "all" || filter === "chats") && RESULTS.chats.length > 0 && (
+                  <Group title="Chat history" sub="Past questions in your workspace">
+                    {RESULTS.chats.map((r, i) => (
+                      <a key={i} href="app.html" className="glass hover-glow" style={{ padding: "16px 22px", borderRadius: "var(--r-lg)", display: "block" }}>
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
+                          <div className="serif" style={{ fontSize: 14, fontStyle: "italic", color: "var(--text)" }}>"{r.q}"</div>
+                          <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.06em" }}>{r.when}</div>
+                        </div>
+                        <p style={{ fontSize: 12.5, color: "var(--text-2)", margin: "0 0 6px", lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: r.a.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text);font-weight:600">$1</strong>') }}></p>
+                        <div className="mono" style={{ fontSize: 10, color: "var(--violet-2)", letterSpacing: "0.08em" }}>↳ {r.doc.toUpperCase()}</div>
+                      </a>
+                    ))}
+                  </Group>
+                )}
+
+                {(filter === "all" || filter === "help") && RESULTS.help.length > 0 && (
+                  <Group title="Help center" sub="Articles">
+                    {RESULTS.help.map(r => (
+                      <a key={r.href} href={r.href} className="glass hover-glow" style={{ padding: "14px 22px", borderRadius: "var(--r-lg)", display: "block" }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{r.t}</div>
+                        <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: 0, lineHeight: 1.5 }}>{r.snippet}</p>
+                      </a>
+                    ))}
+                  </Group>
+                )}
+
+                {(filter === "all" || filter === "pages") && RESULTS.pages.length > 0 && (
+                  <Group title="Pages" sub="Public site">
+                    {RESULTS.pages.map(r => (
+                      <a key={r.href} href={r.href} className="glass hover-glow" style={{ padding: "12px 22px", borderRadius: "var(--r-lg)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: 13.5, fontWeight: 500 }}>{r.t}</span>
+                        <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.06em" }}>chatwithpdfai.com/{r.href}</span>
+                      </a>
+                    ))}
+                  </Group>
+                )}
+              </div>
+
+              {/* Empty state when filter has nothing */}
+              {((filter === "documents" && RESULTS.documents.length === 0) || (filter === "chats" && RESULTS.chats.length === 0)) && (
+                <div className="glass" style={{ padding: 60, borderRadius: "var(--r-xl)", textAlign: "center", marginTop: 20 }}>
+                  <div style={{ fontSize: 32, color: "var(--violet-2)", marginBottom: 14 }}>⌕</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 6px" }}>No matches in this filter.</h3>
+                  <p style={{ fontSize: 13, color: "var(--text-3)", margin: 0 }}>Try "All" or a different query.</p>
+                </div>
+              )}
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    function Group({ title, sub, children }) {
+      return (
+        <div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginBottom: 12, paddingLeft: 4 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{title}</h2>
+            <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>· {sub}</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{children}</div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

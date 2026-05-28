@@ -1,0 +1,62 @@
+# ============================================================
+# CHATWITHPDFAI.COM — .gitignore
+# Static HTML site deployed to Hostinger via GitHub Actions
+# ============================================================
+
+# OS metadata
+.DS_Store
+Thumbs.db
+.thumbnail
+desktop.ini
+$RECYCLE.BIN/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# Node / build artifacts (if you ever add tooling)
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.tmp/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment / secrets — NEVER commit these
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+ftp-credentials.txt
+
+# Local server / preview
+.serve/
+.preview/
+
+# Backup / temp
+*.bak
+*.tmp
+*.orig
+*~lock*
+
+# Python (in case any scripts are added)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS-level archive scratch
+*.zip.tmp

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For legal professionals — CHATWITHPDFAI</title>
+  <meta name="description" content="Diff two contracts in 30 seconds. Build a closing checklist from a 200-page filing. Get every clause footnoted to the page so a partner can verify in one click." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For legal professionals">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For legal professionals","eyebrow":"For legal professionals","h1a":"Find the clause.","h1b":"Cite the clause. Move on.","lede":"Diff two contracts in 30 seconds. Build a closing checklist from a 200-page filing. Get every clause footnoted to the page so a partner can verify in one click.","cta":"Start free — 3 docs →","accent":"var(--violet)","docLabel":"MSA · ACME ↔ HELIX LABS · P. 47","sampleQ":"Compare § 12 to our standard template.","sampleA":"Four material differences: indemnity cap is **0.5× lower**, auto-renewal is new, governing law is Delaware (we use NY), and the cure period is **30 days** vs our standard 14.","sampleCite":"diff · 4 clauses","suggestions":["Show carve-outs","Build closing checklist","Export as redline memo"],"audienceName":"legal professionals","audienceShort":"law firms","workflowLede":"From intake to filing — without the first-pass redline grind.","kpis":[["1.8M","Pages reviewed monthly"],["10 min","First-pass redline"],["99.6%","Citation accuracy"]],"workflows":[{"t":"Upload the deal — folder or single doc","d":"Up to 2,000 pages per doc on Practice; 10,000 on Chamber. Multi-doc chat handles a whole data room as one library."},{"t":"Diff, summarize, redline","d":"Clause-by-clause changelog vs your template. Severity ratings. Closing checklist generated on the fly."},{"t":"Export the memo","d":"One-click to Word, Notion, or Markdown. Every claim footnoted to the page for partner review."}],"quote":"We use it as a junior associate that never sleeps. The citations to the exact paragraph are the only reason a partner trusts the output.","quoteAuthor":"Daniel R.","quoteInitials":"DR","quoteRole":"Senior Associate · Latham & Watkins","features":[{"t":"Clause diff with severity","d":"Compare two contracts. Each difference rated for risk; substantive vs cosmetic separated automatically."},{"t":"Privilege-grade privacy","d":"Encrypted at rest, isolated per workspace, zero training. BAAs available for healthcare deals."},{"t":"Audit-ready citations","d":"Every claim links to a page and paragraph. Partners can verify in one click — no more 'where did this come from?'"},{"t":"SOC 2 + SSO","d":"Chamber plan includes SSO, audit logs, custom data residency, and a signed DPA for in-house counsel."}],"ctaTitle":"Stop redlining first drafts.","ctaSub":"Pay per document. Credits never expire. Chamber plan available with SSO + BAA."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For finance professionals — CHATWITHPDFAI</title>
+  <meta name="description" content="Ingest a 10-K, a transcript, and a research note. Chat across all three at once. Surface footnotes, table changes, and quiet revisions analysts skim past." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For finance professionals">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For finance professionals","eyebrow":"For finance","h1a":"Earnings call","h1b":"to memo by lunch.","lede":"Ingest a 10-K, a transcript, and a research note. Chat across all three at once. Surface footnotes, table changes, and quiet revisions analysts skim past.","cta":"Start free — 3 docs →","accent":"var(--green)","docLabel":"NVDA · Q3 2026 · 10-Q · PAGE 12","sampleQ":"What's the Q4 revenue guidance?","sampleA":"NVIDIA guides Q4 revenue of **$37.5B ± 2%**, up 7% sequentially, driven by Blackwell ramp and Data Center demand. **Gross margin guidance: 73% ± 50 bps.**","sampleCite":"p. 12 · CFO commentary","suggestions":["YoY by segment","Diff vs Q2 10-Q","Push to Notion memo"],"audienceName":"analysts","audienceShort":"research","workflowLede":"From filing drop to memo-in-Slack — every footnote already pulled.","kpis":[["11 min","Filing → memo (median)"],["100%","Footnotes surfaced"],["1M","Token context window"]],"workflows":[{"t":"Ingest the filing + transcript + note","d":"Multi-PDF chat across the whole research bundle. Ask once, get answers from every document — citations tell you which said what."},{"t":"Surface the diff","d":"Compare two consecutive 10-Qs. Get a clause-by-clause diff plus a 'what changed in the language' summary."},{"t":"Export to your stack","d":"Markdown memo, Notion page, or a Slack-formatted summary in one click."}],"quote":"11 minutes from the 10-K dropping to a memo on Slack. The diff view across two consecutive 10-Qs is the feature I would pay alone for.","quoteAuthor":"Maya K.","quoteInitials":"MK","quoteRole":"Equity Research · Arkham Capital","features":[{"t":"Filing diff","d":"Side-by-side comparison of any two filings with both data and language changes highlighted."},{"t":"Footnote miner","d":"We surface every footnote, table revision, and quiet restatement — the things that move the stock when no one is watching."},{"t":"Multi-doc chat","d":"Ask across a folder. 'What do the buy-side and sell-side disagree about?' — works as a single query."},{"t":"API for Quants","d":"Pull citations into your model. Deterministic pricing per document maps cleanly to a research budget."}],"ctaTitle":"Stop reading. Start asking.","ctaSub":"Pay per filing. Credits never expire. API available for systematic workflows."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

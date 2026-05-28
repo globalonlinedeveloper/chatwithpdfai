@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flashcards — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    .card3d { perspective: 1200px; }
+    .card3d-inner { transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.8,.2,1); position: relative; }
+    .card3d-inner.flipped { transform: rotateY(180deg); }
+    .card3d-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; position: absolute; inset: 0; }
+    .card3d-back { transform: rotateY(180deg); }
+  </style>
+</head>
+<body data-screen-label="Flashcards">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const DECK = [
+      { q: "What standard governs Rule 12(b)(6)?", a: "Accept all factual allegations as true; construe in the light most favorable to the non-moving party.", cite: "Kass v. North Am. · p.12, ¶1", tag: "Civil procedure" },
+      { q: "When does the 10b5-1 safe harbor apply?", a: "Only when the trade occurs within a pre-established plan window. Trades outside that window get no protection.", cite: "Kass v. North Am. · p.12, ¶2", tag: "Securities" },
+      { q: "What is the PSLRA scienter standard?", a: "A strong inference of conscious misbehavior or recklessness, per Tellabs Inc. v. Makor Issues & Rights, Ltd.", cite: "Kass v. North Am. · p.12, ¶3-4", tag: "Securities" },
+      { q: "How does temporal proximity support scienter?", a: "When insider stock sales closely follow corrective disclosure, it supports an inference of conscious misbehavior under the Tellabs framework.", cite: "Kass v. North Am. · p.12, ¶4", tag: "Securities" },
+      { q: "What was the disposition in Kass v. North Am.?", a: "Motion to dismiss denied as to Counts I and II under § 10(b) / Rule 10b-5. Case proceeds to discovery.", cite: "Kass v. North Am. · p.12, ¶5", tag: "Disposition" },
+      { q: "What is the indemnification cap in the Acme ↔ Helix MSA?", a: "2× trailing 12-month fees, with carve-outs for IP infringement, breach of confidentiality, and gross negligence.", cite: "MSA · §12.3, p.47", tag: "Contract" },
+      { q: "What termination triggers exist in the Acme MSA?", a: "Three: material breach with 30-day cure, insolvency, and change of control above 50% to a competitor.", cite: "MSA · §14.2, p.51", tag: "Contract" },
+      { q: "What law governs the Acme MSA?", a: "Delaware law, exclusive jurisdiction in Wilmington.", cite: "MSA · §19, p.88", tag: "Contract" },
+    ];
+    const RATINGS = [
+      { k: "again", label: "Again", desc: "<1m", color: "#ff7e7e", key: "1" },
+      { k: "hard", label: "Hard", desc: "~10m", color: "#ffbd2e", key: "2" },
+      { k: "good", label: "Good", desc: "~1d", color: "var(--green)", key: "3" },
+      { k: "easy", label: "Easy", desc: "~4d", color: "var(--violet-2)", key: "4" },
+    ];
+
+    function App() {
+      const [i, setI] = useState(0);
+      const [flipped, setFlipped] = useState(false);
+      const [stats, setStats] = useState({ again: 0, hard: 0, good: 0, easy: 0 });
+      const [done, setDone] = useState(false);
+
+      const card = DECK[i];
+      const next = (r) => {
+        setStats(s => ({ ...s, [r]: s[r] + 1 }));
+        setFlipped(false);
+        setTimeout(() => {
+          if (i + 1 >= DECK.length) setDone(true);
+          else setI(i + 1);
+        }, 280);
+      };
+
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.code === "Space") { e.preventDefault(); setFlipped(f => !f); }
+          if (flipped) {
+            const r = RATINGS.find(r => r.key === e.key);
+            if (r) next(r.k);
+          }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [flipped, i]);
+
+      const reset = () => { setI(0); setFlipped(false); setStats({ again: 0, hard: 0, good: 0, easy: 0 }); setDone(false); };
+
+      return (
+        <PageShell>
+          <section style={{ padding: "32px 0 40px" }}>
+            <div className="spread" style={{ maxWidth: 880, position: "relative" }}>
+              {/* Toolbar */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+                <a href="document.html" className="btn btn-glass btn-sm">← Back to document</a>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em" }}>STUDYING: <span style={{ color: "var(--text)" }}>KASS V. NORTH AM. + ACME MSA</span></span>
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button className="btn btn-glass btn-sm">↓ Anki</button>
+                  <button className="btn btn-glass btn-sm">↓ CSV</button>
+                  <button className="btn btn-glass btn-sm">⚙</button>
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="glass" style={{ padding: "12px 16px", borderRadius: "var(--r-pill)", display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+                <div className="mono" style={{ fontSize: 11, color: "var(--text-2)", letterSpacing: "0.08em" }}>{done ? DECK.length : i + 1} / {DECK.length}</div>
+                <div style={{ flex: 1, height: 5, background: "var(--glass-2)", borderRadius: 999, overflow: "hidden" }}>
+                  <div style={{ width: `${((done ? DECK.length : i) / DECK.length) * 100}%`, height: "100%", background: "var(--grad-iris-2)", borderRadius: 999, transition: "width .3s" }}></div>
+                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {RATINGS.map(r => (
+                    <span key={r.k} className="mono" style={{ fontSize: 10.5, color: r.color, letterSpacing: "0.06em" }}>{r.label[0]}: {stats[r.k]}</span>
+                  ))}
+                </div>
+              </div>
+
+              {done ? (
+                <DoneView stats={stats} total={DECK.length} reset={reset} />
+              ) : (
+                <>
+                  {/* Card */}
+                  <div className="card3d" style={{ height: 420, marginBottom: 22, cursor: "pointer" }} onClick={() => setFlipped(f => !f)}>
+                    <div className={`card3d-inner ${flipped ? "flipped" : ""}`} style={{ width: "100%", height: "100%" }}>
+                      <div className="card3d-face glass glass-iris-border" style={{ padding: "44px 48px", borderRadius: "var(--r-xl)", display: "flex", flexDirection: "column", justifyContent: "center", boxShadow: "var(--shadow-card)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
+                          <span className="pill" style={{ padding: "3px 11px", fontSize: 10.5 }}>{card.tag}</span>
+                          <span className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.14em" }}>QUESTION</span>
+                        </div>
+                        <h2 className="serif" style={{ fontSize: 32, fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.25, color: "var(--text)", margin: 0, textWrap: "pretty" }}>{card.q}</h2>
+                        <div style={{ marginTop: "auto", paddingTop: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span className="mono" style={{ fontSize: 10.5, color: "var(--text-4)", letterSpacing: "0.1em" }}>SPACE TO FLIP</span>
+                          <span className="iris mono" style={{ fontSize: 11, letterSpacing: "0.14em", fontWeight: 600 }}>TAP CARD →</span>
+                        </div>
+                      </div>
+                      <div className="card3d-face card3d-back glass" style={{ padding: "40px 48px", borderRadius: "var(--r-xl)", background: "linear-gradient(180deg, rgba(183,106,255,0.10), rgba(78,163,255,0.04))", display: "flex", flexDirection: "column", boxShadow: "var(--shadow-card)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                          <span className="pill" style={{ padding: "3px 11px", fontSize: 10.5, color: "var(--violet-2)" }}>ANSWER</span>
+                          <span className="mono" style={{ fontSize: 10.5, color: "var(--green)", letterSpacing: "0.14em" }}>✓ GROUNDED</span>
+                        </div>
+                        <p style={{ fontSize: 19, lineHeight: 1.55, color: "var(--text)", margin: 0, fontWeight: 400 }}>{card.a}</p>
+                        <div style={{ marginTop: 20, paddingTop: 14, borderTop: "1px solid var(--stroke-1)", display: "flex", alignItems: "center", gap: 10 }}>
+                          <span className="mono" style={{ fontSize: 10.5, color: "var(--violet-2)", letterSpacing: "0.1em" }}>↳ SOURCE</span>
+                          <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{card.cite}</span>
+                        </div>
+                        <div style={{ marginTop: "auto", paddingTop: 20, textAlign: "center" }}>
+                          <span className="mono" style={{ fontSize: 10.5, color: "var(--text-4)", letterSpacing: "0.1em" }}>{flipped ? "RATE BELOW · 1-4" : ""}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ratings */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, opacity: flipped ? 1 : 0.35, transition: "opacity .2s", pointerEvents: flipped ? "auto" : "none" }} className="rating-grid">
+                    {RATINGS.map(r => (
+                      <button key={r.k} onClick={() => next(r.k)} className="glass hover-glow" style={{ padding: "16px 18px", borderRadius: "var(--r-lg)", cursor: "pointer", textAlign: "left", border: `1px solid ${r.color}`, background: "var(--glass-1)", fontFamily: "var(--sans)", color: "var(--text)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: r.color }}>{r.label}</span>
+                          <kbd className="mono" style={{ fontSize: 10, padding: "2px 6px", background: "var(--glass-2)", border: "1px solid var(--stroke-2)", borderRadius: 4, color: "var(--text-3)" }}>{r.key}</kbd>
+                        </div>
+                        <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.08em" }}>NEXT REVIEW · {r.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <style>{`@media (max-width: 700px) { .rating-grid { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
+                </>
+              )}
+
+              {/* Help row */}
+              <div style={{ marginTop: 28, display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", fontSize: 11, color: "var(--text-4)" }}>
+                {[["SPACE", "Flip card"], ["1-4", "Rate"], ["←/→", "Navigate"], ["E", "Export"]].map(([k, l]) => (
+                  <span key={k} className="mono" style={{ letterSpacing: "0.06em" }}><kbd style={{ padding: "2px 6px", border: "1px solid var(--stroke-2)", borderRadius: 3, marginRight: 6, color: "var(--text-3)" }}>{k}</kbd>{l.toUpperCase()}</span>
+                ))}
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+
+    function DoneView({ stats, total, reset }) {
+      const mastery = Math.round(((stats.good + stats.easy) / total) * 100);
+      return (
+        <div className="glass glass-iris-border" style={{ padding: 44, borderRadius: "var(--r-xl)", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+          <div style={{ width: 72, height: 72, borderRadius: 18, background: "var(--grad-iris-2)", margin: "0 auto 22px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, color: "#fff", boxShadow: "0 14px 32px -10px oklch(0.55 0.22 290 / 0.7)" }}>✓</div>
+          <div className="mono" style={{ fontSize: 11, color: "var(--green)", letterSpacing: "0.16em", marginBottom: 10 }}>● SESSION COMPLETE</div>
+          <h1 className="display" style={{ fontSize: 40, margin: "0 0 16px", lineHeight: 1 }}>{mastery}% <span className="iris">mastery</span></h1>
+          <p style={{ fontSize: 15, color: "var(--text-3)", maxWidth: 460, margin: "0 auto 28px", lineHeight: 1.55 }}>You reviewed all {total} cards. We'll resurface the harder ones tomorrow using spaced repetition.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 28 }}>
+            {RATINGS.map(r => (
+              <div key={r.k} className="glass" style={{ padding: "14px 12px", borderRadius: "var(--r)" }}>
+                <div style={{ fontSize: 24, fontWeight: 600, color: r.color }}>{stats[r.k]}</div>
+                <div className="mono" style={{ fontSize: 9.5, color: "var(--text-3)", letterSpacing: "0.1em", marginTop: 4, textTransform: "uppercase" }}>{r.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={reset} className="btn btn-iris">Study again →</button>
+            <a href="document.html" className="btn btn-glass">Back to document</a>
+            <button className="btn btn-glass">Schedule reminders</button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

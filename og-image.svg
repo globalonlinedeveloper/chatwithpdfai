@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#050614"></stop>
+      <stop offset="100%" stop-color="#11142e"></stop>
+    </linearGradient>
+    <radialGradient id="m1" cx="20%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#b76aff" stop-opacity="0.7"></stop>
+      <stop offset="100%" stop-color="#b76aff" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="m2" cx="85%" cy="75%" r="35%">
+      <stop offset="0%" stop-color="#4ea3ff" stop-opacity="0.55"></stop>
+      <stop offset="100%" stop-color="#4ea3ff" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="m3" cx="65%" cy="15%" r="30%">
+      <stop offset="0%" stop-color="#7eff9d" stop-opacity="0.35"></stop>
+      <stop offset="100%" stop-color="#7eff9d" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="iris" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b76aff"></stop>
+      <stop offset="50%" stop-color="#4ea3ff"></stop>
+      <stop offset="100%" stop-color="#7eff9d"></stop>
+    </linearGradient>
+    <linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b76aff"></stop>
+      <stop offset="100%" stop-color="#4ea3ff"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"></rect>
+  <rect width="1200" height="630" fill="url(#m1)"></rect>
+  <rect width="1200" height="630" fill="url(#m2)"></rect>
+  <rect width="1200" height="630" fill="url(#m3)"></rect>
+  
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="100" x2="1200" y2="100"></line><line x1="0" y1="200" x2="1200" y2="200"></line><line x1="0" y1="300" x2="1200" y2="300"></line><line x1="0" y1="400" x2="1200" y2="400"></line><line x1="0" y1="500" x2="1200" y2="500"></line>
+    <line x1="100" y1="0" x2="100" y2="630"></line><line x1="300" y1="0" x2="300" y2="630"></line><line x1="500" y1="0" x2="500" y2="630"></line><line x1="700" y1="0" x2="700" y2="630"></line><line x1="900" y1="0" x2="900" y2="630"></line><line x1="1100" y1="0" x2="1100" y2="630"></line>
+  </g>
+
+  
+  <g transform="translate(80, 90)">
+    <rect width="50" height="50" rx="12" fill="url(#markGrad)"></rect>
+    <text x="25" y="36" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-weight="700" font-size="26">◇</text>
+    <text x="70" y="36" fill="#fff" font-family="Inter, sans-serif" font-weight="600" font-size="24" letter-spacing="-0.5">chatwithpdfai<tspan fill="#b76aff" opacity="0.7">.com</tspan></text>
+  </g>
+
+  
+  <g transform="translate(80, 200)">
+    <text fill="#ffffff" font-family="Inter, sans-serif" font-weight="500" font-size="84" letter-spacing="-3">
+      <tspan x="0" dy="0">Read every PDF</tspan>
+      <tspan x="0" dy="100" fill="url(#iris)">at light speed.</tspan>
+    </text>
+  </g>
+
+  
+  <text x="80" y="500" fill="#ffffff" fill-opacity="0.7" font-family="Inter, sans-serif" font-weight="400" font-size="26" letter-spacing="-0.3">
+    Drop a PDF. Ask anything. Get cited answers in seconds.
+  </text>
+
+  
+  <g transform="translate(80, 545)">
+    <rect width="220" height="46" rx="23" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.16"></rect>
+    <circle cx="24" cy="23" r="5" fill="#7eff9d"></circle>
+    <text x="44" y="30" fill="#ffffff" fill-opacity="0.85" font-family="Inter, sans-serif" font-weight="500" font-size="15">99.6% citation accuracy</text>
+  </g>
+
+  
+  <g transform="translate(820, 220)">
+    <rect width="300" height="240" rx="18" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.18"></rect>
+    <text x="22" y="40" fill="#ffffff" fill-opacity="0.5" font-family="JetBrains Mono, monospace" font-weight="500" font-size="11" letter-spacing="2">MSA · PAGE 47 / 213</text>
+    <text x="22" y="76" fill="#ffffff" font-family="Inter, sans-serif" font-weight="600" font-size="18">§ 12.3 Limitation</text>
+    <rect x="22" y="96" width="256" height="6" rx="3" fill="#ffffff" fill-opacity="0.18"></rect>
+    <rect x="22" y="112" width="240" height="6" rx="3" fill="#ffffff" fill-opacity="0.14"></rect>
+    <rect x="22" y="128" width="200" height="14" rx="4" fill="url(#iris)" fill-opacity="0.4"></rect>
+    <rect x="22" y="158" width="220" height="6" rx="3" fill="#ffffff" fill-opacity="0.14"></rect>
+    <rect x="22" y="174" width="180" height="6" rx="3" fill="#ffffff" fill-opacity="0.14"></rect>
+    
+    <rect x="22" y="200" width="200" height="28" rx="10" fill="url(#markGrad)"></rect>
+    <text x="34" y="219" fill="#fff" font-family="Inter, sans-serif" font-size="12" font-weight="500">2× annual fees · IP carve-out</text>
+  </g>
+</svg>

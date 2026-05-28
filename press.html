@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Press kit — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Press">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    function App() {
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Press kit" title={<>Logos, screenshots, <span className="iris">facts on file.</span></>} lede="Everything a journalist needs in one place. Press inquiries: press@chatwithpdfai.com" />
+          <section style={{ padding: "0 0 80px" }}>
+            <div className="spread">
+
+              {/* Boilerplate */}
+              <div className="glass" style={{ padding: "32px 36px", borderRadius: "var(--r-xl)", marginBottom: 28 }}>
+                <div className="eyebrow" style={{ marginBottom: 14 }}>Company boilerplate</div>
+                <p style={{ fontSize: 15.5, lineHeight: 1.65, color: "var(--text-2)", margin: 0 }}>
+                  <strong style={{ color: "var(--text)" }}>CHATWITHPDFAI</strong> is an AI research assistant for PDF documents. Users upload contracts, filings, papers, and clinical records, then chat with them in plain language — every answer is footnoted to the exact page and paragraph of the source. Founded in 2024 in San Francisco. Pay-per-document pricing; no subscription. SOC 2 Type II, HIPAA-aligned, GDPR-compliant.
+                </p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }} className="press-grid">
+                {/* Logos */}
+                <div className="glass" style={{ padding: 28, borderRadius: "var(--r-xl)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Logos</h3>
+                    <a href="#" className="btn btn-iris btn-sm">↓ Download all (.zip)</a>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }} className="logo-grid">
+                    {[
+                      { bg: "var(--bg-2)", color: "#fff", name: "Wordmark · Dark" },
+                      { bg: "#fff", color: "#0a0a25", name: "Wordmark · Light" },
+                      { bg: "var(--grad-iris-2)", color: "#fff", name: "Mark · Iris" },
+                      { bg: "var(--bg-2)", color: "var(--violet-2)", name: "Mark · Dark" },
+                    ].map(l => (
+                      <div key={l.name} style={{ borderRadius: "var(--r)", overflow: "hidden", border: "1px solid var(--stroke-2)" }}>
+                        <div style={{ background: l.bg, padding: "32px 16px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6, minHeight: 130 }}>
+                          {l.name.startsWith("Mark") ? (
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: l.color === "#fff" ? "rgba(255,255,255,0.15)" : "var(--glass-2)", display: "flex", alignItems: "center", justifyContent: "center", color: l.color, fontSize: 22, fontWeight: 700 }}>◇</div>
+                          ) : (
+                            <div style={{ color: l.color, fontWeight: 600, fontSize: 14, letterSpacing: "-0.01em" }}>chatwithpdfai<span style={{ opacity: 0.5 }}>.com</span></div>
+                          )}
+                        </div>
+                        <div style={{ padding: "8px 12px", fontSize: 11, color: "var(--text-3)", borderTop: "1px solid var(--stroke-1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span>{l.name}</span>
+                          <span className="mono" style={{ fontSize: 9.5, color: "var(--violet-2)", letterSpacing: "0.1em" }}>SVG · PNG</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Facts */}
+                <div className="glass" style={{ padding: 28, borderRadius: "var(--r-xl)" }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 18px" }}>Facts on file</h3>
+                  {[
+                    ["Founded", "2024"],
+                    ["Headquarters", "San Francisco, CA"],
+                    ["Team size", "23"],
+                    ["Funding", "Seed + Series A"],
+                    ["Users", "180,000+"],
+                    ["Docs read / month", "2.1M+"],
+                    ["Uptime SLA", "99.95%"],
+                    ["Citation accuracy", "99.6%"],
+                  ].map(([k, v]) => (
+                    <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid var(--stroke-1)", fontSize: 13.5 }}>
+                      <span style={{ color: "var(--text-3)" }}>{k}</span>
+                      <span style={{ fontWeight: 500 }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Founders */}
+              <div className="glass" style={{ padding: 28, borderRadius: "var(--r-xl)", marginTop: 16 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 18px" }}>Founders</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }} className="founder-grid">
+                  {[
+                    { n: "Dana Pham", r: "CEO · Co-founder", init: "DP", b: "Former ML eng at Anthropic. Built the first RAG pipeline at a top-5 law firm." },
+                    { n: "Marcus Yi", r: "CTO · Co-founder", init: "MY", b: "Former staff engineer at Stripe. Built distributed payment systems at scale." },
+                  ].map(f => (
+                    <div key={f.n} style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                      <div style={{ width: 64, height: 64, borderRadius: 16, background: "var(--grad-iris-2)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 22, fontWeight: 600, flexShrink: 0 }}>{f.init}</div>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 600 }}>{f.n}</div>
+                        <div style={{ fontSize: 12, color: "var(--violet-2)", marginBottom: 6 }}>{f.r}</div>
+                        <p style={{ fontSize: 12.5, color: "var(--text-3)", margin: 0, lineHeight: 1.5 }}>{f.b}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Brand colors */}
+              <div className="glass" style={{ padding: 28, borderRadius: "var(--r-xl)", marginTop: 16 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 18px" }}>Brand palette</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }} className="color-grid">
+                  {[
+                    ["Violet", "#b76aff"],
+                    ["Blue", "#4ea3ff"],
+                    ["Green", "#7eff9d"],
+                    ["Pink", "#ff7ec5"],
+                    ["Ink", "#050614"],
+                  ].map(([n, c]) => (
+                    <div key={c} style={{ borderRadius: "var(--r)", overflow: "hidden", border: "1px solid var(--stroke-2)" }}>
+                      <div style={{ background: c, height: 80 }}></div>
+                      <div style={{ padding: 10, fontSize: 12 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 2 }}>{n}</div>
+                        <div className="mono" style={{ color: "var(--text-3)", fontSize: 10.5 }}>{c.toUpperCase()}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <style>{`
+                @media (max-width: 880px) { .press-grid, .founder-grid { grid-template-columns: 1fr !important; } }
+                @media (max-width: 720px) { .logo-grid { grid-template-columns: repeat(2, 1fr) !important; } .color-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+              `}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

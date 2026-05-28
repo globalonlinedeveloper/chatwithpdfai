@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blog — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Blog">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const POSTS = [
+      { d: "May 15, 2026", c: "Engineering", t: "How we got citation accuracy from 91% to 99.6%", e: "Two years of work to make a single number move six percentage points. A deep dive into the retrieval-rerank-ground pipeline that ships in every answer.", min: 12, featured: true },
+      { d: "May 02, 2026", c: "Product", t: "Multi-PDF chat across folders, now live", e: "Ask a question once, get answers from across a folder of documents — with citations to which document said what.", min: 5 },
+      { d: "Apr 18, 2026", c: "Security", t: "Our 2026 SOC 2 Type II report is signed", e: "What's in it, what changed since last year, and why we publish a redacted summary for everyone.", min: 7 },
+      { d: "Apr 03, 2026", c: "Customer story", t: "How Latham associates redline 200-page MSAs in under 10 minutes", e: "A case study with Daniel Rajan and his deal team on how the clause-diff workflow replaces their first-pass redline.", min: 9 },
+      { d: "Mar 21, 2026", c: "Engineering", t: "Designing for 'I don't know'", e: "Why every LLM product needs a calibrated refusal — and how we built ours so that the model would rather pass than hallucinate.", min: 11 },
+      { d: "Mar 04, 2026", c: "Product", t: "OCR that actually works on bad scans", e: "What we learned shipping OCR across 70+ languages and how we benchmark against the long tail of crooked, faxed, photographed documents.", min: 8 },
+      { d: "Feb 18, 2026", c: "Manifesto", t: "Why we'll never sell a subscription", e: "Pay-per-document isn't a pricing experiment, it's a values bet. Here's the math behind it.", min: 4 },
+      { d: "Feb 01, 2026", c: "Security", t: "Sub-processor changes & why we publish a public list", e: "Three new vendors. Two retired. Why this list is one of the most-read pages on our site.", min: 6 },
+    ];
+    const CATEGORIES = ["All", "Engineering", "Product", "Security", "Customer story", "Manifesto"];
+
+    function App() {
+      const [cat, setCat] = React.useState("All");
+      const filtered = cat === "All" ? POSTS : POSTS.filter(p => p.c === cat);
+      const featured = POSTS.find(p => p.featured);
+      const rest = filtered.filter(p => p !== featured);
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Blog" title={<>Reading, thinking, <span className="iris">writing.</span></>} lede="Engineering, product, security, and the principles we run by." />
+          <section style={{ padding: "0 0 100px" }}>
+            <div className="spread">
+              {/* Category filter */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 36 }}>
+                {CATEGORIES.map(c => (
+                  <button key={c} onClick={() => setCat(c)} className={cat === c ? "btn btn-iris btn-sm" : "btn btn-glass btn-sm"}>{c}</button>
+                ))}
+              </div>
+
+              {/* Featured */}
+              {cat === "All" && featured && (
+                <a href="#" className="glass hover-glow" style={{ display: "block", padding: 0, borderRadius: "var(--r-xl)", overflow: "hidden", marginBottom: 36 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", minHeight: 320 }} className="feat-post">
+                    <div style={{ padding: "40px 36px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14 }}>
+                        <span className="pill" style={{ padding: "3px 10px", fontSize: 10.5, color: "var(--violet-2)" }}>FEATURED</span>
+                        <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em" }}>{featured.c.toUpperCase()} · {featured.d}</span>
+                      </div>
+                      <h2 style={{ fontSize: 36, fontWeight: 600, letterSpacing: "-0.025em", margin: "0 0 16px", lineHeight: 1.1 }}>{featured.t}</h2>
+                      <p style={{ fontSize: 15.5, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 18px" }}>{featured.e}</p>
+                      <div className="mono" style={{ fontSize: 11, color: "var(--violet-2)", letterSpacing: "0.1em" }}>{featured.min} MIN READ → Continue reading</div>
+                    </div>
+                    <div style={{ background: "linear-gradient(135deg, oklch(0.32 0.18 280 / 0.6), oklch(0.45 0.18 200 / 0.4))", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", inset: 30, border: "1px dashed rgba(255,255,255,0.18)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
+                        <div className="iris" style={{ fontSize: 88, fontWeight: 700, lineHeight: 1, letterSpacing: "-0.04em" }}>99.6%</div>
+                        <div className="mono" style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", letterSpacing: "0.14em", textAlign: "center" }}>CITATION ACCURACY · UP FROM 91%</div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              )}
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }} className="post-grid">
+                {rest.map(p => (
+                  <a key={p.t} href="#" className="glass hover-glow" style={{ display: "flex", flexDirection: "column", padding: "26px 24px", borderRadius: "var(--r-xl)", minHeight: 240 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                      <span className="pill" style={{ padding: "2px 9px", fontSize: 10 }}>{p.c}</span>
+                      <span className="mono" style={{ fontSize: 10, color: "var(--text-4)", letterSpacing: "0.08em" }}>{p.d}</span>
+                    </div>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.2, margin: "0 0 10px", letterSpacing: "-0.015em" }}>{p.t}</h3>
+                    <p style={{ fontSize: 13.5, color: "var(--text-3)", lineHeight: 1.55, margin: 0, flex: 1 }}>{p.e}</p>
+                    <div className="mono" style={{ fontSize: 10.5, color: "var(--violet-2)", letterSpacing: "0.1em", marginTop: 14 }}>{p.min} MIN READ →</div>
+                  </a>
+                ))}
+              </div>
+
+              <div className="glass glass-iris-border" style={{ marginTop: 40, padding: "28px 32px", borderRadius: "var(--r-xl)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                <div>
+                  <h3 style={{ fontSize: 20, fontWeight: 600, margin: "0 0 4px" }}>One email per month.</h3>
+                  <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: 0 }}>The best of the blog, plus product updates. Unsubscribe in one click.</p>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input className="input" type="email" placeholder="you@firm.com" style={{ minWidth: 280 }} />
+                  <button className="btn btn-iris">Subscribe</button>
+                </div>
+              </div>
+              <style>{`
+                @media (max-width: 960px) { .post-grid { grid-template-columns: repeat(2, 1fr) !important; } .feat-post { grid-template-columns: 1fr !important; } }
+                @media (max-width: 560px) { .post-grid { grid-template-columns: 1fr !important; } }
+              `}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

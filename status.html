@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Status — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Status">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const SERVICES = [
+      { name: "Web app · workspace", status: "op" },
+      { name: "Upload & OCR pipeline", status: "op" },
+      { name: "AI inference · primary (Claude)", status: "op" },
+      { name: "AI inference · fallback (GPT)", status: "op" },
+      { name: "Search & retrieval index", status: "op" },
+      { name: "Public API", status: "op" },
+      { name: "Webhooks delivery", status: "degraded" },
+      { name: "Marketing site (chatwithpdfai.com)", status: "op" },
+      { name: "Authentication & SSO", status: "op" },
+      { name: "Billing & invoicing", status: "op" },
+    ];
+    const STATUS = { op: ["Operational", "var(--green)"], degraded: ["Degraded", "#ffbd2e"], down: ["Major outage", "#ff5f5f"] };
+
+    // Past 90 days uptime grid — mostly green with a few yellow blips
+    function Bars({ status }) {
+      const days = 90;
+      return (
+        <div style={{ display: "flex", gap: 2, height: 22, alignItems: "stretch" }}>
+          {[...Array(days)].map((_, i) => {
+            const seed = (i * 17 + 23) % 100;
+            let c = "var(--green)";
+            if (status === "degraded" && i > days - 4 && seed < 50) c = "#ffbd2e";
+            else if (seed < 2 && status === "op") c = "#ffbd2e";
+            return <div key={i} style={{ flex: 1, background: c, opacity: 0.85, borderRadius: 1 }} title={`Day -${days - i}`}></div>;
+          })}
+        </div>
+      );
+    }
+
+    const INCIDENTS = [
+      { d: "May 20, 2026 · 14:22 UTC", t: "Webhook delivery delays", sev: "degraded", body: "Investigating. Some customers seeing 5-15 min delay in webhook events. Inbound API and inference unaffected." },
+      { d: "May 03, 2026", t: "Brief inference timeouts (16 min)", sev: "resolved", body: "Resolved. Auto-failover from primary to fallback inference completed. Postmortem published." },
+      { d: "Apr 14, 2026", t: "Scheduled maintenance — citation engine upgrade", sev: "resolved", body: "Completed in 18 minutes. New paragraph-resolution engine deployed; citation accuracy now 99.6%." },
+      { d: "Mar 27, 2026", t: "Marketing site CDN slow in APAC", sev: "resolved", body: "Cloudflare APAC POP issue; app unaffected. Resolved by Cloudflare in 42 min." },
+    ];
+
+    function App() {
+      const anyDown = SERVICES.some(s => s.status !== "op");
+      return (
+        <PageShell minimalFooter>
+          <section style={{ padding: "60px 0 30px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--green), transparent 60%)", top: 100, right: 100, opacity: 0.35 }}></div>
+            <div className="spread" style={{ position: "relative", zIndex: 2 }}>
+              <div className="section-eyebrow">System status</div>
+              <h1 className="section-title" style={{ fontSize: 48, margin: "14px 0 12px" }}>
+                {anyDown ? <>One service <span style={{ color: "#ffbd2e" }}>degraded</span></> : <>All systems <span className="iris">operational</span></>}
+              </h1>
+              <p style={{ fontSize: 14.5, color: "var(--text-3)", marginBottom: 36 }}>
+                Live snapshot. Updates every 60 seconds. Subscribe by email or RSS below.
+              </p>
+
+              <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden", marginBottom: 24 }}>
+                {SERVICES.map((s, i) => {
+                  const [label, color] = STATUS[s.status];
+                  return (
+                    <div key={s.name} style={{ padding: "16px 22px", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", display: "grid", gridTemplateColumns: "1fr 2fr 130px", gap: 20, alignItems: "center" }}>
+                      <div style={{ fontSize: 14, fontWeight: 500 }}>{s.name}</div>
+                      <Bars status={s.status} />
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end" }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, boxShadow: `0 0 8px ${color}` }}></div>
+                        <span className="mono" style={{ fontSize: 10.5, letterSpacing: "0.1em", color, textTransform: "uppercase" }}>{label}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }} className="metric-grid">
+                {[
+                  ["99.97%", "Uptime · last 90 days"],
+                  ["1.4s", "Median answer latency"],
+                  ["0.4%", "Citation false-positive rate"],
+                ].map(([n, l]) => (
+                  <div key={l} className="glass" style={{ padding: "20px 22px", borderRadius: "var(--r-lg)" }}>
+                    <div className="iris" style={{ fontSize: 32, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.02em" }}>{n}</div>
+                    <div className="mono" style={{ fontSize: 10.5, color: "var(--text-3)", letterSpacing: "0.12em", marginTop: 6, textTransform: "uppercase" }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section style={{ padding: "40px 0 80px" }}>
+            <div className="spread">
+              <div className="section-eyebrow">Past incidents</div>
+              <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
+                {INCIDENTS.map((i, idx) => (
+                  <div key={idx} className="glass" style={{ padding: "18px 22px", borderRadius: "var(--r-lg)", borderLeft: `3px solid ${i.sev === "degraded" ? "#ffbd2e" : i.sev === "down" ? "#ff5f5f" : "var(--green)"}` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{i.t}</h3>
+                      <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.06em" }}>{i.d}</span>
+                    </div>
+                    <p style={{ fontSize: 13.5, color: "var(--text-3)", margin: 0, lineHeight: 1.55 }}>{i.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="glass" style={{ marginTop: 30, padding: "22px 24px", borderRadius: "var(--r-lg)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>Subscribe to status updates</div>
+                  <div style={{ fontSize: 12.5, color: "var(--text-3)" }}>Email or RSS · only for major incidents</div>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input className="input" placeholder="you@firm.com" style={{ minWidth: 240 }} />
+                  <button className="btn btn-iris">Subscribe</button>
+                  <a href="#" className="btn btn-glass">RSS</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

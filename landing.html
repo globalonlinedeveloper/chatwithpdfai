@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHATWITHPDFAI — Read every PDF at light speed</title>
+  <meta name="description" content="Drop a PDF. Ask anything. Get cited answers in seconds. Pay per document, no subscription. SOC 2, HIPAA-aligned, GDPR-compliant." />
+  <meta name="theme-color" content="#050614" />
+  <meta name="author" content="CHATWITHPDFAI, Inc." />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://chatwithpdfai.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="CHATWITHPDFAI" />
+  <meta property="og:title" content="CHATWITHPDFAI — Read every PDF at light speed" />
+  <meta property="og:description" content="Drop a PDF. Ask anything. Get cited answers in seconds. Pay per document, no subscription." />
+  <meta property="og:url" content="https://chatwithpdfai.com/" />
+  <meta property="og:image" content="https://chatwithpdfai.com/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@chatwithpdfai" />
+  <meta name="twitter:title" content="CHATWITHPDFAI — Read every PDF at light speed" />
+  <meta name="twitter:description" content="Drop a PDF. Ask anything. Get cited answers in seconds. Pay per document, no subscription." />
+  <meta name="twitter:image" content="https://chatwithpdfai.com/og-image.svg" />
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CHATWITHPDFAI",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web",
+    "description": "AI chat with PDFs. Cited answers, OCR, multi-doc chat, 70+ languages.",
+    "url": "https://chatwithpdfai.com/",
+    "offers": { "@type": "Offer", "price": "5", "priceCurrency": "USD" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "1820" }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Landing">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel" src="landing/hero.jsx"></script>
+  <script type="text/babel" src="landing/method.jsx"></script>
+  <script type="text/babel" src="landing/audiences.jsx"></script>
+  <script type="text/babel" src="landing/closing.jsx"></script>
+
+  <script type="text/babel">
+    /*EDITMODE-BEGIN*/
+    const TWEAK_DEFAULTS = {
+      "intensity": "balanced",
+      "showAurora": true
+    };
+    /*EDITMODE-END*/
+
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+      React.useEffect(() => {
+        const bg = document.querySelector(".aurora-bg");
+        if (bg) bg.style.display = t.showAurora ? "block" : "none";
+
+        const intensities = {
+          subtle: { mesh: 0.5, blob: 0.25 },
+          balanced: { mesh: 1.0, blob: 0.45 },
+          vivid: { mesh: 1.6, blob: 0.75 },
+        };
+        const cfg = intensities[t.intensity] || intensities.balanced;
+        document.documentElement.style.setProperty("--mesh-intensity", cfg.mesh);
+        document.querySelectorAll(".section-blob").forEach(el => {
+          el.style.opacity = cfg.blob;
+        });
+      }, [t.intensity, t.showAurora]);
+
+      return (
+        <>
+          <Masthead />
+          <main>
+            <Hero />
+            <HowItWorks />
+            <LivePreview />
+            <FeaturesGrid />
+            <UseCases />
+            <CompareTable />
+            <Testimonials />
+            <Pricing />
+            <Security />
+            <FAQ />
+          </main>
+          <Footer />
+
+          <CookieBanner />
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="Aurora">
+              <TweakRadio label="Intensity" value={t.intensity} onChange={v => setTweak("intensity", v)}
+                options={[
+                  {value: "subtle", label: "Subtle"},
+                  {value: "balanced", label: "Balanced"},
+                  {value: "vivid", label: "Vivid"},
+                ]} />
+              <TweakToggle label="Show background mesh" value={t.showAurora} onChange={v => setTweak("showAurora", v)} />
+            </TweakSection>
+            <TweakSection title="Try the product">
+              <TweakButton onClick={() => window.location.href = "app.html"}>Open the chat app →</TweakButton>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

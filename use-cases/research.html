@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For researchers — CHATWITHPDFAI</title>
+  <meta name="description" content="Upload 40 papers. Ask what they disagree about. Get a methodology comparison table with citations — ready for your draft. Save the search as a Thread, re-run it when new papers arrive." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For researchers">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For researchers","eyebrow":"For researchers","h1a":"A literature review","h1b":"that finishes itself.","lede":"Upload 40 papers. Ask what they disagree about. Get a methodology comparison table with citations — ready for your draft. Save the search as a Thread, re-run it when new papers arrive.","cta":"Start free — 3 docs →","accent":"var(--pink)","docLabel":"VASWANI ET AL. · NEURIPS 2017","sampleQ":"What do these 40 papers disagree about?","sampleA":"Three disagreements: (1) **whether self-attention scales sublinearly** for very long contexts (Liu vs Choromanski), (2) optimal head count for translation tasks, (3) the importance of positional encoding under rotary vs absolute schemes.","sampleCite":"across 12 papers","suggestions":["Methodology table","Conflict summary","Save as Thread"],"audienceName":"researchers","audienceShort":"academics","workflowLede":"Three steps from a folder of PDFs to a citation-ready section.","kpis":[["40+","Papers per Thread"],["0.4%","False-citation rate"],["8 hrs","Saved per review"]],"workflows":[{"t":"Drop a folder of papers","d":"PDFs, preprints, OCR'd scans — all readable. Up to 2,000 pages each on Practice."},{"t":"Ask comparative questions","d":"'What do these disagree about?' 'How does Method X compare to Method Y?' Citations tell you which paper said what."},{"t":"Save as a Thread","d":"Re-run the same search when new papers arrive. We diff the results and tell you what changed."}],"quote":"I'd given up on lit-review tools that hallucinate. This one tells me when the papers conflict and shows me both sides.","quoteAuthor":"Dr. Hugo P.","quoteInitials":"HP","quoteRole":"Principal Investigator","features":[{"t":"Methodology tables","d":"Auto-generate a comparison table across papers — task, dataset, model, metric, score — ready to drop into your manuscript."},{"t":"Threads & alerts","d":"Save a question as a Thread. We re-run it when you add new papers; you get a diff in your inbox."},{"t":"Citation export","d":"BibTeX, Zotero, or plain-text APA / Chicago / Vancouver. Every citation already verified."},{"t":"Calibrated refusal","d":"If we can't ground a claim across the papers, we say so — instead of making something up."}],"ctaTitle":"Read once. Question forever.","ctaSub":"Pay per paper. Credits never expire."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

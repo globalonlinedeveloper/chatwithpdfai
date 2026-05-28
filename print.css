@@ -1,0 +1,52 @@
+/* Print stylesheet — applied via @media print on legal/long-form pages */
+
+@media print {
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  html, body { background: #ffffff !important; color: #0a0a25 !important; font-family: "Inter", "Helvetica", Arial, sans-serif !important; font-size: 11pt !important; }
+  .aurora-bg, .section-blob, .masthead, footer, .toc, button, .btn, .pill, .chip, .cookie-banner, .tweaks-panel, [class*="tweaks"] { display: none !important; }
+  .spread { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+  .prose { max-width: none !important; color: #0a0a25 !important; font-size: 11pt !important; line-height: 1.55 !important; }
+  .prose h1, .prose h2, .prose h3, .prose strong, .prose td, .prose th, .section-title, h1, h2, h3, h4 {
+    color: #0a0a25 !important;
+    -webkit-text-fill-color: #0a0a25 !important;
+    background: none !important;
+    page-break-after: avoid;
+  }
+  .iris, .iris * { color: #0a0a25 !important; -webkit-text-fill-color: #0a0a25 !important; background: none !important; }
+  .glass, .glass-iris-border { background: #ffffff !important; border: 1px solid #ddd !important; box-shadow: none !important; backdrop-filter: none !important; }
+  .glass::before, .glass-iris-border::before { display: none !important; }
+  a { color: #0a0a25 !important; text-decoration: underline !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #666 !important; }
+  .prose a[href^="#"]::after, a[href^="mailto:"]::after { content: ""; }
+  blockquote { border-left: 2px solid #999 !important; color: #333 !important; padding-left: 14px !important; }
+  code, pre { background: #f4f4f4 !important; border: 1px solid #ddd !important; color: #0a0a25 !important; }
+  .eyebrow, .section-eyebrow, .mono { color: #555 !important; }
+  hr { border-top: 1px solid #aaa !important; }
+  table { border-collapse: collapse !important; }
+  th, td { border: 1px solid #ccc !important; padding: 6pt 8pt !important; color: #0a0a25 !important; background: transparent !important; }
+  thead { background: #f4f4f4 !important; }
+  /* Page setup */
+  @page {
+    margin: 0.75in 0.6in 0.85in;
+    @bottom-center {
+      content: "CHATWITHPDFAI · " attr(data-screen-label) " · page " counter(page) " of " counter(pages);
+      font-family: "Inter", sans-serif;
+      font-size: 9pt;
+      color: #666;
+    }
+  }
+  /* Page break controls */
+  h1, h2 { page-break-before: auto; page-break-after: avoid; }
+  table, blockquote, .glass { page-break-inside: avoid; }
+  /* Footer brand on first page */
+  body::before {
+    content: "chatwithpdfai.com";
+    display: block;
+    font-size: 9pt;
+    color: #666;
+    margin-bottom: 24pt;
+    padding-bottom: 12pt;
+    border-bottom: 1px solid #ccc;
+    letter-spacing: 0.02em;
+  }
+}

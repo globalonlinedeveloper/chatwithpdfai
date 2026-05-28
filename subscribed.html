@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You're subscribed — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Subscribed">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    function App() {
+      return (
+        <PageShell minimalFooter>
+          <section style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 24px", position: "relative" }}>
+            <div className="section-blob" style={{ background: "radial-gradient(circle, var(--green), transparent 60%)", top: "30%", left: "50%", transform: "translate(-50%, -50%)", width: 600, height: 600, opacity: 0.35 }}></div>
+            <div className="glass glass-iris-border" style={{ maxWidth: 520, width: "100%", padding: 44, borderRadius: "var(--r-xl)", textAlign: "center", position: "relative", zIndex: 2, boxShadow: "var(--shadow-card)" }}>
+              <div style={{ width: 72, height: 72, borderRadius: 18, background: "var(--grad-iris-2)", margin: "0 auto 22px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, color: "#fff", boxShadow: "0 14px 32px -10px oklch(0.55 0.22 290 / 0.7)" }}>✓</div>
+              <div className="mono" style={{ fontSize: 11, color: "var(--green)", letterSpacing: "0.16em", marginBottom: 10 }}>● SUBSCRIPTION CONFIRMED</div>
+              <h1 className="display" style={{ fontSize: 36, margin: "0 0 14px", lineHeight: 1.05 }}>You're on the <span className="iris">list.</span></h1>
+              <p style={{ fontSize: 15, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 28px" }}>
+                One email per month — the best of the blog plus product updates. Unsubscribe in one click, any time.
+              </p>
+              <div className="glass" style={{ padding: "14px 16px", borderRadius: "var(--r)", marginBottom: 24, fontSize: 13, color: "var(--text-2)" }}>
+                Want to read while you wait? Try our <a href="blog/citation-accuracy.html" style={{ color: "var(--violet-2)", textDecoration: "underline" }}>most-read post</a>: how we got citation accuracy to 99.6%.
+              </div>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <a href="landing.html" className="btn btn-iris">← Back to landing</a>
+                <a href="auth/signup.html" className="btn btn-glass">Start free trial →</a>
+              </div>
+              <div style={{ marginTop: 26, paddingTop: 22, borderTop: "1px solid var(--stroke-1)", fontSize: 11, color: "var(--text-4)", lineHeight: 1.6 }}>
+                You can manage preferences any time at <a href="unsubscribe.html" style={{ color: "var(--text-3)", textDecoration: "underline" }}>chatwithpdfai.com/unsubscribe</a>.
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

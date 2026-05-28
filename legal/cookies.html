@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cookie Policy — CHATWITHPDFAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <link rel="stylesheet" href="../print.css" media="print" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Cookie policy">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../long-form.jsx"></script>
+  <script type="text/babel">
+    function CookieSettings() {
+      const [analytics, setAnalytics] = React.useState(true);
+      return (
+        <div className="glass" style={{ padding: "20px 22px", borderRadius: "var(--r-lg)", margin: "24px 0", maxWidth: 720 }}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>Your preferences</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", border: "1px solid var(--stroke-1)", borderRadius: "var(--r)" }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>Essential cookies</div>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 3 }}>Sign-in, security, basic functionality. Always on.</div>
+              </div>
+              <input type="checkbox" checked disabled />
+            </label>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", border: "1px solid var(--stroke-1)", borderRadius: "var(--r)" }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>Analytics cookies</div>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 3 }}>Help us understand which features get used. Anonymized.</div>
+              </div>
+              <input type="checkbox" checked={analytics} onChange={e => setAnalytics(e.target.checked)} />
+            </label>
+          </div>
+          <button onClick={() => { try { localStorage.setItem("cwpa_cookies_v1", analytics ? "all" : "essential"); } catch{}; alert("Saved."); }} className="btn btn-iris" style={{ marginTop: 18 }}>
+            Save preferences
+          </button>
+        </div>
+      );
+    }
+
+    const SECTIONS = [
+      { id: "what", title: "What cookies we use", body: [
+        "A cookie is a small file your browser stores on your device. We use cookies for two reasons:",
+        { ol: [
+          "**Essential** — to keep you signed in and the service secure. These are always on.",
+          "**Analytics** — to understand which features get used so we can improve them. Turn off anytime.",
+        ]},
+        "We do not use advertising or cross-site tracking cookies. We do not sell data to advertisers.",
+      ]},
+      { id: "list", title: "Specific cookies", body: [
+        { table: { headers: ["Name", "Purpose", "Duration", "Type"], rows: [
+          ["cwpa_session", "Keeps you signed in", "30 days", "Essential"],
+          ["cwpa_csrf", "Anti-CSRF token", "Session", "Essential"],
+          ["cwpa_cookies_v1", "Stores your cookie preference", "1 year", "Essential"],
+          ["ph_*", "PostHog anonymized analytics", "1 year", "Analytics"],
+        ]} },
+      ]},
+      { id: "manage", title: "Manage your preferences", body: [
+        "Use the toggles above, or clear cookies from your browser settings. Most browsers let you set a global rule to block third-party cookies; we work fine under that setting.",
+      ]},
+      { id: "manage-control", title: " ", body: [{ h3: "Set your preferences" }] },
+    ];
+    function App() {
+      return (
+        <PageShell>
+          <PageHeader eyebrow="Legal · Cookies" title="Cookie Policy" lede="What we store on your device, and why. We never use ad-tracking cookies." />
+          <section style={{ padding: "0 0 100px" }}>
+            <div className="spread">
+              <div className="prose">
+                <CookieSettings />
+                <h2>What cookies we use</h2>
+                <p>A cookie is a small file your browser stores on your device. We use cookies for two reasons:</p>
+                <ol>
+                  <li><strong>Essential</strong> — to keep you signed in and the service secure. These are always on.</li>
+                  <li><strong>Analytics</strong> — to understand which features get used so we can improve them. Turn off anytime above.</li>
+                </ol>
+                <p>We do not use advertising or cross-site tracking cookies. We do not sell data to advertisers.</p>
+
+                <h2>Specific cookies</h2>
+                <table>
+                  <thead><tr><th>Name</th><th>Purpose</th><th>Duration</th><th>Type</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>cwpa_session</code></td><td>Keeps you signed in</td><td>30 days</td><td>Essential</td></tr>
+                    <tr><td><code>cwpa_csrf</code></td><td>Anti-CSRF token</td><td>Session</td><td>Essential</td></tr>
+                    <tr><td><code>cwpa_cookies_v1</code></td><td>Your cookie preference</td><td>1 year</td><td>Essential</td></tr>
+                    <tr><td><code>ph_*</code></td><td>PostHog anonymized analytics</td><td>1 year</td><td>Analytics</td></tr>
+                  </tbody>
+                </table>
+
+                <h2>Manage your preferences</h2>
+                <p>Use the toggles at the top, or clear cookies from your browser settings. Most browsers let you set a global rule to block third-party cookies; we work fine under that setting.</p>
+
+                <p style={{ marginTop: 40, color: "var(--text-3)", fontSize: 13.5 }}>Last updated: May 22, 2026 · Questions? <a href="mailto:privacy@chatwithpdfai.com">privacy@chatwithpdfai.com</a></p>
+              </div>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

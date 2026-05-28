@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" style="margin:0;padding:0;background:#050614;">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Your weekly digest — CHATWITHPDFAI</title></head>
+<body style="margin:0;padding:0;background:#050614;font-family:-apple-system,'Inter',Arial,sans-serif;color:#fff;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#050614;padding:40px 20px;">
+  <tr><td align="center">
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="background:linear-gradient(180deg,#0a0c20,#11142e);border-radius:20px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;">
+      <tr><td style="padding:30px 36px 24px;">
+        <table role="presentation" width="100%"><tr>
+          <td>
+            <table role="presentation"><tr>
+              <td style="background:linear-gradient(135deg,#b76aff,#4ea3ff);width:32px;height:32px;border-radius:8px;text-align:center;color:#fff;font-weight:700;">◇</td>
+              <td style="padding-left:10px;color:#fff;font-size:16px;font-weight:600;">chatwithpdfai<span style="color:rgba(255,255,255,0.5)">.com</span></td>
+            </tr></table>
+          </td>
+          <td style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,0.5);letter-spacing:0.1em;">WEEK OF {{week_start}}</td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:0 36px 12px;">
+        <p style="margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#b76aff;text-transform:uppercase;">Your week, in documents</p>
+        <h1 style="margin:0 0 22px;font-size:30px;font-weight:600;color:#fff;letter-spacing:-0.8px;line-height:1.1;">Hi {{first_name}} — <span style="background:linear-gradient(90deg,#b76aff,#4ea3ff,#7eff9d);-webkit-background-clip:text;background-clip:text;color:transparent;">here's the recap.</span></h1>
+
+        <!-- Stats -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
+          <tr>
+            <td width="33%" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 14px;text-align:center;">
+              <p style="margin:0;font-size:28px;color:#b76aff;font-weight:700;letter-spacing:-1px;">{{docs_read}}</p>
+              <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Documents read</p>
+            </td>
+            <td width="8"></td>
+            <td width="33%" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 14px;text-align:center;">
+              <p style="margin:0;font-size:28px;color:#4ea3ff;font-weight:700;letter-spacing:-1px;">{{questions_asked}}</p>
+              <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Questions asked</p>
+            </td>
+            <td width="8"></td>
+            <td width="33%" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 14px;text-align:center;">
+              <p style="margin:0;font-size:28px;color:#7eff9d;font-weight:700;letter-spacing:-1px;">{{time_saved}}</p>
+              <p style="margin:4px 0 0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Estimated time saved</p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Most chatted doc -->
+        <p style="margin:0 0 10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Most chatted this week</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:18px;">
+          <tr><td style="padding:16px 18px;">
+            <p style="margin:0;font-size:14px;font-weight:600;color:#fff;">{{top_doc_name}}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.55);">{{top_doc_chats}} questions · {{top_doc_pages}} pages</p>
+          </td></tr>
+        </table>
+
+        <!-- New features -->
+        <p style="margin:24px 0 10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:rgba(255,255,255,0.5);text-transform:uppercase;">New this week</p>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+          <tr><td style="padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:6px;">
+            <p style="margin:0;font-size:13.5px;font-weight:600;color:#fff;">Clause-diff v2</p>
+            <p style="margin:3px 0 0;font-size:12px;color:rgba(255,255,255,0.6);">Diff against a folder of standard templates, not just one. <a href="https://chatwithpdfai.com/changelog.html" style="color:#d9b6ff;">Read more →</a></p>
+          </td></tr>
+        </table>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 0;">
+          <tr><td style="background:linear-gradient(135deg,#b76aff,#4ea3ff);border-radius:999px;">
+            <a href="https://chatwithpdfai.com/app.html" style="display:inline-block;padding:11px 22px;color:#fff;font-weight:600;text-decoration:none;font-size:14px;">Open workspace →</a>
+          </td></tr>
+        </table>
+
+        <p style="margin:30px 0 0;font-size:11.5px;color:rgba(255,255,255,0.4);line-height:1.6;">
+          You're getting this because you opted into product emails. <a href="https://chatwithpdfai.com/account.html" style="color:rgba(255,255,255,0.6);">Manage notifications</a> · <a href="{{unsubscribe_url}}" style="color:rgba(255,255,255,0.6);">Unsubscribe</a>
+        </p>
+      </td></tr>
+      <tr><td style="padding:18px 36px 28px;border-top:1px solid rgba(255,255,255,0.08);">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:rgba(255,255,255,0.35);">CHATWITHPDFAI · 548 Market St #84219 · San Francisco CA 94104</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

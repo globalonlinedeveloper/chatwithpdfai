@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Our 2026 SOC 2 Type II report is signed — CHATWITHPDFAI</title>
+  <meta name="description" content="What's in it, what changed since last year, and why we publish a redacted summary for everyone — not just enterprise prospects." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Our 2026 SOC 2 Type II report is signed">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Our 2026 SOC 2 Type II report is signed","category":"Security","date":"Apr 18, 2026","readTime":"7 min read","lede":"What's in it, what changed since last year, and why we publish a redacted summary for everyone — not just enterprise prospects.","author":{"name":"Dana Pham","role":"CEO · co-founder","initials":"DP"},"backHref":"../blog.html","backLabel":"Back to blog"},"sections":[{"body":["Our 2026 SOC 2 Type II report is signed and on file. It covers the 12 months ending March 31, 2026, audited by a Big-Four firm under AICPA's TSP framework."]},{"h2":"Scope and trust criteria","body":["This year's audit covers all five Trust Services Criteria:",{"ul":["**Security** — protection against unauthorized access","**Availability** — system uptime and operational performance","**Processing integrity** — accurate, timely processing","**Confidentiality** — non-public data is protected","**Privacy** — GDPR / CCPA alignment, data subject rights"]},"Scope includes our production AWS environment, the inference layer, the marketing site, the support helpdesk, the billing system, and the employee laptops that touch production."]},{"h2":"What changed since 2025","body":[{"ol":["Added **EU residency** as an in-scope control. Customers electing EU residency now have their data tested by the auditor.","Added a control around **AI vendor zero-retention** contracts.","Tightened the **incident response** test: simulated incidents must be detected and triaged within 5 minutes (was 15).","Expanded **vendor risk review** to require evidence of independent attestation, not just self-attestation."]}]},{"h2":"Why we publish a redacted summary","body":["Most companies treat SOC 2 reports as enterprise-only confidential. We disagree. The structure of the report — controls, gaps, exceptions — is useful to any customer who wants to verify our claims.","The redacted version (with vendor names, IPs, and individual identities removed) is downloadable from /legal/security with a signed NDA in one click. The full version is available to Practice and Chamber customers under their existing DPA."]}],"related":[{"title":"Sub-processor changes & why we publish a public list","tag":"Security","href":"subprocessor-changes.html"},{"title":"How we got citation accuracy to 99.6%","tag":"Engineering","href":"citation-accuracy.html"},{"title":"Why we'll never sell a subscription","tag":"Manifesto","href":"no-subscription.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

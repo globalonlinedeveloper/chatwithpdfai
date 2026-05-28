@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You're offline — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Offline">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    function App() {
+      const [online, setOnline] = useState(navigator.onLine);
+      useEffect(() => {
+        const on = () => setOnline(true);
+        const off = () => setOnline(false);
+        window.addEventListener("online", on);
+        window.addEventListener("offline", off);
+        return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
+      }, []);
+      return (
+        <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div className="glass glass-iris-border" style={{ maxWidth: 480, padding: 44, borderRadius: "var(--r-xl)", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+            <a href="landing.html" className="brand" style={{ display: "inline-flex", marginBottom: 24 }}>
+              <span className="brand-mark">◇</span>chatwithpdfai<span className="domain">.com</span>
+            </a>
+            <div style={{ width: 64, height: 64, borderRadius: 16, background: online ? "rgba(126,255,157,0.18)" : "var(--glass-2)", border: `1px solid ${online ? "rgba(126,255,157,0.4)" : "var(--stroke-2)"}`, margin: "0 auto 18px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: online ? "var(--green)" : "var(--text-3)" }}>{online ? "✓" : "✕"}</div>
+            <div className="mono" style={{ fontSize: 11, color: online ? "var(--green)" : "#ffbd2e", letterSpacing: "0.16em", marginBottom: 10, textTransform: "uppercase" }}>● {online ? "Back online" : "No connection"}</div>
+            <h1 className="display" style={{ fontSize: 32, margin: "0 0 14px", lineHeight: 1 }}>{online ? <>You're <span className="iris">back.</span></> : <>You're <span className="iris">offline.</span></>}</h1>
+            <p style={{ fontSize: 15, color: "var(--text-3)", lineHeight: 1.55, margin: "0 0 26px" }}>
+              {online ? "Connection restored. You can keep working." : "We can't reach the server right now. Your unsaved drafts are still on this device — nothing is lost."}
+            </p>
+            <button onClick={() => location.reload()} className="btn btn-iris btn-lg" style={{ width: "100%", justifyContent: "center" }}>↻ {online ? "Reload workspace" : "Try again"}</button>
+            <div style={{ marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--stroke-1)" }}>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>Available offline</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {[["Cached documents", "library.html"], ["Pricing", "pricing.html"], ["Status page", "status.html"]].map(([l, h]) => (
+                  <a key={h} href={h} className="btn btn-glass btn-sm" style={{ justifyContent: "space-between" }}><span>{l}</span><span style={{ color: "var(--violet-2)" }}>→</span></a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

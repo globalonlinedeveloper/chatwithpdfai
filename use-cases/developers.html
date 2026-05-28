@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For developers — CHATWITHPDFAI</title>
+  <meta name="description" content="REST + streaming endpoints. Deterministic citations. SDKs in TypeScript, Python, and Go. Per-document billing maps 1:1 to your customers — no subscription middleware to build." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Use case · For developers">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="use-case-page.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"title":"For developers","eyebrow":"For developers","h1a":"Bring the API.","h1b":"Bring your stack.","lede":"REST + streaming endpoints. Deterministic citations. SDKs in TypeScript, Python, and Go. Per-document billing maps 1:1 to your customers — no subscription middleware to build.","cta":"Read the docs →","accent":"var(--blue)","docLabel":"POST /v3/CHAT","sampleQ":"POST /v3/chat { document_id, question }","sampleA":"**200 OK** · answer with citations · streaming via SSE · `latency_ms: 1412` · `credits_used: 0` (only upload consumes credits)","sampleCite":"REST API · v3","suggestions":["TypeScript SDK","Webhook events","OpenAPI spec"],"audienceName":"developers","audienceShort":"your product","workflowLede":"Per-doc billing, deterministic citations, streaming endpoints. Built for production.","kpis":[["$0.05","Per document · OCR included"],["600/min","Default rate limit"],["1M","Token context window"]],"workflows":[{"t":"Get an API key in 60 seconds","d":"Sandbox key with 10 test credits, no card. Promote to production from your dashboard."},{"t":"Ship","d":"Three endpoints to know: upload, chat, citations. Streaming via SSE. Webhooks for ocr.completed, summary.ready, citation.verified."},{"t":"Pass the cost through","d":"Per-document pricing maps cleanly to your customers. White-label citations available on Chamber."}],"quote":"We replaced three vendors and our internal RAG stack in a week. The deterministic citations were what convinced our compliance team.","quoteAuthor":"Theo S.","quoteInitials":"TS","quoteRole":"Eng Lead · Meridian Legal","features":[{"t":"Streaming endpoints","d":"Server-sent events with token, citation, and done events. Stream tokens to your UI; ship citations as they land."},{"t":"Webhooks","d":"Subscribe to document.ready, summary.ready, citation.verified, credits.low. HMAC-SHA256 signed payloads."},{"t":"OpenAPI 3.1 spec","d":"Generate your own client. We publish the spec, a Postman collection, and SDKs for TypeScript, Python, and Go."},{"t":"Compliance-friendly","d":"SOC 2 Type II, HIPAA-aligned, GDPR. DPA on file. Sub-processor list public. Build on top with confidence."}],"ctaTitle":"An API a compliance team will sign off on.","ctaSub":"Sandbox key with 10 credits. Docs published. SDKs maintained."};
+    function App() { return <UseCasePage data={PAGE} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

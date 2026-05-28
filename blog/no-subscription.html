@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why we'll never sell a subscription — CHATWITHPDFAI</title>
+  <meta name="description" content="Pay-per-document isn't a pricing experiment, it's a values bet. Here's the math behind it." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Why we'll never sell a subscription">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Why we'll never sell a subscription","category":"Manifesto","date":"Feb 18, 2026","readTime":"4 min read","lede":"Pay-per-document isn't a pricing experiment, it's a values bet. Here's the math behind it.","author":{"name":"Dana Pham","role":"CEO · co-founder","initials":"DP"},"backHref":"../blog.html","backLabel":"Back to blog"},"sections":[{"body":["Every advisor we talked to in 2024 told us to charge a monthly subscription. Predictable revenue. Recurring billing. Lower CAC payback. It is the SaaS playbook for a reason.","We didn't do it. We sell credit packs. Credits never expire. You buy when you need it; you don't pay when you don't.","Here's why."]},{"h2":"The math","body":["Subscriptions punish the months you don't use them. The user who reads 80 documents in one push for a deal close, and then nothing for three months, pays the same as the user who reads 25 documents every single month.","On a $29/month subscription with 'unlimited reading' bundled, the heavy user wins and the bursty user loses. Most of our customers are bursty.","Pay-per-document inverts this. A $29 Practice pack of 400 documents covers the bursty user for a year. The heavy user buys multiple packs. Both pay for what they actually use."]},{"h2":"The values bet","body":["When you sell a subscription, your incentive is to make it expensive for the user to leave. Locked-in data, slow exports, friction on cancellation.","When you sell credit packs, your incentive is to make the product so good that the user comes back voluntarily. No retention games. No cancellation gauntlets.",{"quote":"If we walked away for two years and came back, our unused credits will still be there. That sentence is the entire pitch.","cite":"Manifesto · principle 01"},"We will never sell a subscription. If you ever see one, we have failed."]}],"related":[{"title":"How Latham redlines MSAs in 10 minutes","tag":"Customer story","href":"latham-case-study.html"},{"title":"Sub-processor changes","tag":"Security","href":"subprocessor-changes.html"},{"title":"Designing for 'I don't know'","tag":"Engineering","href":"designing-for-i-dont-know.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

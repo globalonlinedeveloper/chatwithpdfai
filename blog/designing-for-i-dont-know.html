@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Designing for 'I don't know' — CHATWITHPDFAI</title>
+  <meta name="description" content="Why every LLM product needs a calibrated refusal — and how we built ours so that the model would rather pass than hallucinate." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Designing for 'I don't know'">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Designing for 'I don't know'","category":"Engineering","date":"Mar 21, 2026","readTime":"11 min read","lede":"Why every LLM product needs a calibrated refusal — and how we built ours so that the model would rather pass than hallucinate.","author":{"name":"Marcus Yi","role":"CTO · co-founder","initials":"MY"},"backHref":"../blog.html","backLabel":"Back to blog"},"sections":[{"body":["The most underrated feature in any LLM product is the ability to say 'I don't know.' It is also the hardest one to ship, because every product instinct fights it."]},{"h2":"Why models confabulate","body":["Large language models are trained on next-token prediction. Saying 'I don't know' is a low-probability completion compared to plausible-sounding text. Without explicit signal, the model will always prefer fluency over honesty."]},{"h2":"Three layers of refusal","body":[{"ol":["**Pre-grounding refusal.** Before we even let the model answer, we check whether the retrieved spans plausibly contain the answer. If not, the model is instructed to refuse.","**Post-grounding refusal.** After the model generates a citation, our grounding model verifies the citation. If verification fails on every retrieval, refuse.","**Confidence-calibrated softening.** Even when we have an answer, if the confidence is below 0.7, we hedge: \"Based on the document, it appears that...\" instead of asserting."]}]},{"h2":"Cultural costs","body":["The first time we shipped calibrated refusal, customer support complaints went up. People said \"why isn't it answering my question?\" Then the customers who needed honesty (lawyers, doctors, researchers) started showing up in droves.",{"quote":"Finally a research tool that says 'I don't know' instead of inventing a paper.","cite":"Dr. Hugo P."},"Refusal is a feature. We optimize for it. We measure it weekly."]}],"related":[{"title":"How we got citation accuracy to 99.6%","tag":"Engineering","href":"citation-accuracy.html"},{"title":"Why we'll never sell a subscription","tag":"Manifesto","href":"no-subscription.html"},{"title":"OCR that actually works","tag":"Product","href":"ocr-bad-scans.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

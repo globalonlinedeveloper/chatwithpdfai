@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exporting your chat — CHATWITHPDFAI</title>
+  <meta name="description" content="Send a conversation to Markdown, Word, Notion, or your notes app. Citations preserved." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Exporting your chat">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Exporting your chat","category":"Features","date":"Updated May 2026","readTime":"3 min read","lede":"Send a conversation to Markdown, Word, Notion, or your notes app. Citations preserved.","backHref":"index.html","backLabel":"Help center"},"sections":[{"h2":"Export formats","body":[{"ul":["**Markdown** — plain `.md` file with footnoted citations (all plans)","**Word document** — `.docx` with hyperlinked citations (Practice+)","**Notion page** — direct push to a workspace (Practice+, requires Notion integration)","**Obsidian** — `.md` with backlinks to the source PDF (Practice+)","**JSON** — structured export for downstream tools (Practice+)"]}]},{"h2":"How to export","body":["In the chat panel, click the **↓ Export** button (top right). Choose your format. The export downloads immediately or pushes to the integration if connected."]},{"h2":"What's included","body":["Every message (yours and the AI's), every citation, the source document title and page list, and the auto-summary if it was generated. The PDF itself is not included — recipients of an export need the original PDF separately."]},{"h2":"Shareable links (different from export)","body":["For read-only sharing, use the **↗ Share** button instead. This creates a public read-only URL — recipients see the chat and a preview of the document, but cannot ask new questions and don't need to install anything."]}],"related":[{"title":"Integrations","tag":"Help","href":"integrations.html"},{"title":"Sharing a chat","tag":"Help","href":"sharing.html"},{"title":"API quickstart","tag":"Docs","href":"../docs.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

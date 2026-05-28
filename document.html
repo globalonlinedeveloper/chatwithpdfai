@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Document — CHATWITHPDFAI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="a11y.css" />
+  <link rel="stylesheet" href="prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Document detail">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel">
+    const DOC = {
+      name: "MSA — Acme ↔ Helix Labs.pdf",
+      pages: 213,
+      type: "Contract · Master Service Agreement",
+      folder: "Active Cases",
+      uploadedBy: "Maya Khan",
+      uploadedOn: "May 12, 2026",
+      summary: "Three-year MSA between Acme Corp. and Helix Labs governed by Delaware law. Auto-renewal with 90-day non-renewal notice. Indemnification capped at 2× trailing 12-month fees with carve-outs for IP, confidentiality, and gross negligence. Termination on 30-day cure for material breach, or on change of control above 50% to a competitor.",
+      keyPoints: [
+        "Indemnification cap: 2× trailing 12-month fees · carve-outs for IP, confidentiality, gross negligence",
+        "Term: 3-year initial · auto-renewal · 90-day non-renewal notice",
+        "Termination: 30-day cure for material breach · insolvency · 50% change of control",
+        "Governing law: Delaware · exclusive jurisdiction Wilmington",
+      ],
+      chats: [
+        { q: "What's the indemnification cap?", a: "2× annual fees with three carve-outs.", when: "Today, 3:24 PM" },
+        { q: "List all termination triggers", a: "Material breach (30-day cure), insolvency, change of control above 50%.", when: "Today, 3:21 PM" },
+        { q: "Compare § 12 to our standard MSA", a: "Indemnity cap is 0.5× lower; auto-renewal is new; governing law differs.", when: "Yesterday" },
+        { q: "Generate a closing checklist", a: "12-item checklist generated. Exported to Word.", when: "May 14" },
+      ],
+    };
+
+    function App() {
+      return (
+        <PageShell>
+          <section style={{ padding: "32px 0 80px" }}>
+            <div className="spread">
+              <a href="library.html" className="btn btn-glass btn-sm" style={{ marginBottom: 16 }}>← Back to library</a>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 28, alignItems: "start" }} className="docd-grid">
+                {/* Main */}
+                <div>
+                  <div className="glass" style={{ padding: "32px 36px", borderRadius: "var(--r-xl)", marginBottom: 16 }}>
+                    <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                      <div style={{ width: 70, height: 88, background: "linear-gradient(135deg, rgba(183,106,255,0.12), rgba(78,163,255,0.08))", border: "1px solid var(--stroke-2)", borderRadius: "var(--r-sm)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span className="mono" style={{ fontSize: 10, letterSpacing: "0.14em", color: "var(--text-3)" }}>PDF</span>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <h1 style={{ fontSize: 24, fontWeight: 600, margin: "0 0 6px", letterSpacing: "-0.02em" }}>{DOC.name}</h1>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 12px" }}>{DOC.type} · {DOC.pages} pages</p>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <span className="pill" style={{ padding: "3px 9px", fontSize: 10.5 }}>{DOC.folder}</span>
+                          <span className="pill" style={{ padding: "3px 9px", fontSize: 10.5 }}>⭐ Starred</span>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <a href="app.html" className="btn btn-iris">Open in workspace →</a>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, marginTop: 22, flexWrap: "wrap" }}>
+                      <button className="btn btn-glass btn-sm">↗ Share</button>
+                      <button className="btn btn-glass btn-sm">↓ Download original</button>
+                      <button className="btn btn-glass btn-sm">↓ Export chat</button>
+                      <button className="btn btn-glass btn-sm">⋯ Move</button>
+                      <div style={{ flex: 1 }}></div>
+                      <button className="btn btn-ghost btn-sm" style={{ color: "#ff8888" }}>Delete</button>
+                    </div>
+                  </div>
+
+                  <div className="glass" style={{ padding: "26px 30px", borderRadius: "var(--r-xl)", marginBottom: 16 }}>
+                    <div className="eyebrow" style={{ marginBottom: 14 }}>Auto-summary</div>
+                    <p className="serif" style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-2)", margin: 0, fontStyle: "italic" }}>{DOC.summary}</p>
+                  </div>
+
+                  <div className="glass" style={{ padding: "26px 30px", borderRadius: "var(--r-xl)", marginBottom: 16 }}>
+                    <div className="eyebrow" style={{ marginBottom: 14 }}>Key points</div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                      {DOC.keyPoints.map((p, i) => (
+                        <li key={i} style={{ display: "flex", gap: 12, fontSize: 14, lineHeight: 1.55, color: "var(--text-2)" }}>
+                          <span className="mono iris" style={{ fontSize: 11, letterSpacing: "0.08em", fontWeight: 600, flexShrink: 0, marginTop: 3 }}>0{i + 1}</span>
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="glass" style={{ padding: "26px 30px", borderRadius: "var(--r-xl)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 14 }}>Recent chats · {DOC.chats.length}</div>
+                    {DOC.chats.map((c, i) => (
+                      <div key={i} style={{ padding: "12px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none" }}>
+                        <div className="serif" style={{ fontSize: 14, fontStyle: "italic", color: "var(--text)", marginBottom: 6 }}>"{c.q}"</div>
+                        <div style={{ fontSize: 12.5, color: "var(--text-3)", marginBottom: 4 }}>{c.a}</div>
+                        <div className="mono" style={{ fontSize: 10, color: "var(--text-4)", letterSpacing: "0.08em" }}>{c.when.toUpperCase()}</div>
+                      </div>
+                    ))}
+                    <a href="app.html" className="btn btn-iris" style={{ marginTop: 16, width: "100%", justifyContent: "center" }}>Continue chatting →</a>
+                  </div>
+                </div>
+
+                {/* Sidebar */}
+                <aside style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div className="glass" style={{ padding: "22px 24px", borderRadius: "var(--r-lg)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 12 }}>Details</div>
+                    {[
+                      ["Uploaded by", DOC.uploadedBy],
+                      ["Uploaded on", DOC.uploadedOn],
+                      ["Pages", DOC.pages],
+                      ["OCR", "Not needed"],
+                      ["Language", "English"],
+                      ["File size", "8.4 MB"],
+                      ["Credits used", "1"],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid var(--stroke-1)", fontSize: 13 }}>
+                        <span style={{ color: "var(--text-3)" }}>{k}</span>
+                        <span style={{ color: "var(--text)", fontWeight: 500 }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="glass" style={{ padding: "22px 24px", borderRadius: "var(--r-lg)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 12 }}>Access</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {[
+                        { i: "MK", n: "Maya Khan", r: "Owner" },
+                        { i: "TS", n: "Theo Sato", r: "Editor" },
+                        { i: "IL", n: "Iris Lee", r: "Viewer" },
+                      ].map(m => (
+                        <div key={m.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--grad-iris-2)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600 }}>{m.i}</div>
+                          <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 500 }}>{m.n}</div></div>
+                          <span className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.08em" }}>{m.r.toUpperCase()}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="btn btn-glass btn-sm" style={{ width: "100%", marginTop: 14, justifyContent: "center" }}>+ Invite member</button>
+                  </div>
+
+                  <div className="glass" style={{ padding: "22px 24px", borderRadius: "var(--r-lg)" }}>
+                    <div className="eyebrow" style={{ marginBottom: 12 }}>Activity</div>
+                    {[
+                      ["Today, 3:24 PM", "Maya asked: 'What's the indemnification cap?'"],
+                      ["Today, 1:08 PM", "Theo viewed page 47"],
+                      ["May 14", "Iris exported chat to Word"],
+                      ["May 12", "Document uploaded by Maya"],
+                    ].map(([t, w], i) => (
+                      <div key={i} style={{ padding: "8px 0", borderTop: i > 0 ? "1px solid var(--stroke-1)" : "none", fontSize: 12 }}>
+                        <div className="mono" style={{ fontSize: 10, color: "var(--text-3)", letterSpacing: "0.06em", marginBottom: 2 }}>{t.toUpperCase()}</div>
+                        <div style={{ color: "var(--text-2)" }}>{w}</div>
+                      </div>
+                    ))}
+                  </div>
+                </aside>
+              </div>
+              <style>{`@media (max-width: 880px) { .docd-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

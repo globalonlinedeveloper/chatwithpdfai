@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arkham Capital · 11-minute earnings memo — CHATWITHPDFAI</title>
+  <meta name="description" content="Maya Khan's research team turned 10-K drops into Slack memos in under 11 minutes — and never misses a footnote." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Arkham Capital · 11-minute earnings memo">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Arkham Capital · 11-minute earnings memo","category":"Customer story","date":"Apr 17, 2026","readTime":"7 min read","lede":"Maya Khan's research team turned 10-K drops into Slack memos in under 11 minutes — and never misses a footnote.","author":{"name":"Iris Chen","role":"Customer success","initials":"IC"},"backHref":"index.html","backLabel":"All customers"},"sections":[{"body":["Arkham Capital is a $4B equity research-driven hedge fund. Maya Khan covers semiconductors. Earnings season is hell."]},{"h2":"The problem","body":["NVIDIA reports earnings. The 10-Q drops at 4:01 PM. By 4:15, every other fund on the street has skimmed the headline numbers, but the alpha is in the footnotes, the table changes, and the language revisions in the MD&A.","Reading a 90-page 10-Q top to bottom takes an analyst 45 minutes minimum. By then, the move has happened.",{"quote":"The diff view across two consecutive 10-Qs is the feature I would pay alone for. It catches what humans skim past.","cite":"Maya Khan · Equity Research"}]},{"h2":"The solution","body":["Maya's team set up a Thread for each name on their coverage list. When a new filing drops, the Thread auto-ingests the document and runs a saved diff against the prior period — every line item, every footnote, every MD&A change.",{"stats":[["11 min","Filing → memo on Slack"],["100%","Footnotes surfaced"],["~30","Names covered"]]}]},{"h2":"The workflow","body":[{"ol":["A new filing is detected (SEC EDGAR webhook → API upload)","The Thread re-runs the saved diff and the saved analyst questions across the new + prior period","Output is a structured memo: headline number changes, footnote changes, MD&A language deltas, segment-level moves","Memo posts to a private Slack channel; analyst spot-checks via citations"]}]},{"h2":"Why it works for fundamental analysts","body":[{"ul":["**Footnote miner** — surfaces every quiet revision, table change, and restatement","**Multi-doc chat** — ask across the 10-K, the transcript, and the sell-side note simultaneously","**API + webhooks** — wired into their internal stack with deterministic per-doc pricing","**Calibrated refusal** — if a claim isn't in the document, we say so (not invent it)"]}]},{"h2":"Results","body":["Maya's team estimates the time savings at ~14 hours per analyst per earnings season. More valuable than the hours: catching footnote changes that drove three of their highest-conviction trades in 2026 Q1."]}],"related":[{"title":"Latham & Watkins · MSA redlines","tag":"Customer story","href":"latham.html"},{"title":"Mayo Clinic · bedside translation","tag":"Customer story","href":"mayo.html"},{"title":"For finance professionals","tag":"Use case","href":"../use-cases/finance.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

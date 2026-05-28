@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Latham & Watkins · M&A deal team — CHATWITHPDFAI</title>
+  <meta name="description" content="Daniel Rajan's team replaced 4-6 hours of first-pass MSA redline with 10 minutes on CHATWITHPDFAI. Here's how." />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../a11y.css" />
+  <link rel="stylesheet" href="../prose.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body data-screen-label="Latham & Watkins · M&A deal team">
+  <a class="skip-link" href="#root">Skip to content</a>
+  <div class="aurora-bg"></div>
+  <div id="root"></div>
+  <script type="text/babel" src="../chrome.jsx"></script>
+  <script type="text/babel" src="../article.jsx"></script>
+  <script type="text/babel">
+    const PAGE = {"meta":{"title":"Latham & Watkins · M&A deal team","category":"Customer story","date":"Apr 03, 2026","readTime":"9 min read","lede":"Daniel Rajan's team replaced 4-6 hours of first-pass MSA redline with 10 minutes on CHATWITHPDFAI. Here's how.","author":{"name":"Iris Chen","role":"Customer success","initials":"IC"},"backHref":"index.html","backLabel":"All customers"},"sections":[{"body":["Latham & Watkins is one of the largest law firms in the world. Daniel Rajan's tech M&A team handles a steady stream of 100-300-page Master Service Agreements, license agreements, and consent forms — the documents nobody wants to read but every deal hinges on."]},{"h2":"The problem","body":["First-pass MSA redline against the firm's standard template took 4-6 hours of associate time per document. The team handled ~120 MSAs per quarter. That's ~600 hours of associate billings spent on the most thankless task in M&A — finding what changed before judgment can be applied.",{"quote":"You're not adding judgment yet. You're just finding what changed. It's the most thankless task in the deal.","cite":"Daniel Rajan · Senior Associate"}]},{"h2":"The solution","body":["Daniel's team migrated to the Chamber plan, which includes SSO with the firm's Okta and a signed DPA. They use multi-PDF chat to compare each incoming MSA against the firm's standard template, with clause-by-clause severity ratings.",{"stats":[["10 min","First-pass redline"],["~600 hr","Saved per quarter"],["99.6%","Citation accuracy"]]}]},{"h2":"The workflow","body":[{"ol":["Upload both PDFs (incoming MSA + firm template) to a deal folder","Run the clause-diff command — get a clause-by-clause changelog with severity ratings","Spot-check the top 10 material changes via the citation footnotes (one click jumps to the source paragraph)","Export the redline as a Word memo, formatted to the firm's house style"]}]},{"h2":"Why it works at biglaw scale","body":[{"ul":["**Citations on every claim** — partners can verify in one click instead of trusting blindly","**SSO + audit logs** — every access to a privileged document is logged for the firm's IT","**Custom DPA on file** — pre-negotiated with the firm's general counsel, no per-deal review needed","**No training on documents** — contractual with us and with every model vendor we use"]}]},{"h2":"Results","body":[{"quote":"We use it as a junior associate that never sleeps. The citations to the exact paragraph are the only reason a partner trusts the output.","cite":"Daniel Rajan"},"Daniel's team has expanded usage to litigation discovery, regulatory filings, and IP due diligence. The firm is in conversations to roll out enterprise-wide."]}],"related":[{"title":"Arkham Capital · 11-minute earnings memo","tag":"Customer story","href":"arkham.html"},{"title":"Mayo Clinic · bedside translation","tag":"Customer story","href":"mayo.html"},{"title":"How Latham redlines MSAs","tag":"Blog","href":"../blog/latham-case-study.html"}]};
+    function App() { return <ArticlePage meta={PAGE.meta} sections={PAGE.sections} related={PAGE.related} />; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
