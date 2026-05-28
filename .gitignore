@@ -36,7 +36,9 @@ yarn-error.log*
 
 # Environment / secrets — NEVER commit these
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.example
 *.pem
 *.key
 secrets.json
@@ -55,9 +57,3 @@ known_hosts
 .preview/
 
 # Backup / temp
-*.bak
-*.tmp
-*.orig
-*~lock*
-
-# 
