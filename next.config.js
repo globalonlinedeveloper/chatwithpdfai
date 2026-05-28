@@ -2,10 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Tell Next.js to ALWAYS include these packages in the output trace,
-  // even if its dependency tracker can't statically follow the import.
-  // Critical for Hostinger which prunes node_modules aggressively to only
-  // what Next.js's build trace marks as needed.
+  // Hostinger prunes node_modules aggressively. These tell Next.js to keep deps
+  // for our server-only routes. Add new entries whenever a route imports a new pkg.
   experimental: {
     outputFileTracingIncludes: {
       '/api/contact':  ['./node_modules/mysql2/**/*', './node_modules/nodemailer/**/*'],
@@ -14,8 +12,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['mysql2', 'nodemailer'],
   },
 
-  // Clean URLs: /pricing -> /pricing.html, /blog/no-subscription -> /blog/no-subscription.html
-  // Rewrites only fire when no real file matches, so /landing.html still serves directly.
   async rewrites() {
     return [
       { source: '/:slug', destination: '/:slug.html' },
@@ -23,7 +19,6 @@ const nextConfig = {
     ];
   },
 
-  // Redirect bare extensions away (canonical URLs without .html)
   async redirects() {
     return [
       { source: '/index.html', destination: '/', permanent: true },
