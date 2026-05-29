@@ -42,6 +42,9 @@ const nextConfig = {
       { source: '/signup.html', destination: '/signup', permanent: true },
       { source: '/forgot.html', destination: '/forgot', permanent: true },
       { source: '/reset.html', destination: '/reset', permanent: true },
+      { source: '/library.html', destination: '/library', permanent: true },
+      { source: '/account.html', destination: '/account', permanent: true },
+      { source: '/buy.html', destination: '/buy', permanent: true },
     ];
   },
 
