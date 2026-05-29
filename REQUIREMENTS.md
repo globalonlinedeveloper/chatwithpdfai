@@ -268,6 +268,9 @@ Stuff that matters after launch.
 | 2026-05-29 | In-browser PDF viewer + citation-jump deferred to M4b | Heavy frontend; lower launch priority than auth (M5) + payment (M6) |
 | 2026-05-29 | M5 (core) shipped: bcryptjs auth — signup/signin/signout/me with DB-backed session cookies; product routes scoped to the signed-in user | First launch-blocker; users/sessions schema (migration 002) now in use |
 | 2026-05-29 | Email verification + password reset = M5b; product routes fall back to STUB_USER_ID pre-launch | Keeps the gated build usable; the stub fallback MUST be removed at launch |
+| 2026-05-29 | M6a shipped: credit ledger — `user_credits` + `credit_transactions`, `/api/credits` balance, per-chat deduction gated by `CREDITS_ENFORCED`; migration 004 applied (4 packs seeded) | Verified on live DB: grant -> deduct -> 402 on insufficient |
+| 2026-05-29 | Razorpay purchase flow (order/checkout/webhook/receipt) = M6b, awaiting Razorpay test keys | Ledger + `purchases` table ready; just needs the gateway wired |
+| 2026-05-29 | Traced mysql2 for /api/chat, /api/chat/estimate, /api/credits in next.config | Were missing -> Hostinger would prune mysql2 and break them once the flag is on |
 
 ---
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { routeChat } from '@/lib/llm/router';
 import { getReadyDocuments, retrievePagesMulti, cacheKey, cacheGet, cachePut, ensureConversation, addMessage, logUsage } from '@/lib/store/chat';
 import { getCurrentUser } from '@/lib/auth';
+import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,6 +30,7 @@ export async function POST(req) {
   if (message.length < 2) return NextResponse.json({ error: 'message required' }, { status: 400 });
 
   const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+  if (creditsEnforced()) { const _bal = await getBalance(userId); if (_bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   try {
     const docs = await getReadyDocuments(ids, userId);
     if (docs.length !== ids.length) return NextResponse.json({ error: 'One or more documents not found' }, { status: 404 });
@@ -54,6 +56,7 @@ export async function POST(req) {
     await addMessage({ conversationId: convId, role: 'assistant', content: result.text, citedPages: citations, credits: result.credits, provider: result.provider, model: result.model, inTok: result.inputTokens, outTok: result.outputTokens });
     await logUsage({ userId, conversationId: convId, documentId: ids[0], task: 'chat', provider: result.provider, model: result.model, inTok: result.inputTokens, outTok: result.outputTokens, costInr: result.costInr, credits: result.credits });
     await cachePut({ key, documentId: ids[0], model: result.model, text: result.text, citedPages: citations });
+    if (creditsEnforced()) await chargeCredits(userId, result.credits, 'chat', 'chat_message', null);
 
     return NextResponse.json({ ok: true, conversationId: convId, answer: result.text, citations, sources, provider: result.provider, model: result.model, credits: result.credits, costInr: Number(result.costInr.toFixed(4)), documents: ids });
   } catch (e) {
