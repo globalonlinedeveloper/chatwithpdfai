@@ -16,6 +16,7 @@ export default function RootLayout({ children }) {
         />
         <link rel="stylesheet" href="/styles.css" />
         <link rel="stylesheet" href="/a11y.css" />
+        <link rel="stylesheet" href="/prose.css" />
       </head>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
