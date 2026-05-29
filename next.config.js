@@ -37,6 +37,10 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/index.html', destination: '/', permanent: true },
+      { source: '/signin.html', destination: '/signin', permanent: true },
+      { source: '/signup.html', destination: '/signup', permanent: true },
+      { source: '/forgot.html', destination: '/forgot', permanent: true },
+      { source: '/reset.html', destination: '/reset', permanent: true },
     ];
   },
 
