@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { routeChat } from '@/lib/llm/router';
 import { getReadyDocuments, retrievePagesMulti, cacheKey, cacheGet, cachePut, ensureConversation, addMessage, logUsage } from '@/lib/store/chat';
+import { getCurrentUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,7 @@ export async function POST(req) {
   if (!ids.length) return NextResponse.json({ error: 'documentId(s) required' }, { status: 400 });
   if (message.length < 2) return NextResponse.json({ error: 'message required' }, { status: 400 });
 
-  const userId = STUB_USER_ID;
+  const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
   try {
     const docs = await getReadyDocuments(ids, userId);
     if (docs.length !== ids.length) return NextResponse.json({ error: 'One or more documents not found' }, { status: 404 });

@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { documents } from '@/lib/store/documents';
+import { getCurrentUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,13 +17,14 @@ function flagOn() {
   return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1';
 }
 
-export async function GET() {
+export async function GET(req) {
   if (!flagOn()) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   try {
-    const rows = await documents.listDocuments(STUB_USER_ID);
+    const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+    const rows = await documents.listDocuments(userId);
     const docs = rows.map((r) => ({
       id: r.id,
       filename: r.original_filename,

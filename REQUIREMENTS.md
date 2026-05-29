@@ -266,6 +266,8 @@ Stuff that matters after launch.
 | 2026-05-29 | M4 (partial) shipped: multi-PDF chat (ask across up to 5 docs), credit-cost preview (/api/chat/estimate, no LLM call), library view | Headline compare-docs feature works; cost shown before sending |
 | 2026-05-29 | Multi-doc retrieval = `WHERE document_id IN (...)` full-scan exact cosine + JS sort | Same HNSW-avoidance as single-doc; fine for a handful of docs x <=500 pages |
 | 2026-05-29 | In-browser PDF viewer + citation-jump deferred to M4b | Heavy frontend; lower launch priority than auth (M5) + payment (M6) |
+| 2026-05-29 | M5 (core) shipped: bcryptjs auth — signup/signin/signout/me with DB-backed session cookies; product routes scoped to the signed-in user | First launch-blocker; users/sessions schema (migration 002) now in use |
+| 2026-05-29 | Email verification + password reset = M5b; product routes fall back to STUB_USER_ID pre-launch | Keeps the gated build usable; the stub fallback MUST be removed at launch |
 
 ---
 

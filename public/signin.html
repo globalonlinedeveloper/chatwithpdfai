@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>Sign in · CHATWITHPDFAI</title><style>:root{--ink:#15192b;--muted:#5b637d;--line:#e4e7f0;--brand:#3b5bdb;--ok:#0f9d58;--bad:#d23f3f;--bg:#f7f8fc}*{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}.wrap{max-width:420px;margin:0 auto;padding:56px 20px}h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 22px;font-size:14px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}input{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px}button{width:100%;margin-top:18px;font:inherit;font-weight:600;color:#fff;background:var(--brand);border:0;border-radius:10px;padding:12px;cursor:pointer}button:disabled{opacity:.5}.status{margin-top:12px;font-size:14px;min-height:18px}.status.bad{color:var(--bad)}.alt{margin-top:16px;font-size:14px;color:var(--muted);text-align:center}a{color:var(--brand)}</style></head>
+<body><div class="wrap"><h1>Sign in</h1><p class="sub">Internal (feature-flagged).</p>
+<div class="card">
+<label>Email</label><input data-testid="signin-email" type="email" autocomplete="email"/>
+<label>Password</label><input data-testid="signin-password" type="password" autocomplete="current-password"/>
+<button type="button" data-testid="signin-btn">Sign in</button>
+<div class="status" data-testid="signin-status" role="status"></div>
+<div class="alt">No account? <a href="/signup.html">Sign up</a></div>
+</div></div>
+<script>
+(function(){var s=document.querySelector('[data-testid="signin-status"]'),b=document.querySelector('[data-testid="signin-btn"]');
+b.addEventListener('click',function(){var email=document.querySelector('[data-testid="signin-email"]').value.trim(),password=document.querySelector('[data-testid="signin-password"]').value;
+s.className='status';s.textContent='Signing in…';b.disabled=true;
+fetch('/api/auth/signin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){if(x.ok){location.href='/account.html';}else{s.className='status bad';s.textContent=x.j.error||'Sign-in failed';b.disabled=false;}}).catch(function(e){s.className='status bad';s.textContent=e.message;b.disabled=false;});});})();
+</script></body></html>

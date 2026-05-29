@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
 import { estimateCredits } from '@/lib/llm/router';
+import { getCurrentUser } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -20,7 +21,8 @@ export async function POST(req) {
   const message = (typeof body.message === 'string' ? body.message : '').trim().slice(0, 2000);
   if (!ids.length || message.length < 2) return NextResponse.json({ error: 'documentId(s) and message required' }, { status: 400 });
   try {
-    const docs = await getReadyDocuments(ids, STUB_USER_ID);
+    const userId = (await getCurrentUser(req))?.id ?? STUB_USER_ID;
+    const docs = await getReadyDocuments(ids, userId);
     if (docs.length !== ids.length) return NextResponse.json({ error: 'One or more documents not found' }, { status: 404 });
     const pages = await retrievePagesMulti({ documentIds: ids, query: message, topK: 6 });
     const chars = pages.reduce((n, p) => n + Math.min(String(p.text).length, 1200), 0) + message.length + 200;
