@@ -33,4 +33,6 @@ npm start
 | `server.js` | Express entry — required by Hostinger Node.js |
 | `package.json` | Node deps + start script |
 | `landing.html` | Marketing home (root `/` redirects here) |
-| `auth/`, `blog/`, `h
+| `auth/`, `blog/`, `help/`, `legal/`, `customers/`, `emails/` | Section pages |
+| `app/`, `landing/`, `futures/`, `use-cases/` | React component partials |
+| `*.css`, `*.svg`, `favicon.svg`, `og-image.svg`, `manifest.json`, `robots.txt`, `sitemap.xml` | Static assets |

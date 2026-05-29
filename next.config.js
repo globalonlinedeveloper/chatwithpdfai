@@ -8,6 +8,8 @@ const nextConfig = {
     outputFileTracingIncludes: {
       '/api/contact':  ['./node_modules/mysql2/**/*', './node_modules/nodemailer/**/*'],
       '/api/waitlist': ['./node_modules/mysql2/**/*'],
+      '/api/documents': ['./node_modules/mysql2/**/*'],
+      '/api/documents/upload': ['./node_modules/mysql2/**/*', './node_modules/unpdf/**/*'],
     },
     serverComponentsExternalPackages: ['mysql2', 'nodemailer'],
   },

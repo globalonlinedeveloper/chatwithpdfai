@@ -1,6 +1,6 @@
 # CHATWITHPDFAI.COM — Product Requirements
 
-> **Living document.** Updated every time we ship or defer something. Last updated 2026-05-28.
+> **Living document.** Updated every time we ship or defer something. Last updated 2026-05-29.
 >
 > This is the single source of truth for **what the product is, what's built, and what's next**.
 
@@ -71,6 +71,8 @@ A **pay-per-document** AI chat product for PDFs. Drop a PDF, ask anything, get c
 | Input validation (`lib/validate.js`) | ✅ | Email, topic, IP extraction |
 | Env vars in hPanel | ✅ | Persistent across deploys |
 | `users` + `sessions` tables (schema only) | ✅ Created | Idle until auth phase resumes |
+| Product schema (migration 003) | ✅ Applied to live DB | `pdf_documents`, `pdf_pages` (`VECTOR(1536)`+cosine index), `chat_conversations`, `chat_messages`, `llm_usage`, `llm_cache`; validated on MariaDB 11.8.6 |
+| Ingest pipeline (upload→extract→embed→store) | 🟡 Built + E2E-tested, not deployed | `/api/documents/upload` behind PRODUCT_MVP flag; real OpenAI embeddings + live vector retrieval verified; Playwright green |
 | SSH key auth from Claude sandbox | ✅ | `~/.cowork-private/hostinger_id_ed25519` |
 | Operational docs (`.cowork-private/OPERATIONS.md`) | ✅ | Server paths, gotchas, credentials reference |
 
@@ -80,15 +82,49 @@ A **pay-per-document** AI chat product for PDFs. Drop a PDF, ask anything, get c
 
 Phases are ordered by user's directive: **product features first, auth + payment last.**
 
+### 🚀 Path to launch — sequenced build order (added 2026-05-29)
+
+> The **critical path** from today's state (static site + contact/waitlist live) to a **paid public launch**. The phase tables below stay as the detailed backlog; this section orders them, marks dependencies, and adds rough effort. Effort is in focused dev-days for one developer working with Claude — **rough, for sequencing not commitment**. Calendar estimate ≈ **6–9 weeks** solo.
+
+**Sequencing principle (new 2026-05-29):** build the PDF pipeline with **per-user scoping from day one** — every table carries `user_id`, every upload path is namespaced by user — using a hardcoded **stub user** behind the feature flag. Auth (M5) then swaps the stub for real sessions with near-zero rework. This honours the "product first, auth+payment last" directive *and* keeps the data model launch-ready. A **minimal auth gate** and **payment** are hard launch-blockers (no free tier → every action needs an identity and a credit balance).
+
+| # | Milestone | Goal | Depends on | Rough effort |
+| --- | --- | --- | --- | --- |
+| M0 | Foundations & de-risk | Resolve the deploy inconsistency, put Cloudflare in front, benchmark vector search + OCR on the live box | live app | 1–2 d |
+| M1 | Data model | Migration `003`: `pdf_documents`, `pdf_pages` (`VECTOR(1536)` + HNSW index), `chat_conversations`, `chat_messages`, `llm_usage`, `llm_cache` — all carry `user_id` | M0 | 0.5–1 d |
+| M2 | Ingest pipeline | Upload endpoint + hard limits, text extraction, OCR fallback, per-page embeddings, in-process background queue | M1 | 5–8 d |
+| M3 | Chat engine | `lib/llm/router.js` (multi-provider cost routing), single-PDF RAG chat with citations, `llm_usage` cost tracking → credit ledger, response cache, credit-cost preview | M2 | 6–9 d |
+| M4 | Product UI | Document viewer + citation jump, library / my-docs view, multi-PDF chat | M3 | 4–6 d |
+| M5 | Auth gate | Signup + email verify, signin/out, forgot/reset, account page, middleware on `/app`, nav signed-in state; swap stub user for real session | M1 (schema) — buildable in parallel with M2–M4 | 3–5 d |
+| M6 | Payment (Razorpay) | `credit_packs` / `purchases` / `user_credits` schema, Orders API + Checkout.js modal, signature verify, webhook handler, receipt email, balance display, refund flow | M3 (credit ledger) + M5 (auth) | 3–5 d |
+| M7 | Launch readiness | Uptime + error tracking + resource logging, email-volume counter, security hardening, reconcile SOC 2 / HIPAA / GDPR copy, pre-launch checklist | M2–M6 | 3–5 d |
+| ✅ | **Launch** | Feature flag off, registration open, smoke test, monitor | all above | — |
+
+**Build vs. launch ordering.** M2–M4 (the product) are built and tested behind the feature flag with the stub user *before* M5/M6 land. **M5 can run in parallel with M2–M4** (it only depends on the M1 schema). M6 needs both the credit ledger (M3) and auth (M5). M7 hardening overlaps the tail of M6. The product is the long pole (~M2–M4 ≈ 15–23 d); auth + payment add ~6–10 d but parallelise.
+
+**Risks / blockers to clear on the path** — each one can stall the critical path if ignored:
+
+| Risk | Why it matters | Action / where |
+| --- | --- | --- |
+| **Deploy inconsistency** | `DEPLOYMENT.md` / `README` describe an Express `server.js`, but there is no `server.js` and `package.json` runs `next start`. Unknown what Hostinger actually launches. | M0: confirm the live app's *Startup file* in hPanel; align the docs to reality. |
+| **No Tesseract binary; 3 GB shared RAM** | `tesseract.js` is memory-heavy and competes with embedding jobs for limited RAM → OOM risk. | M0/M2: benchmark `tesseract.js` on the live box; if it strains RAM, default OCR to Gemini Pro Vision and drop local OCR. |
+| **Vector search scaling** | MariaDB 11.8 `VECTOR` works, but unindexed search degrades by ~50K embeddings. | M1: add `VECTOR INDEX USING HNSW` in the initial schema, not later. |
+| **SMTP ~500/day cap** | Launch-day signups (welcome + verify + receipt) can blow the cap and silently drop mail. | M7: move transactional email to Resend / Amazon SES before opening registration. |
+| **SOC 2 / HIPAA / GDPR copy** | Marketing pages already *claim* these; claiming before it's true is a legal and trust risk. | M7: substantiate (audit, BAA, signed DPA) or soften the copy before launch. |
+| **No system cron** | Heavy work must not block requests; no SSH-level cron available. | M2: `node-cron` in-process queue, serialise PDF processing (one at a time) to protect RAM. |
+| **Shared secrets** | DB / email / SSH currently share one password (noted 2026-05-29). | M7: distinct strong passwords; rotate before launch. |
+
+**Definition of "launched":** registration is open to the public and a user can sign up → verify email → buy a credit pack via Razorpay → upload a PDF → receive a cited answer → see credits decrement, with uptime + error monitoring live and the SOC 2 / HIPAA / GDPR copy reconciled with reality.
+
 ### 🟦 Phase 1 — Product MVP (build now)
 The actual chat-with-PDF product. Build behind a feature flag so we can test without exposing publicly until auth+payment land.
 
 | Feature | Status | Notes |
 | --- | --- | --- |
-| PDF upload endpoint | ⬜ Planned | Multipart POST → save to `~/domains/chatwithpdfai.com/uploads/<user_id>/<uuid>.pdf`; row in `pdf_documents` |
-| PDF text extraction | ⬜ Planned | `pdf-parse` library; populate `pdf_pages.text` per page |
+| PDF upload endpoint | 🟡 Built + E2E-tested (not deployed) | `POST /api/documents/upload`; 50 MB / 500-page limits; saves to disk + `pdf_documents`; serialized queue; behind PRODUCT_MVP flag |
+| PDF text extraction | 🟡 Built + E2E-tested | `lib/pdf/extract.js` via **`unpdf`** (not pdf-parse — see Decisions); per-page text |
 | OCR fallback for scanned pages | ⬜ Planned | Tesseract first; if confidence low → Gemini Pro Vision call |
-| Per-page embeddings | ⬜ Planned | OpenAI `text-embedding-3-small`; store as `VECTOR(1536)` in `pdf_pages.embedding` |
+| Per-page embeddings | 🟡 Built + verified (real OpenAI) | `lib/llm/embed.js`; OpenAI `text-embedding-3-small`; stored as `VECTOR(1536)`; cosine retrieval verified on live DB |
 | `lib/llm/router.js` smart routing | ⬜ Planned | Multi-provider with cost-based selection; see Architecture section |
 | `llm_usage` cost tracking | ⬜ Planned | Every LLM call logged with provider/model/tokens/cost |
 | AI chat (single PDF) | ⬜ Planned | RAG: top-k vector search → LLM call → cited response |
@@ -216,12 +252,26 @@ Stuff that matters after launch.
 | 2026-05-28 | Hard API limits enforced before launch | Max 50 MB upload / 500 pages-per-PDF / 100 queries-per-user-per-day; rate limit per IP |
 | 2026-05-28 | Heavy work runs async in background queue | PDF processing must not block the UI; user-facing requests stay <1s |
 | 2026-05-28 | Monitoring (uptime + error tracking + resource trends) ships with Phase 2 | Can't react to limits without measuring them first |
+| 2026-05-29 | Added a sequenced **Path to launch** (M0–M7) with dependencies + rough effort | Roadmap listed features by phase but not build order, dependencies, or effort — couldn't plan a launch from it |
+| 2026-05-29 | Build the pipeline with `user_id` scoping behind a stub user from day one | Lets auth (M5) slot in with near-zero rework while still building the product before auth |
+| 2026-05-29 | Minimal auth gate (M5) + payment (M6) are launch-blockers, not deferrable past launch | No free tier → every action needs an identity + credit balance; "build last" ≠ "launch without" |
+| 2026-05-29 | `VECTOR INDEX USING HNSW` goes in the initial migration `003`, not deferred | Cheap now; retrofitting an index after 50K+ rows is disruptive |
+| 2026-05-29 | OCR defaults to Gemini Pro Vision if `tesseract.js` strains 3 GB RAM (validated at M0) | No Tesseract binary on Hostinger; local JS OCR may OOM under concurrent embedding load |
+| 2026-05-29 | **M1 shipped** — migration 003 applied to the live MariaDB; `VECTOR(1536)` + cosine `VECTOR INDEX` validated on 11.8.6; `VEC_DISTANCE_COSINE` confirmed | Retires the vector-DDL risk; M1 done against production |
+| 2026-05-29 | PDF text extraction uses **`unpdf`**, not `pdf-parse` | pdf-parse's bundled 2017 pdf.js throws "bad XRef entry" once a mysql2 pool is active in the same process — i.e. it breaks every upload after the first DB call. Caught by the Playwright E2E. `unpdf` (modern serverless pdf.js) coexists with mysql2 and parses reliably. |
+| 2026-05-29 | Upload route parses the PDF **before** any DB write | No stray document row for an unparseable PDF; cleaner failure path; also kept parsing off the same tick as a live query |
+| 2026-05-29 | Playwright E2E suite added (`tests/e2e`), run against real DB + real OpenAI embeddings | "Use actuals" — the green run mocks nothing; 5/5 pass incl. a real upload→extract→embed→cited-retrieval round trip |
 
 ---
 
 ## Open questions
 
-(none right now — all major architecture decisions resolved 2026-05-28; see **Decisions made** below)
+| Question | Surfaced | Resolve at |
+| --- | --- | --- |
+| Does `tesseract.js` fit within 3 GB shared RAM under concurrent load, or do we default OCR to Gemini Pro Vision? | 2026-05-29 | M0 (benchmark) |
+| What does Hostinger's Node app actually run as its Startup file — `next start`, or a `server.js` that isn't in the repo? | 2026-05-29 | M0 |
+| Confirm the Phase 4 INR pricing tiers (₹399 / ₹999 / ₹2,999 / ₹9,999) before wiring Razorpay | 2026-05-28 | M6 |
+| Substantiate the SOC 2 / HIPAA claims pre-launch, or soften the marketing copy? | 2026-05-29 | M7 |
 
 ---
 
@@ -251,4 +301,68 @@ Record actual cost in `llm_usage` table → deduct credits with markup
 | --- | --- | --- | --- | --- | --- |
 | Google | `gemini-2.5-flash` | ✅ | ~$0.075 | ~$0.30 | **Default for text + vision** — cheapest capable |
 | Anthropic | `claude-haiku-4-5` | ✅ | ~$0.25 | ~$1.25 | Fallback when Gemini rate-limited |
-| Open
+| OpenAI | `gpt-4o-mini` | ✅ | ~$0.15 | ~$0.60 | Fallback #2 |
+| Google | `gemini-2.5-pro` | ✅ | ~$1.25 | ~$5 | Complex multi-doc reasoning |
+| Anthropic | `claude-sonnet-4-6` | ✅ | ~$3 | ~$15 | Premium tier; long-form analysis |
+| OpenAI | `gpt-4o` | ✅ | ~$2.50 | ~$10 | Premium fallback |
+
+### Credit pricing model
+
+- Track actual provider cost per query in `llm_usage` table (provider, model, input_tokens, output_tokens, cost_inr)
+- Set **target gross margin = 70%** (i.e., user pays ~3.3× our cost in credits)
+- Convert cost → credits at fixed rate: 1 credit = ₹2 of LLM spend at our cost (so 1 credit ≈ ₹6.66 retail = our ₹3.99–₹7.98 per-document range)
+- Multi-PDF queries cost more credits proportional to combined token count
+- Vision/OCR queries cost more credits (vision tokens are pricier)
+- Display "this query will cost X credits" before sending to user
+
+### `lib/llm/router.js` responsibility
+
+1. Accept `{ task: 'chat'|'embed'|'ocr', pdfs: [...], messages: [...], userTier: 'free|paid' }`
+2. Classify task constraints (vision needed? token estimate? multi-doc?)
+3. Pick provider+model
+4. Call provider SDK
+5. Log to `llm_usage`
+6. Return response + computed credit cost
+7. On error → exponential backoff → fallback provider
+
+---
+
+## Embedding strategy
+
+**Decided:** **Per-page** embeddings.
+
+- One embedding per PDF page → simple, easy to cite ("answer from page 5")
+- Stored in MariaDB as `VECTOR(1536)` column on a `pdf_pages` table
+- Retrieval: `ORDER BY VEC_DISTANCE_COSINE(embedding, query_embedding) LIMIT 5`
+- If a page has too much text for one embedding (>8K tokens), the page is split into 2-3 chunks but all chunks share the same `page_number` for clean citation
+
+### Storage layout
+
+```sql
+pdf_documents     (id, user_id, original_filename, disk_path, page_count, status, created_at)
+pdf_pages         (id, document_id, page_number, text, embedding VECTOR(1536), created_at, INDEX vec_idx USING HNSW)
+chat_conversations (id, user_id, primary_document_id, title, created_at)
+chat_messages     (id, conversation_id, role, content, cited_page_ids JSON, credits_used, llm_provider, llm_model, created_at)
+llm_usage         (id, user_id, conversation_id, provider, model, input_tokens, output_tokens, cost_inr, credits_charged, created_at)
+```
+
+### File storage layout (Hostinger disk)
+
+```
+~/domains/chatwithpdfai.com/uploads/
+  └── <user_id>/
+      └── <document_uuid>.pdf
+```
+
+- Path stored in `pdf_documents.disk_path`
+- Permissions: 600 (user-read only)
+- Daily backup via Hostinger (already covered by hosting plan)
+
+---
+
+## Maintenance notes for this document
+
+- Update the **Status** column of every table whenever a feature ships
+- Move items between phases as priorities shift (record the date in **Decisions made**)
+- Add new **Open questions** as they come up; mark them resolved by moving the answer to **Decisions made**
+- Don't include credentials, IPs, or anything from `.cowork-private/` here — this file IS in the repo

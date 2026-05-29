@@ -101,4 +101,27 @@
                       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         <label><div className="eyebrow" style={{ marginBottom: 5 }}>Your email</div><input className="input" type="email" required placeholder="you@firm.com" value={email} onChange={e => setEmail(e.target.value)} disabled={submitting} /></label>
                         <label><div className="eyebrow" style={{ marginBottom: 5 }}>What's it about?</div>
-                         
+                          <select className="input" required value={topic} onChange={e => setTopic(e.target.value)} disabled={submitting}>
+                            <option>Support</option><option>Sales</option><option>Privacy</option><option>Security</option><option>Press</option><option>Other</option>
+                          </select>
+                        </label>
+                        <label><div className="eyebrow" style={{ marginBottom: 5 }}>Message</div><textarea className="input" required rows="5" placeholder="Tell us what's going on…" style={{ resize: "vertical", fontFamily: "var(--sans)" }} value={message} onChange={e => setMessage(e.target.value)} disabled={submitting} /></label>
+                        {/* honeypot — hidden from humans, bots fill it in */}
+                        <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} aria-hidden="true" />
+                        {error && <div role="alert" style={{ color: "#ff6b6b", fontSize: 13, padding: "8px 10px", borderRadius: 8, background: "rgba(255,107,107,0.08)" }}>{error}</div>}
+                        <button type="submit" className="btn btn-iris" style={{ marginTop: 4, padding: "12px 16px", justifyContent: "center", opacity: submitting ? 0.6 : 1 }} disabled={submitting}>{submitting ? "Sending…" : "Send →"}</button>
+                      </form>
+                    </>
+                  )}
+                </div>
+              </div>
+              <style>{`@media (max-width: 880px) { .ct-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div>
+          </section>
+        </PageShell>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
