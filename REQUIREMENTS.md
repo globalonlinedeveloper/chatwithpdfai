@@ -263,6 +263,9 @@ Stuff that matters after launch.
 | 2026-05-29 | Playwright E2E suite added (`tests/e2e`), run against real DB + real OpenAI embeddings | "Use actuals" — the green run mocks nothing; 5/5 pass incl. a real upload→extract→embed→cited-retrieval round trip |
 | 2026-05-29 | M3 shipped: LLM router across Gemini 2.5-flash / GPT-4o-mini / Claude Haiku (cheapest-first + fallback) + cited single-PDF RAG chat + response cache | Core product Q&A works end to end on real services; default route Gemini 2.5-flash (~1 credit/query) |
 | 2026-05-29 | Single-doc retrieval = full-scan exact cosine + JS sort, not ORDER BY VEC_DISTANCE LIMIT | HNSW index KNN returned 0 rows under a WHERE document_id filter; exact full-scan over one document is correct and fast. HNSW retained for future cross-doc search. |
+| 2026-05-29 | M4 (partial) shipped: multi-PDF chat (ask across up to 5 docs), credit-cost preview (/api/chat/estimate, no LLM call), library view | Headline compare-docs feature works; cost shown before sending |
+| 2026-05-29 | Multi-doc retrieval = `WHERE document_id IN (...)` full-scan exact cosine + JS sort | Same HNSW-avoidance as single-doc; fine for a handful of docs x <=500 pages |
+| 2026-05-29 | In-browser PDF viewer + citation-jump deferred to M4b | Heavy frontend; lower launch priority than auth (M5) + payment (M6) |
 
 ---
 
