@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Chat with a PDF · CHATWITHPDFAI (internal)</title>
+  <style>
+    :root { --ink:#15192b; --muted:#5b637d; --line:#e4e7f0; --brand:#3b5bdb; --ok:#0f9d58; --bad:#d23f3f; --bg:#f7f8fc; }
+    *{box-sizing:border-box} body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+    .wrap{max-width:760px;margin:0 auto;padding:40px 20px}
+    h1{font-size:24px;margin:0 0 4px} .sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input,textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+    textarea{min-height:72px;resize:vertical}
+    .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+    button{font:inherit;font-weight:600;color:#fff;background:var(--brand);border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .answer{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;min-height:24px}
+    .meta{margin-top:10px;font-size:13px;color:var(--muted)}
+    .pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;background:#eef1fb;color:var(--brand);margin-right:6px}
+    .bad{color:var(--bad)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Chat with a PDF</h1>
+    <p class="sub">Internal test harness for the Phase&nbsp;1 chat engine (feature-flagged). Answers cite source pages; routed to the cheapest capable model.</p>
+
+    <div class="card">
+      <label for="doc">Document ID</label>
+      <input id="doc" data-testid="doc-id" inputmode="numeric" placeholder="e.g. 12" />
+      <label for="q" style="margin-top:14px">Question</label>
+      <textarea id="q" data-testid="question" placeholder="What is the invoice total?"></textarea>
+      <div class="row">
+        <button type="button" data-testid="ask-btn">Ask</button>
+        <span class="meta" data-testid="ask-meta"></span>
+      </div>
+    </div>
+
+    <div class="answer" data-testid="answer">Ask a question to get a cited answer.</div>
+    <div class="meta"><span data-testid="citations"></span></div>
+  </div>
+
+  <script>
+    (function () {
+      var docEl = document.querySelector('[data-testid="doc-id"]');
+      var qEl = document.querySelector('[data-testid="question"]');
+      var btn = document.querySelector('[data-testid="ask-btn"]');
+      var ans = document.querySelector('[data-testid="answer"]');
+      var cite = document.querySelector('[data-testid="citations"]');
+      var meta = document.querySelector('[data-testid="ask-meta"]');
+
+      var params = new URLSearchParams(location.search);
+      if (params.get('doc')) docEl.value = params.get('doc');
+
+      btn.addEventListener('click', function () {
+        var documentId = Number(docEl.value);
+        var message = (qEl.value || '').trim();
+        if (!documentId) { ans.textContent = 'Enter a document ID first.'; ans.className = 'answer bad'; return; }
+        if (!message) { ans.textContent = 'Type a question first.'; ans.className = 'answer bad'; return; }
+        btn.disabled = true; meta.textContent = 'Thinking…'; ans.className = 'answer'; ans.textContent = '…'; cite.textContent = '';
+        fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ documentId: documentId, message: message }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (!res.ok) { ans.className = 'answer bad'; ans.textContent = 'Error: ' + (res.body.error || 'chat failed'); return; }
+            ans.className = 'answer'; ans.textContent = res.body.answer;
+            var bits = [];
+            if (res.body.citations && res.body.citations.length) bits.push('<span class="pill" data-testid="cite-pages">Pages: ' + res.body.citations.join(', ') + '</span>');
+            bits.push('<span class="pill" data-testid="cite-provider">' + (res.body.provider || '?') + (res.body.model ? ' · ' + res.body.model : '') + '</span>');
+            if (typeof res.body.credits === 'number') bits.push('<span class="pill">' + res.body.credits + ' credit' + (res.body.credits === 1 ? '' : 's') + '</span>');
+            if (res.body.cached) bits.push('<span class="pill">cached</span>');
+            cite.innerHTML = bits.join(' ');
+          })
+          .catch(function (e) { ans.className = 'answer bad'; ans.textContent = 'Error: ' + e.message; })
+          .finally(function () { btn.disabled = false; meta.textContent = ''; });
+      });
+    })();
+  </script>
+</body>
+</html>

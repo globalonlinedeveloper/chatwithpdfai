@@ -261,6 +261,8 @@ Stuff that matters after launch.
 | 2026-05-29 | PDF text extraction uses **`unpdf`**, not `pdf-parse` | pdf-parse's bundled 2017 pdf.js throws "bad XRef entry" once a mysql2 pool is active in the same process — i.e. it breaks every upload after the first DB call. Caught by the Playwright E2E. `unpdf` (modern serverless pdf.js) coexists with mysql2 and parses reliably. |
 | 2026-05-29 | Upload route parses the PDF **before** any DB write | No stray document row for an unparseable PDF; cleaner failure path; also kept parsing off the same tick as a live query |
 | 2026-05-29 | Playwright E2E suite added (`tests/e2e`), run against real DB + real OpenAI embeddings | "Use actuals" — the green run mocks nothing; 5/5 pass incl. a real upload→extract→embed→cited-retrieval round trip |
+| 2026-05-29 | M3 shipped: LLM router across Gemini 2.5-flash / GPT-4o-mini / Claude Haiku (cheapest-first + fallback) + cited single-PDF RAG chat + response cache | Core product Q&A works end to end on real services; default route Gemini 2.5-flash (~1 credit/query) |
+| 2026-05-29 | Single-doc retrieval = full-scan exact cosine + JS sort, not ORDER BY VEC_DISTANCE LIMIT | HNSW index KNN returned 0 rows under a WHERE document_id filter; exact full-scan over one document is correct and fast. HNSW retained for future cross-doc search. |
 
 ---
 
