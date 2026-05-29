@@ -9,6 +9,7 @@ const nextConfig = {
       '/api/contact':  ['./node_modules/mysql2/**/*', './node_modules/nodemailer/**/*'],
       '/api/waitlist': ['./node_modules/mysql2/**/*'],
       '/api/documents': ['./node_modules/mysql2/**/*'],
+      '/api/documents/[id]': ['./node_modules/mysql2/**/*'],
       '/api/chat': ['./node_modules/mysql2/**/*'],
       '/api/chat/estimate': ['./node_modules/mysql2/**/*'],
       '/api/credits': ['./node_modules/mysql2/**/*'],

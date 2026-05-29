@@ -11,7 +11,7 @@ export default function SignInPage() {
     try {
       const r = await fetch('/api/auth/signin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: f.get('email'), password: f.get('password') }) });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) { window.location.href = '/library'; return; }
+      if (r.ok) { window.location.href = '/workspace'; return; }
       setErr(j.error || 'Sign-in failed'); setBusy(false);
     } catch (e2) { setErr(e2.message); setBusy(false); }
   }
