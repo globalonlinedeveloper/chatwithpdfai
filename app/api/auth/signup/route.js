@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { query } from '@/lib/db';
 import { isEmail, clip } from '@/lib/validate';
 import { hashPassword, createSession, sessionCookie } from '@/lib/auth';
+import { sendMail } from '@/lib/email';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
@@ -24,6 +25,8 @@ export async function POST(req) {
       [email, hash, name, vtoken]
     );
     const token = await createSession(r.insertId, req);
+    const _site = process.env.SITE_URL || 'https://chatwithpdfai.com';
+    sendMail({ to: email, subject: 'Verify your CHATWITHPDFAI email', text: 'Welcome! Verify your email: ' + _site + '/api/auth/verify?token=' + vtoken }).catch((e) => console.error('[signup] verify email failed', e.message));
     const res = NextResponse.json({ ok: true, user: { id: r.insertId, email, name } });
     res.cookies.set(sessionCookie(token));
     return res;

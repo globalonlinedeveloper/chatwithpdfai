@@ -271,6 +271,7 @@ Stuff that matters after launch.
 | 2026-05-29 | M6a shipped: credit ledger — `user_credits` + `credit_transactions`, `/api/credits` balance, per-chat deduction gated by `CREDITS_ENFORCED`; migration 004 applied (4 packs seeded) | Verified on live DB: grant -> deduct -> 402 on insufficient |
 | 2026-05-29 | Razorpay purchase flow (order/checkout/webhook/receipt) = M6b, awaiting Razorpay test keys | Ledger + `purchases` table ready; just needs the gateway wired |
 | 2026-05-29 | Traced mysql2 for /api/chat, /api/chat/estimate, /api/credits in next.config | Were missing -> Hostinger would prune mysql2 and break them once the flag is on |
+| 2026-05-29 | M5b shipped: email verification (signup -> /api/auth/verify) + password reset (/api/auth/forgot -> /api/auth/reset) | Single-use, time-boxed tokens; SMTP send best-effort; forgot.html/reset.html UI. Verified end to end on live DB. |
 
 ---
 
