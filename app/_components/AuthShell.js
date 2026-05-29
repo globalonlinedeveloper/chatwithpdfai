@@ -41,7 +41,7 @@ export function AuthShell({ title, lede, children, footer }) {
           </div>
         </div>
       </div>
-      <style>{`@media (max-width: 880px){.auth-grid{grid-template-columns:1fr !important}.auth-aside{display:none}}`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 880px){.auth-grid{grid-template-columns:1fr !important}.auth-aside{display:none}}` }} />
     </div>
   );
 }

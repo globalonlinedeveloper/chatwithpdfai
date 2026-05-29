@@ -158,11 +158,11 @@ function Hero() {
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: -100, right: -50 }}></div>
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--blue), transparent 60%)", bottom: -150, left: -100 }}></div>
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 980px) {
           .hero-grid { grid-template-columns: 1fr !important; gap: 50px !important; }
         }
-      `}</style>
+      ` }} />
     </section>
   );
 }

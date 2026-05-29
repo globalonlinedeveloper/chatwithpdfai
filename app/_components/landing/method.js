@@ -61,7 +61,7 @@ function HowItWorks() {
           ))}
         </div>
       </div>
-      <style>{`@media (max-width: 860px) { .how-grid { grid-template-columns: 1fr !important; } }`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 860px) { .how-grid { grid-template-columns: 1fr !important; } }` }} />
     </section>
   );
 }
@@ -257,10 +257,10 @@ function FeaturesGrid() {
           ))}
         </div>
       </div>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 980px) { .feat-grid { grid-template-columns: repeat(2, 1fr) !important; } }
         @media (max-width: 560px) { .feat-grid { grid-template-columns: 1fr !important; } }
-      `}</style>
+      ` }} />
     </section>
   );
 }

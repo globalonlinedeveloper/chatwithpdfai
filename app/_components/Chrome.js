@@ -92,7 +92,7 @@ export function Footer({ minimal }) {
           <a href="mailto:support@chatwithpdfai.com" className="mono" style={{ letterSpacing: '0.08em', color: 'var(--text-3)' }}>SUPPORT@CHATWITHPDFAI.COM</a>
         </div>
       </div>
-      <style>{`@media (max-width: 900px){.foot-grid{grid-template-columns:1fr 1fr !important}} @media (max-width:560px){.foot-grid{grid-template-columns:1fr !important}}`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 900px){.foot-grid{grid-template-columns:1fr 1fr !important}} @media (max-width:560px){.foot-grid{grid-template-columns:1fr !important}}` }} />
     </footer>
   );
 }

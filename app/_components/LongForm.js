@@ -44,10 +44,10 @@ function LongFormPage({ eyebrow, title, lede, lastUpdated, sections, downloadLab
             ))}
           </aside>
         </div>
-        <style>{`@media (max-width: 980px) {
+        <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 980px) {
           .lf-grid { grid-template-columns: 1fr !important; }
           .lf-grid > aside { display: none; }
-        }`}</style>
+        }` }} />
       </section>
     </SiteShell>
   );

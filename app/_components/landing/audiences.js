@@ -172,7 +172,7 @@ function UseCases() {
           </div>
         </div>
       </div>
-      <style>{`@media (max-width: 900px) { .uc-grid { grid-template-columns: 1fr !important; } }`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 900px) { .uc-grid { grid-template-columns: 1fr !important; } }` }} />
     </section>
   );
 }
@@ -300,12 +300,12 @@ function Testimonials() {
           ))}
         </div>
       </div>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 860px) {
           .test-grid { grid-template-columns: 1fr !important; }
           .test-grid > div { grid-column: auto !important; }
         }
-      `}</style>
+      ` }} />
     </section>
   );
 }

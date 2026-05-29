@@ -53,7 +53,7 @@ function Pricing() {
           </div>
         </div>
       </div>
-      <style>{`@media (max-width: 900px){.price-grid{grid-template-columns:1fr 1fr !important}} @media (max-width:560px){.price-grid{grid-template-columns:1fr !important}}`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 900px){.price-grid{grid-template-columns:1fr 1fr !important}} @media (max-width:560px){.price-grid{grid-template-columns:1fr !important}}` }} />
     </section>
   );
 }
@@ -97,12 +97,12 @@ function Security() {
           </div>
         </div>
       </div>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 900px) {
           .sec-grid { grid-template-columns: 1fr !important; }
           .sec-claims { grid-template-columns: 1fr !important; }
         }
-      `}</style>
+      ` }} />
     </section>
   );
 }
@@ -228,10 +228,10 @@ function Footer() {
             <span className="mono" style={{ letterSpacing: "0.08em" }}>STATUS · ALL SYSTEMS OPERATIONAL ●</span>
           </div>
         </div>
-        <style>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @media (max-width: 900px) { .foot-grid { grid-template-columns: 1fr 1fr !important; } }
           @media (max-width: 560px) { .foot-grid { grid-template-columns: 1fr !important; } }
-        `}</style>
+        ` }} />
       </div>
     </footer>
   );

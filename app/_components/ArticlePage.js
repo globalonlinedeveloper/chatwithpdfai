@@ -56,7 +56,7 @@ function ArticlePage({ meta, sections, related, type = "post" }) {
                   </a>
                 ))}
               </div>
-              <style>{`@media (max-width: 760px) { .rel-grid { grid-template-columns: 1fr !important; } }`}</style>
+              <style dangerouslySetInnerHTML={{ __html: `@media (max-width: 760px) { .rel-grid { grid-template-columns: 1fr !important; } }` }} />
             </div>
           )}
         </div>
