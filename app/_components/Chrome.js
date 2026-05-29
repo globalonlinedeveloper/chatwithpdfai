@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 const NAV = [
   { label: 'Product', href: '/#how', k: 'product' },
   { label: 'Pricing', href: '/pricing', k: 'pricing' },
-  { label: 'Blog', href: '/blog', k: 'blog' },
-  { label: 'Help', href: '/help/index.html', k: 'help' },
+  { label: 'Help', href: '/help', k: 'help' },
 ];
 
 export function Masthead({ active }) {
@@ -55,8 +54,8 @@ export function Footer({ minimal }) {
   }
   const cols = [
     { h: 'Product', l: [['Features', '/#features'], ['Pricing', '/pricing']] },
-    { h: 'Company', l: [['Blog', '/blog'], ['Manifesto', '/manifesto.html'], ['Contact', '/contact']] },
-    { h: 'Resources', l: [['Help', '/help/index.html'], ['Privacy', '/legal/privacy'], ['Terms', '/legal/terms'], ['Security', '/legal/security'], ['DPA', '/legal/dpa'], ['Cookies', '/legal/cookies']] },
+    { h: 'Company', l: [['Contact', '/contact']] },
+    { h: 'Resources', l: [['Help', '/help'], ['Privacy', '/legal/privacy'], ['Terms', '/legal/terms'], ['Security', '/legal/security'], ['DPA', '/legal/dpa'], ['Cookies', '/legal/cookies']] },
   ];
   return (
     <footer style={{ borderTop: '1px solid var(--stroke-1)', padding: '60px 0 30px', marginTop: 80 }}>

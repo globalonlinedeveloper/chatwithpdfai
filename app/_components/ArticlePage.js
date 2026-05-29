@@ -1,8 +1,11 @@
+'use client';
+import React from 'react';
+import SiteShell from './Chrome';
 // Long-form article renderer — used by blog posts, help center, customer stories
 
 function ArticlePage({ meta, sections, related, type = "post" }) {
   return (
-    <PageShell active={type === "post" ? "blog" : type === "help" ? "help" : "customers"}>
+    <SiteShell active={type === "post" ? "blog" : "help"}>
       {/* Hero */}
       <section style={{ padding: "60px 0 30px", position: "relative" }}>
         <div className="section-blob" style={{ background: "radial-gradient(circle, var(--violet), transparent 60%)", top: -50, right: -100, opacity: 0.3 }}></div>
@@ -23,7 +26,7 @@ function ArticlePage({ meta, sections, related, type = "post" }) {
                 <div style={{ fontSize: 13.5, fontWeight: 600 }}>{meta.author.name}</div>
                 <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{meta.author.role}</div>
               </div>
-              <button onClick={() => { navigator.clipboard?.writeText(location.href); window.cwpaToast?.({ kind: "success", title: "Link copied" }); }} className="btn btn-glass btn-sm">↗ Share</button>
+              <button onClick={() => { navigator.clipboard?.writeText(location.href); }} className="btn btn-glass btn-sm">↗ Share</button>
             </div>
           )}
         </div>
@@ -58,7 +61,7 @@ function ArticlePage({ meta, sections, related, type = "post" }) {
           )}
         </div>
       </section>
-    </PageShell>
+    </SiteShell>
   );
 }
 
@@ -99,4 +102,4 @@ function renderInline(text) {
   });
 }
 
-Object.assign(window, { ArticlePage });
+export default ArticlePage;
