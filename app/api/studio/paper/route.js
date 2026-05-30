@@ -42,7 +42,8 @@ Hard rules:
 - Every fact, date, name and code behaviour must be accurate. Never invent. If unsure, choose content you are certain about.
 - For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).
 - Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
-- Each question object MUST include a "type" field and follow that type's exact shape.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
+- Each question object MUST include a "type" field and follow that type's exact shape.
+- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
 - Output ONLY valid minified JSON, no markdown, no commentary:
 {"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
 }
@@ -194,7 +195,7 @@ export async function POST(req) {
   }
   const totalQ = sections.reduce((n, s) => n + s.count, 0);
   try {
-    const excludeNote = allExclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them. Generate entirely new questions on fresh sub-topics:\n- ${allExclude.join('\n- ')}` : '';
+    const excludeNote = allExclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them, but STILL produce the full number of questions requested. Generate entirely new questions on fresh sub-topics:\n- ${allExclude.join('\n- ')}` : '';
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
     const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
     const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
@@ -206,7 +207,31 @@ export async function POST(req) {
     outSections = outSections.map((s, i) => ({ title: str(s && s.title, 80) || (sections[i] ? sections[i].title : ''), marks: sections[i] ? sections[i].marks : 1, questions: (Array.isArray(s && s.questions) ? s.questions : []).map(sanitize).filter(Boolean) })).filter((s) => s.questions.length);
     if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
 
-    let totalCredits = result.credits;
+    // Enforce the requested per-section counts: trim overflow, top up shortfalls.
+    // (Models — esp. with a long "avoid these" exclude list — sometimes return one fewer than asked.)
+    let topUpCredits = 0;
+    for (let i = 0; i < outSections.length; i++) {
+      const want = sections[i] ? sections[i].count : outSections[i].questions.length;
+      if (outSections[i].questions.length > want) { outSections[i].questions = outSections[i].questions.slice(0, want); continue; }
+      let guard = 0;
+      while (outSections[i].questions.length < want && guard++ < 2) {
+        const need = want - outSections[i].questions.length;
+        const haveStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q || q.assertion, 160))).filter(Boolean);
+        const exTop = [...new Set([...haveStems, ...allExclude])].slice(0, 120);
+        const tSys = buildSystem({ sections: [{ title: outSections[i].title, types: sections[i] ? sections[i].types : ['mcq'], count: need, marks: outSections[i].marks }], difficulty, level, language, examStyle, grounded });
+        const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} more NEW question(s) for the section "${outSections[i].title || 'this section'}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${exTop.join('\n- ')}${sourceNote}`;
+        let tr;
+        try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(5000, 450 * need + 800), temperature: 0.85, jsonMode: true }); }
+        catch (e) { break; }
+        topUpCredits += tr.credits || 0;
+        let tp; try { tp = extractJson(tr.text); } catch (e) { break; }
+        const got = ((Array.isArray(tp.sections) && tp.sections[0] && Array.isArray(tp.sections[0].questions)) ? tp.sections[0].questions : (Array.isArray(tp.questions) ? tp.questions : [])).map(sanitize).filter(Boolean);
+        if (!got.length) break;
+        outSections[i].questions = outSections[i].questions.concat(got).slice(0, want);
+      }
+    }
+
+    let totalCredits = result.credits + topUpCredits;
     let verifyInfo = { verified: false, fixes: 0 };
     if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: true, fixes: vr.fixes }; }
     try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO studio_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
