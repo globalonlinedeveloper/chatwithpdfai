@@ -93,27 +93,59 @@ function normalizeSections(body) {
 }
 
 // Phase 4a: best-effort second-model check of the answer key. Never throws.
+// The checker re-derives each answer on a different model (prefer Gemini) and
+// returns the correct answer as TEXT for option questions; we map text->index
+// ourselves, so an index/value mix-up in the marked key (e.g. "10 % 3" marked
+// as option "2" when the answer is 1) gets caught and corrected.
+function normAns(s) { return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' ').replace(/[\s.;:]+$/, ''); }
+
 async function verifyPass(sections) {
   const refs = []; for (const s of sections) for (const q of s.questions) refs.push(q);
   const items = [];
   refs.forEach((q, i) => {
-    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') items.push({ i, line: `[${i}] ${q.type === 'assertion' ? 'A: ' + q.assertion + ' | R: ' + q.reason : q.q}\nOptions: ${q.options.map((o, k) => k + '=' + o).join(' | ')}\nMarked: ${q.answer}` });
-    else if (q.type === 'tf') items.push({ i, line: `[${i}] ${q.q}\nMarked(true/false): ${q.answer}` });
-    else if (q.type === 'fill' || q.type === 'numeric') items.push({ i, line: `[${i}] ${q.q}\nMarked: ${q.answer}` });
+    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') {
+      const stem = q.type === 'assertion' ? ('Assertion: ' + q.assertion + ' | Reason: ' + q.reason) : q.q;
+      const opts = (q.options || []).map((o, k) => '  (' + k + ') ' + o).join('\n');
+      const marked = (q.options || [])[q.answer];
+      items.push({ i, kind: 'option', line: '[' + i + '] ' + stem + '\nOptions:\n' + opts + '\nMarked correct: (' + q.answer + ') ' + marked });
+    } else if (q.type === 'tf') {
+      items.push({ i, kind: 'tf', line: '[' + i + '] ' + q.q + '\nMarked correct (true/false): ' + q.answer });
+    } else if (q.type === 'fill' || q.type === 'numeric') {
+      items.push({ i, kind: 'value', line: '[' + i + '] ' + q.q + '\nMarked correct: ' + q.answer });
+    }
   });
   if (!items.length) return { credits: 0, fixes: 0 };
-  const sys = `You are a meticulous exam answer-checker. For EACH numbered item, FIRST work out the correct answer yourself, independently of the marked answer: for code-output items mentally execute the code step by step; for numeric items compute step by step; for factual items recall the verified fact. THEN compare with the "Marked" answer and also check the marked answer is internally consistent. Override the marked answer ONLY if your independently-derived answer clearly differs. For option items give the correct option index (integer); for true/false give true or false; for fill/numeric give the correct value. Output ONLY JSON: {"fixes":[{"i":<index>,"correct":<index|true|false|"text">}]}. Include only the items you are correcting; if all are right, return {"fixes":[]}.`;
+  const sys = 'You are a meticulous exam answer-checker. Work through EACH numbered item INDEPENDENTLY and from scratch BEFORE trusting the marked answer:\n'
+    + '- code-output items: mentally execute the code line by line and state the exact output.\n'
+    + '- numeric/fill items: compute or recall the exact value step by step.\n'
+    + '- option items (MCQ/assertion): work out the correct answer, THEN find which option text matches it.\n'
+    + '- true/false items: decide whether the statement is true or false.\n'
+    + 'Then compare with the "Marked correct" value. A common error to catch: the marked OPTION TEXT does not match the genuinely correct value (the answer index points at the wrong option). If your independently-derived answer differs from the marked answer, you MUST output a correction.\n'
+    + 'For option items, return "answer" as the EXACT TEXT of the correct option, copied verbatim. For true/false items return true or false. For numeric/fill items return the correct value.\n'
+    + 'Output ONLY JSON: {"fixes":[{"i":<index>,"answer":<text|true|false>}]}. Include every item you are correcting; if all marked answers are correct, return {"fixes":[]}.';
   let result;
-  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1, jsonMode: true, prefer: 'google' }); }
+  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: Math.min(2600, 500 + 90 * items.length), temperature: 0.1, jsonMode: true, prefer: 'google' }); }
   catch { return { credits: 0, fixes: 0 }; }
   let parsed; try { parsed = extractJson(result.text); } catch { return { credits: result.credits || 0, fixes: 0 }; }
   const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
+  const kindByIdx = new Map(items.map((x) => [x.i, x.kind]));
   let n = 0;
   for (const f of fixes) {
-    const q = refs[Number(f.i)]; if (!q) continue;
-    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') { const c = Number(f.correct); if (Number.isInteger(c) && c >= 0 && c < q.options.length && c !== q.answer) { q.answer = c; n++; } }
-    else if (q.type === 'tf') { const c = f.correct === true || String(f.correct).toLowerCase() === 'true'; if (c !== q.answer) { q.answer = c; n++; } }
-    else if (q.type === 'fill' || q.type === 'numeric') { const c = str(f.correct, 80); if (c && c !== String(q.answer)) { q.answer = c; n++; } }
+    const idx = Number(f.i); const q = refs[idx]; const kind = kindByIdx.get(idx);
+    if (!q || !kind) continue;
+    if (kind === 'option') {
+      let target = -1;
+      const a = f.answer;
+      if (typeof a === 'string' && a.trim()) target = (q.options || []).findIndex((o) => normAns(o) === normAns(a));
+      if (target < 0) { const c = Number.isInteger(a) ? a : Number(f.index); if (Number.isInteger(c) && c >= 0 && c < (q.options || []).length) target = c; }
+      if (target >= 0 && target !== q.answer) { q.answer = target; n++; }
+    } else if (kind === 'tf') {
+      const c = f.answer === true || normAns(f.answer) === 'true';
+      if (c !== q.answer) { q.answer = c; n++; }
+    } else if (kind === 'value') {
+      const c = str(f.answer, 80);
+      if (c && c !== String(q.answer)) { q.answer = c; n++; }
+    }
   }
   return { credits: result.credits || 0, fixes: n };
 }
