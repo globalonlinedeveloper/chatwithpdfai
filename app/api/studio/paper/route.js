@@ -26,9 +26,7 @@ function buildSystem({ sections, difficulty, level, language, examStyle }) {
   const used = [...new Set(sections.flatMap((s) => s.types))];
   const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
   const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
-  const langInstr = language === 'ta-en'
-    ? 'Write each question and option in Tamil first, then its English translation on the next line in parentheses. Keep explanations in English.'
-    : 'Write everything in clear English.';
+  const langInstr = language === 'ta-en' ? 'Write each question and option in Tamil first, then its English translation on the next line in parentheses. Keep explanations in English.' : 'Write everything in clear English.';
   return `You are an expert exam question-paper setter${examStyle ? ' preparing a ' + examStyle + '-style paper' : ''}.
 ${langInstr}
 Difficulty: ${DIFF[difficulty] || DIFF.mixed}.${level ? ' Target level: ' + level + '.' : ''}
@@ -60,50 +58,49 @@ function sanitize(q) {
   if (!q || typeof q !== 'object') return null;
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
   const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
-  if (type === 'mcq' || type === 'code') {
-    const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : [];
-    if (options.length < 2) return null;
-    return { ...base, options, answer: clampIdx(q.answer, options.length) };
-  }
-  if (type === 'multi') {
-    const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : [];
-    if (options.length < 2) return null;
-    let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : [];
-    if (!answers.length) answers = [0];
-    return { ...base, options, answers: [...new Set(answers)] };
-  }
+  if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
+  if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
   if (type === 'tf') return { ...base, answer: q.answer === true || String(q.answer).toLowerCase() === 'true' };
   if (type === 'fill') return { ...base, answer: str(q.answer, 300) };
   if (type === 'numeric') return { ...base, answer: str(q.answer, 80), unit: str(q.unit, 40) };
-  if (type === 'match') {
-    const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(p && p.r, 200) })).filter((p) => p.l && p.r) : [];
-    if (pairs.length < 2) return null;
-    return { ...base, pairs };
-  }
-  if (type === 'assertion') {
-    const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(o, 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true'];
-    return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) };
-  }
+  if (type === 'match') { const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(p && p.r, 200) })).filter((p) => p.l && p.r) : []; if (pairs.length < 2) return null; return { ...base, pairs }; }
+  if (type === 'assertion') { const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(o, 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true']; return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) }; }
   if (type === 'short' || type === 'long') return { ...base, modelAnswer: str(q.modelAnswer || q.answer, 1500) };
   return base;
 }
 
 function normalizeSections(body) {
   let sections = Array.isArray(body.sections) ? body.sections : [];
-  sections = sections.map((s) => ({
-    title: str(s && s.title, 80),
-    types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)),
-    count: Math.max(1, Math.min(30, Number(s && s.count) || 5)),
-    marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)),
-  })).filter((s) => s.types.length);
-  if (!sections.length) {
-    let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t));
-    if (!types.length) types = ['mcq'];
-    sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }];
-  }
-  // cap total
+  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)) })).filter((s) => s.types.length);
+  if (!sections.length) { let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)); if (!types.length) types = ['mcq']; sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }]; }
   let total = 0; sections = sections.filter((s) => { if (total >= 40) return false; total += s.count; return true; });
   return sections;
+}
+
+// Phase 4a: best-effort second-model check of the answer key. Never throws.
+async function verifyPass(sections) {
+  const refs = []; for (const s of sections) for (const q of s.questions) refs.push(q);
+  const items = [];
+  refs.forEach((q, i) => {
+    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') items.push({ i, line: `[${i}] ${q.type === 'assertion' ? 'A: ' + q.assertion + ' | R: ' + q.reason : q.q}\nOptions: ${q.options.map((o, k) => k + '=' + o).join(' | ')}\nMarked: ${q.answer}` });
+    else if (q.type === 'tf') items.push({ i, line: `[${i}] ${q.q}\nMarked(true/false): ${q.answer}` });
+    else if (q.type === 'fill' || q.type === 'numeric') items.push({ i, line: `[${i}] ${q.q}\nMarked: ${q.answer}` });
+  });
+  if (!items.length) return { credits: 0, fixes: 0 };
+  const sys = `You are a meticulous exam answer-checker. For each numbered item, decide whether the "Marked" answer is correct. Override ONLY when you are confident the marked answer is wrong. For option items give the correct option index (integer); for true/false give true or false; for fill/numeric give the correct text/number. Output ONLY JSON: {"fixes":[{"i":<index>,"correct":<index|true|false|"text">}]}. Include only the items you are correcting; if all are right, return {"fixes":[]}.`;
+  let result;
+  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: 1200, temperature: 0.1 }); }
+  catch { return { credits: 0, fixes: 0 }; }
+  let parsed; try { parsed = extractJson(result.text); } catch { return { credits: result.credits || 0, fixes: 0 }; }
+  const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
+  let n = 0;
+  for (const f of fixes) {
+    const q = refs[Number(f.i)]; if (!q) continue;
+    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') { const c = Number(f.correct); if (Number.isInteger(c) && c >= 0 && c < q.options.length && c !== q.answer) { q.answer = c; n++; } }
+    else if (q.type === 'tf') { const c = f.correct === true || String(f.correct).toLowerCase() === 'true'; if (c !== q.answer) { q.answer = c; n++; } }
+    else if (q.type === 'fill' || q.type === 'numeric') { const c = str(f.correct, 80); if (c && c !== String(q.answer)) { q.answer = c; n++; } }
+  }
+  return { credits: result.credits || 0, fixes: n };
 }
 
 export async function POST(req) {
@@ -119,6 +116,9 @@ export async function POST(req) {
   const difficulty = ['easy', 'medium', 'hard', 'mixed'].includes(body.difficulty) ? body.difficulty : 'mixed';
   const language = body.language === 'ta-en' ? 'ta-en' : 'en';
   const sections = normalizeSections(body);
+  const nonce = str(body.nonce, 40);
+  const exclude = Array.isArray(body.exclude) ? body.exclude.slice(0, 80).map((s) => str(s, 140)).filter(Boolean) : [];
+  const verify = body.verify !== false;
   if (topic.length < 3) return NextResponse.json({ error: 'Please describe the topic or syllabus.' }, { status: 400 });
 
   const u = await getCurrentUser(req);
@@ -129,38 +129,31 @@ export async function POST(req) {
 
   const totalQ = sections.reduce((n, s) => n + s.count, 0);
   try {
-    const userMsg = `Topic / syllabus: ${topic}\nProduce the paper exactly per the section blueprint above.`;
-    const result = await routeChat({
-      system: buildSystem({ sections, difficulty, level, language, examStyle }),
-      messages: [{ role: 'user', content: userMsg }],
-      maxTokens: Math.min(7000, 320 * totalQ + 800),
-      temperature: 0.6,
-    });
+    const excludeNote = exclude.length ? `\n\nThese questions were already used — do NOT repeat or paraphrase any of them. Generate entirely new questions on fresh sub-topics:\n- ${exclude.join('\n- ')}` : '';
+    const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
+    const userMsg = `Topic / syllabus: ${topic}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}`;
+    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(7000, 320 * totalQ + 800), temperature: 0.8 });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
-
     let outSections = Array.isArray(parsed.sections) ? parsed.sections : [{ title: '', questions: parsed.questions }];
-    outSections = outSections.map((s, i) => ({
-      title: str(s && s.title, 80) || (sections[i] ? sections[i].title : ''),
-      marks: sections[i] ? sections[i].marks : 1,
-      questions: (Array.isArray(s && s.questions) ? s.questions : []).map(sanitize).filter(Boolean),
-    })).filter((s) => s.questions.length);
+    outSections = outSections.map((s, i) => ({ title: str(s && s.title, 80) || (sections[i] ? sections[i].title : ''), marks: sections[i] ? sections[i].marks : 1, questions: (Array.isArray(s && s.questions) ? s.questions : []).map(sanitize).filter(Boolean) })).filter((s) => s.questions.length);
     if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
+
+    let totalCredits = result.credits;
+    let verifyInfo = { verified: false, fixes: 0 };
+    if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: true, fixes: vr.fixes }; }
 
     const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
     const nQ = outSections.reduce((n, s) => n + s.questions.length, 0);
     const durationMin = Math.max(15, Math.round(nQ * 1.5));
 
-    let credits = result.credits;
-    if (creditsEnforced()) credits = await chargeCredits(userId, result.credits, 'studio_paper', 'studio', null);
+    let credits = totalCredits;
+    if (creditsEnforced()) credits = await chargeCredits(userId, totalCredits, 'studio_paper', 'studio', null);
     const balance = creditsEnforced() ? await getBalance(userId) : null;
+    const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
-    return NextResponse.json({
-      ok: true,
-      paper: { title: str(parsed.title || topic, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections },
-      credits, balance, provider: result.provider, model: result.model,
-    });
+    return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes }, stems, credits, balance, provider: result.provider, model: result.model });
   } catch (e) {
     const status = e.statusCode || 500;
     if (status >= 500) console.error('[studio/paper] failed', e);
