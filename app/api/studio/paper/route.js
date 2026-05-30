@@ -5,7 +5,6 @@ import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 
 const TYPE_SCHEMA = {
@@ -13,34 +12,39 @@ const TYPE_SCHEMA = {
   multi: 'multi (one or more correct): {"type":"multi","q":"...","options":["o1","o2","o3","o4"],"answers":[<indices>],"explanation":"..."}',
   tf: 'tf (true/false): {"type":"tf","q":"<statement>","answer":true|false,"explanation":"..."}',
   fill: 'fill (use ___ for the blank): {"type":"fill","q":"... ___ ...","answer":"<word or phrase>","explanation":"..."}',
-  match: 'match: {"type":"match","q":"Match the following","pairs":[{"l":"left item","r":"its correct match"}, (3-5 pairs)],"explanation":"..."}',
-  assertion: 'assertion (assertion-reason): {"type":"assertion","assertion":"...","reason":"...","options":["Both A and R are true and R explains A","Both A and R are true but R does not explain A","A is true but R is false","A is false but R is true"],"answer":<0-3>,"explanation":"..."}',
-  numeric: 'numeric: {"type":"numeric","q":"...","answer":<number>,"unit":"<optional unit>","explanation":"..."}',
-  short: 'short (2-3 line answer): {"type":"short","q":"...","modelAnswer":"<concise model answer>"}',
-  long: 'long (essay / detailed): {"type":"long","q":"...","modelAnswer":"<key points the answer should cover>"}',
-  code: 'code (programming, output or bug): {"type":"code","q":"What is the output?\\n<code>","options":["o1","o2","o3","o4"],"answer":<0-3>,"explanation":"..."}',
+  match: 'match: {"type":"match","q":"Match the following","pairs":[{"l":"left","r":"correct match"}, (3-5 pairs)],"explanation":"..."}',
+  assertion: 'assertion: {"type":"assertion","assertion":"...","reason":"...","options":["Both A and R are true and R explains A","Both A and R are true but R does not explain A","A is true but R is false","A is false but R is true"],"answer":<0-3>,"explanation":"..."}',
+  numeric: 'numeric: {"type":"numeric","q":"...","answer":<number>,"unit":"<optional>","explanation":"..."}',
+  short: 'short: {"type":"short","q":"...","modelAnswer":"<concise model answer>"}',
+  long: 'long: {"type":"long","q":"...","modelAnswer":"<key points>"}',
+  code: 'code: {"type":"code","q":"What is the output?\\n<code>","options":["o1","o2","o3","o4"],"answer":<0-3>,"explanation":"..."}',
 };
 const ALL_TYPES = Object.keys(TYPE_SCHEMA);
-const DIFF = { easy: 'easy (recall/recognition)', medium: 'medium (application)', hard: 'hard (analysis/evaluation)', mixed: 'a balanced mix of easy, medium and hard' };
+const DIFF = { easy: 'easy (recall)', medium: 'medium (application)', hard: 'hard (analysis)', mixed: 'a balanced mix of easy, medium and hard' };
 
-function buildSystem({ types, difficulty, level, language, examStyle }) {
-  const schemas = types.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
+function buildSystem({ sections, difficulty, level, language, examStyle }) {
+  const used = [...new Set(sections.flatMap((s) => s.types))];
+  const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
+  const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
   const langInstr = language === 'ta-en'
     ? 'Write each question and option in Tamil first, then its English translation on the next line in parentheses. Keep explanations in English.'
     : 'Write everything in clear English.';
   return `You are an expert exam question-paper setter${examStyle ? ' preparing a ' + examStyle + '-style paper' : ''}.
 ${langInstr}
-Difficulty: ${DIFF[difficulty] || DIFF.mixed}.${level ? ' Target audience level: ' + level + '.' : ''}
-Use only these question types, mixing them sensibly across the paper:
+Difficulty: ${DIFF[difficulty] || DIFF.mixed}.${level ? ' Target level: ' + level + '.' : ''}
+Build a paper with these sections, in order:
+${blueprint}
+
+Question type shapes you may use:
 ${schemas}
 
 Hard rules:
 - Every fact, date, name and code behaviour must be accurate. Never invent. If unsure, choose content you are certain about.
-- For mcq/code/assertion, exactly one correct option; distractors must be plausible (reflect common misconceptions), never filler.
-- Vary sub-topics and difficulty; no duplicate or near-duplicate questions.
-- Each question object MUST include a "type" from the list above and follow that exact shape.
+- For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).
+- Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
+- Each question object MUST include a "type" field and follow that type's exact shape.
 - Output ONLY valid minified JSON, no markdown, no commentary:
-{"title":"<short paper title>","questions":[ <question objects in the order they should appear> ]}`;
+{"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
 }
 
 function extractJson(text) {
@@ -49,14 +53,13 @@ function extractJson(text) {
   if (a >= 0 && b > a) t = t.slice(a, b + 1);
   return JSON.parse(t);
 }
-
 function clampIdx(n, len) { n = Number(n); return Number.isInteger(n) && n >= 0 && n < len ? n : 0; }
 function str(x, n) { return String(x == null ? '' : x).slice(0, n); }
 
 function sanitize(q) {
   if (!q || typeof q !== 'object') return null;
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
-  const base = { type, q: str(q.q, 1200), explanation: str(q.explanation, 500) };
+  const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
   if (type === 'mcq' || type === 'code') {
     const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : [];
     if (options.length < 2) return null;
@@ -85,6 +88,24 @@ function sanitize(q) {
   return base;
 }
 
+function normalizeSections(body) {
+  let sections = Array.isArray(body.sections) ? body.sections : [];
+  sections = sections.map((s) => ({
+    title: str(s && s.title, 80),
+    types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)),
+    count: Math.max(1, Math.min(30, Number(s && s.count) || 5)),
+    marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)),
+  })).filter((s) => s.types.length);
+  if (!sections.length) {
+    let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t));
+    if (!types.length) types = ['mcq'];
+    sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }];
+  }
+  // cap total
+  let total = 0; sections = sections.filter((s) => { if (total >= 40) return false; total += s.count; return true; });
+  return sections;
+}
+
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   let body;
@@ -93,12 +114,11 @@ export async function POST(req) {
   const topic = str(body.topic, 600).trim();
   const examStyle = str(body.examStyle, 80).trim();
   const level = str(body.level, 60).trim();
+  const institution = str(body.institution, 100).trim();
+  const instructions = str(body.instructions, 400).trim();
   const difficulty = ['easy', 'medium', 'hard', 'mixed'].includes(body.difficulty) ? body.difficulty : 'mixed';
   const language = body.language === 'ta-en' ? 'ta-en' : 'en';
-  let types = Array.isArray(body.types) ? body.types.filter((t) => ALL_TYPES.includes(t)) : [];
-  if (!types.length) types = ['mcq'];
-  types = [...new Set(types)];
-  let count = Math.max(3, Math.min(30, Number(body.count) || 10));
+  const sections = normalizeSections(body);
   if (topic.length < 3) return NextResponse.json({ error: 'Please describe the topic or syllabus.' }, { status: 400 });
 
   const u = await getCurrentUser(req);
@@ -107,20 +127,30 @@ export async function POST(req) {
   const userId = u.id;
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
 
+  const totalQ = sections.reduce((n, s) => n + s.count, 0);
   try {
-    const typeNote = types.length > 1 ? `Mix these question types: ${types.join(', ')}.` : `Use ${types[0]} questions.`;
-    const userMsg = `Create a question paper with exactly ${count} questions on this topic/syllabus: ${topic}\n${typeNote}`;
+    const userMsg = `Topic / syllabus: ${topic}\nProduce the paper exactly per the section blueprint above.`;
     const result = await routeChat({
-      system: buildSystem({ types, difficulty, level, language, examStyle }),
+      system: buildSystem({ sections, difficulty, level, language, examStyle }),
       messages: [{ role: 'user', content: userMsg }],
-      maxTokens: Math.min(6000, 320 * count + 700),
+      maxTokens: Math.min(7000, 320 * totalQ + 800),
       temperature: 0.6,
     });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
-    let questions = (Array.isArray(parsed.questions) ? parsed.questions : []).map(sanitize).filter(Boolean).slice(0, count);
-    if (!questions.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
+
+    let outSections = Array.isArray(parsed.sections) ? parsed.sections : [{ title: '', questions: parsed.questions }];
+    outSections = outSections.map((s, i) => ({
+      title: str(s && s.title, 80) || (sections[i] ? sections[i].title : ''),
+      marks: sections[i] ? sections[i].marks : 1,
+      questions: (Array.isArray(s && s.questions) ? s.questions : []).map(sanitize).filter(Boolean),
+    })).filter((s) => s.questions.length);
+    if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
+
+    const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
+    const nQ = outSections.reduce((n, s) => n + s.questions.length, 0);
+    const durationMin = Math.max(15, Math.round(nQ * 1.5));
 
     let credits = result.credits;
     if (creditsEnforced()) credits = await chargeCredits(userId, result.credits, 'studio_paper', 'studio', null);
@@ -128,7 +158,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       ok: true,
-      paper: { title: str(parsed.title || topic, 140), examStyle, language, difficulty, topic, questions },
+      paper: { title: str(parsed.title || topic, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections },
       credits, balance, provider: result.provider, model: result.model,
     });
   } catch (e) {
