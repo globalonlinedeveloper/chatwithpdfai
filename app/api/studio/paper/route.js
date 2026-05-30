@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/auth';
 import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
 import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
 import { query } from '@/lib/db';
+import { getClientIp } from '@/lib/validate';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -174,6 +176,7 @@ export async function POST(req) {
   if (!u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
   if (!u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
   const userId = u.id;
+  if (!(await rateLimit({ bucket: 'studio_paper', ip: 'u' + userId, max: 30, windowMin: 60 }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   const topicKey = (topic || '').toLowerCase().slice(0, 80);
   let dbSeen = [];

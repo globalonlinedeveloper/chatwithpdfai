@@ -3,6 +3,7 @@ export const AUTO = ['mcq', 'code', 'assertion', 'tf', 'multi', 'fill', 'numeric
 export const isAuto = (q) => AUTO.includes(q.type);
 export const rights = (pairs) => [...pairs.map((p) => p.r)].sort((a, b) => String(a).localeCompare(String(b)));
 const norm = (x) => String(x == null ? '' : x).trim().toLowerCase().replace(/\s+/g, ' ');
+const normFill = (x) => norm(x).replace(/^(?:a|an|the)\s+/, '').replace(/[.,;:!?]+$/, '');
 const L = (i) => String.fromCharCode(97 + i);
 
 export function grade(q, ua) {
@@ -10,9 +11,9 @@ export function grade(q, ua) {
     case 'mcq': case 'code': case 'assertion': return ua === q.answer;
     case 'tf': return ua === q.answer;
     case 'multi': { const a = [...(Array.isArray(ua) ? ua : [])].sort().join(','); const b = [...q.answers].sort().join(','); return a === b && a !== ''; }
-    case 'fill': { const u = norm(ua); return !!u && (u === norm(q.answer) || norm(q.answer).includes(u)); }
-    case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) return Math.abs(x - y) < 1e-6; return !!norm(ua) && norm(ua) === norm(q.answer); }
-    case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => ua[pi] === rs.indexOf(p.r)); }
+    case 'fill': { const u = normFill(ua); return !!u && String(q.answer).split('|').some((a) => normFill(a) === u); }
+    case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) { const tol = Math.max(0.001, Math.abs(y) * 0.005); return Math.abs(x - y) <= tol; } return !!norm(ua) && norm(ua) === norm(q.answer); }
+    case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => rs[ua[pi]] === p.r); }
     default: return null;
   }
 }

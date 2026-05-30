@@ -33,15 +33,16 @@ const rights = (pairs) => [...pairs.map((p) => p.r)].sort((a, b) => String(a).lo
 const AUTO = ['mcq', 'code', 'assertion', 'tf', 'multi', 'fill', 'numeric', 'match'];
 const isAuto = (q) => AUTO.includes(q.type);
 const norm = (x) => String(x == null ? '' : x).trim().toLowerCase().replace(/\s+/g, ' ');
+const normFill = (x) => norm(x).replace(/^(?:a|an|the)\s+/, '').replace(/[.,;:!?]+$/, '');
 
 function grade(q, ua) {
   switch (q.type) {
     case 'mcq': case 'code': case 'assertion': return ua === q.answer;
     case 'tf': return ua === q.answer;
     case 'multi': { const a = [...(Array.isArray(ua) ? ua : [])].sort().join(','); const b = [...q.answers].sort().join(','); return a === b && a !== ''; }
-    case 'fill': { const u = norm(ua); return !!u && (u === norm(q.answer) || norm(q.answer).includes(u)); }
-    case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) return Math.abs(x - y) < 1e-6; return !!norm(ua) && norm(ua) === norm(q.answer); }
-    case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => ua[pi] === rs.indexOf(p.r)); }
+    case 'fill': { const u = normFill(ua); return !!u && String(q.answer).split('|').some((a) => normFill(a) === u); }
+    case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) { const tol = Math.max(0.001, Math.abs(y) * 0.005); return Math.abs(x - y) <= tol; } return !!norm(ua) && norm(ua) === norm(q.answer); }
+    case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => rs[ua[pi]] === p.r); }
     default: return null;
   }
 }
@@ -148,6 +149,8 @@ export default function StudioPage() {
   const [savedMsg, setSavedMsg] = useState('');
   const [shares, setShares] = useState([]);
   const [shareMsg, setShareMsg] = useState('');
+  const [attemptsFor, setAttemptsFor] = useState(null);
+  const [attemptList, setAttemptList] = useState([]);
   const [busy, setBusy] = useState(false);
   const [paper, setPaper] = useState(null);
   const [used, setUsed] = useState(null);
@@ -173,6 +176,7 @@ export default function StudioPage() {
   function loadShares() { fetch('/api/studio/assignments').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.assignments)) setShares(j.assignments); }).catch(() => {}); }
   async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/studio/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
   async function delShare(id) { try { await fetch('/api/studio/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
+  async function viewAttempts(id) { if (attemptsFor === id) { setAttemptsFor(null); return; } try { const r = await fetch('/api/studio/assignments?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && Array.isArray(j.attempts)) { setAttemptList(j.attempts); setAttemptsFor(id); } } catch (e) {} }
   function patchQ(gi, patch) { setPaper((pp) => { if (!pp) return pp; let n = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((q) => { n += 1; return n === gi ? { ...q, ...patch } : q; }) })) }; }); }
   const totalQ = sections.reduce((n, s) => n + Number(s.count || 0), 0);
   const totalMarks = sections.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0);
@@ -279,8 +283,8 @@ export default function StudioPage() {
                   <span style={{ fontSize: 12.5, fontWeight: 500, flex: 1, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sh.title}</span>
                   <a href={'/t/' + sh.token} target="_blank" rel="noreferrer" className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }}>open</a>
                   <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-3)' }}>{sh.attempts} attempts{sh.attempts ? ' \u00b7 avg ' + sh.avgPct + '%' : ''}</span>
-                  <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + sh.token); }} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }}>Copy link</button>
-                  <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} aria-label="Delete shared test">✕</button>
+                  {sh.attempts > 0 && <button onClick={() => viewAttempts(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} data-testid="view-attempts">{attemptsFor === sh.id ? 'Hide' : 'View'} attempts</button>}<button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + sh.token); }} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }}>Copy link</button>
+                  <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 11, padding: '3px 9px' }} aria-label="Delete shared test">✕</button>{attemptsFor === sh.id && (<div style={{ flexBasis: '100%', width: '100%', marginTop: 6, borderTop: '1px solid var(--stroke-1)', paddingTop: 6 }}>{attemptList.length === 0 ? <div style={{ fontSize: 12, color: 'var(--text-3)' }}>No attempts yet.</div> : attemptList.map((a) => <div key={a.id} style={{ display: 'flex', gap: 10, fontSize: 12, padding: '3px 0' }}><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'Anonymous'}</span><span style={{ fontWeight: 600 }}>{a.score}/{a.total}{a.total ? ' (' + Math.round(100 * a.score / a.total) + '%)' : ''}</span><span className="mono" style={{ color: 'var(--text-4)' }}>{new Date(a.createdAt).toLocaleDateString('en-IN')}</span></div>)}</div>)}
                 </div>
               ))}
             </div>
