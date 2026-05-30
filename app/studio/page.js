@@ -138,7 +138,7 @@ export default function StudioPage() {
   const [sections, setSections] = useState([{ title: 'Section A', type: 'mcq', count: 10, marks: 1 }]);
   const [difficulty, setDifficulty] = useState('mixed');
   const [level, setLevel] = useState('');
-  const [language, setLanguage] = useState('en');
+  const [language] = useState('en'); // English only; bilingual (ta-en) backend kept dormant/reversible
   const [includeKey, setIncludeKey] = useState(true);
   const [verify, setVerify] = useState(true);
   const [prevStems, setPrevStems] = useState([]);
@@ -242,7 +242,6 @@ export default function StudioPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
             <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
             <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
-            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Language<select value={language} onChange={(e) => setLanguage(e.target.value)} style={ctrl}><option value="en">English</option><option value="ta-en">Tamil + English</option></select></label>
             <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
             <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key (uses a little extra credit)"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
             <div style={{ flex: 1 }}></div>
