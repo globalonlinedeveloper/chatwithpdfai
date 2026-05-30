@@ -75,6 +75,7 @@ function Header({ credits, docTitle, onUpload, onExport }) {
       <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Workspace{docTitle ? ' · ' + docTitle : ''}</span>
       <div style={{ flex: 1 }}></div>
       <CreditMeter credits={credits} />
+      <a href="/studio" className="btn btn-glass btn-sm" title="Generate question papers">✦ Studio</a>
       <a href="/account" className="btn btn-glass btn-sm">Account</a>
       <button onClick={onExport} className="btn btn-glass btn-sm">Export ↓</button>
       <button onClick={onUpload} className="btn btn-iris btn-sm" data-testid="upload-open">+ Upload PDF</button>
