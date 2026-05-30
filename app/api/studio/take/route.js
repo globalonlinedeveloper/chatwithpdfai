@@ -8,7 +8,7 @@ function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.en
 
 export async function GET(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  const token = String(new URL(req.url).searchParams.get('token') || '').slice(0, 24);
+  const token = String(new URL(req.url).searchParams.get('token') || '').replace(/\.html?$/i, '').slice(0, 24);
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
   const rows = await query('SELECT title, payload, active FROM studio_assignments WHERE token = ?', [token]);
   if (!rows[0] || !rows[0].active) return NextResponse.json({ error: 'This test link is not available' }, { status: 404 });
@@ -19,7 +19,7 @@ export async function GET(req) {
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
-  const token = String(body.token || '').slice(0, 24);
+  const token = String(body.token || '').replace(/\.html?$/i, '').slice(0, 24);
   const name = String(body.name || '').slice(0, 120);
   const answers = body.answers && typeof body.answers === 'object' ? body.answers : {};
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });

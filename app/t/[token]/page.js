@@ -14,7 +14,7 @@ function TakeInput({ q, gi, ua, locked, onA }) {
 }
 
 export default function TakeTest({ params }) {
-  const token = params.token;
+  const token = String(params.token || '').replace(/\.html?$/i, '');
   const [test, setTest] = useState(null);
   const [err, setErr] = useState('');
   const [name, setName] = useState('');

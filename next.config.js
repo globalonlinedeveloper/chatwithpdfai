@@ -29,13 +29,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['mysql2', 'nodemailer'],
   },
 
-  async rewrites() {
-    return [
-      { source: '/:slug', destination: '/:slug.html' },
-      { source: '/:dir/:slug', destination: '/:dir/:slug.html' },
-    ];
-  },
-
   async redirects() {
     return [
       { source: '/index.html', destination: '/', permanent: true },
