@@ -47,11 +47,23 @@ Hard rules:
 {"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
 }
 
+function repairJsonControls(t) {
+  let out = '', inStr = false, esc = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (esc) { out += ch; esc = false; continue; }
+    if (ch === '\\') { out += ch; esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; out += ch; continue; }
+    if (inStr) { if (ch === '\n') { out += '\\n'; continue; } if (ch === '\r') { out += '\\r'; continue; } if (ch === '\t') { out += '\\t'; continue; } }
+    out += ch;
+  }
+  return out;
+}
 function extractJson(text) {
   let t = String(text || '').trim().replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '').trim();
   const a = t.indexOf('{'); const b = t.lastIndexOf('}');
   if (a >= 0 && b > a) t = t.slice(a, b + 1);
-  return JSON.parse(t);
+  try { return JSON.parse(t); } catch (e) { return JSON.parse(repairJsonControls(t)); }
 }
 function clampIdx(n, len) { n = Number(n); return Number.isInteger(n) && n >= 0 && n < len ? n : 0; }
 function str(x, n) { return String(x == null ? '' : x).slice(0, n); }
@@ -154,7 +166,7 @@ export async function POST(req) {
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
     const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
     const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
-    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(7000, 320 * totalQ + 800), temperature: 0.8 });
+    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(8000, 500 * totalQ + 1500), temperature: 0.8 });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
