@@ -45,7 +45,7 @@ Hard rules:
 - For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).
 - Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
 - Each question object MUST include a "type" field and follow that type's exact shape.
-- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
+- Return EVERY section listed in the blueprint above, in order, each populated with its full set of questions — never omit a section or leave one empty.\n- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
 - Output ONLY valid minified JSON, no markdown, no commentary:
 {"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
 }
@@ -206,33 +206,40 @@ export async function POST(req) {
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
-    let outSections = Array.isArray(parsed.sections) ? parsed.sections : [{ title: '', questions: parsed.questions }];
-    outSections = outSections.map((s, i) => ({ title: str(s && s.title, 80) || (sections[i] ? sections[i].title : ''), marks: sections[i] ? sections[i].marks : 1, questions: (Array.isArray(s && s.questions) ? s.questions : []).map(sanitize).filter(Boolean) })).filter((s) => s.questions.length);
-    if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
+    const pool = ((Array.isArray(parsed.sections) ? parsed.sections.flatMap((s) => (Array.isArray(s && s.questions) ? s.questions : [])) : (Array.isArray(parsed.questions) ? parsed.questions : []))).map(sanitize).filter(Boolean);
+    let outSections = sections.map((req, i) => {
+      const types = req.types && req.types.length ? req.types : ['mcq'];
+      const picked = [];
+      for (let j = 0; j < pool.length && picked.length < req.count; j++) { if (pool[j] && types.includes(pool[j].type)) { picked.push(pool[j]); pool[j] = null; } }
+      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, types, questions: picked };
+    });
 
-    // Enforce the requested per-section counts: trim overflow, top up shortfalls.
-    // (Models — esp. with a long "avoid these" exclude list — sometimes return one fewer than asked.)
+    // Enforce the requested blueprint: each requested section must appear with its exact count.
+    // Models often leave whole sections empty or omit them, so top up per requested section
+    // (generating the right type) — not just the sections the model happened to return.
     let topUpCredits = 0;
     for (let i = 0; i < outSections.length; i++) {
-      const want = sections[i] ? sections[i].count : outSections[i].questions.length;
-      if (outSections[i].questions.length > want) { outSections[i].questions = outSections[i].questions.slice(0, want); continue; }
+      const want = sections[i].count;
+      if (outSections[i].questions.length > want) outSections[i].questions = outSections[i].questions.slice(0, want);
       let guard = 0;
-      while (outSections[i].questions.length < want && guard++ < 2) {
+      while (outSections[i].questions.length < want && guard++ < 3) {
         const need = want - outSections[i].questions.length;
         const haveStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q || q.assertion, 160))).filter(Boolean);
         const exTop = [...new Set([...haveStems, ...allExclude])].slice(0, 120);
-        const tSys = buildSystem({ sections: [{ title: outSections[i].title, types: sections[i] ? sections[i].types : ['mcq'], count: need, marks: outSections[i].marks }], difficulty, level, language, examStyle, grounded });
-        const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} more NEW question(s) for the section "${outSections[i].title || 'this section'}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${exTop.join('\n- ')}${sourceNote}`;
+        const tSys = buildSystem({ sections: [{ title: outSections[i].title, types: outSections[i].types, count: need, marks: outSections[i].marks }], difficulty, level, language, examStyle, grounded });
+        const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} ${outSections[i].types.join('/')} question(s) for the section "${outSections[i].title}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${exTop.join('\n- ')}${sourceNote}`;
         let tr;
-        try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(5000, 450 * need + 800), temperature: 0.85, jsonMode: true }); }
+        try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(6000, 500 * need + 900), temperature: 0.85, jsonMode: true }); }
         catch (e) { break; }
         topUpCredits += tr.credits || 0;
         let tp; try { tp = extractJson(tr.text); } catch (e) { break; }
-        const got = ((Array.isArray(tp.sections) && tp.sections[0] && Array.isArray(tp.sections[0].questions)) ? tp.sections[0].questions : (Array.isArray(tp.questions) ? tp.questions : [])).map(sanitize).filter(Boolean);
+        const got = ((Array.isArray(tp.sections) && tp.sections[0] && Array.isArray(tp.sections[0].questions)) ? tp.sections[0].questions : (Array.isArray(tp.questions) ? tp.questions : [])).map(sanitize).filter(Boolean).filter((q) => outSections[i].types.includes(q.type));
         if (!got.length) break;
         outSections[i].questions = outSections[i].questions.concat(got).slice(0, want);
       }
     }
+    outSections = outSections.filter((s) => s.questions.length);
+    if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
 
     let totalCredits = result.credits + topUpCredits;
     let verifyInfo = { verified: false, fixes: 0 };
