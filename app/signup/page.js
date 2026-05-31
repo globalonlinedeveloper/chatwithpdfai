@@ -27,7 +27,7 @@ export default function SignUpPage() {
             <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '2px 0 0' }}>Click the link in that email, then buy credits and upload your first PDF.</p>
           </div>
         </div>
-        <a href="/workspace" className="btn btn-glass" style={{ width: '100%', marginTop: 18, justifyContent: 'center' }}>Go to your workspace →</a>
+        <a href="/home" className="btn btn-glass" style={{ width: '100%', marginTop: 18, justifyContent: 'center' }}>Go to your dashboard →</a>
       </AuthShell>
     );
   }

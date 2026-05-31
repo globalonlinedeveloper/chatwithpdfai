@@ -1,50 +1,71 @@
 'use client';
 import { useState, useEffect } from 'react';
-import SiteShell from '../_components/Chrome';
+import AppNav from '../_components/AppNav';
 
-function fmtSize(b){ if(!b) return ''; const mb=b/1048576; return mb>=1?mb.toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'; }
-function fmtDate(s){ try{ return new Date(s).toLocaleDateString(undefined,{month:'short',day:'numeric'});}catch{return '';} }
+function fmtSize(b) { if (!b) return ''; const mb = b / 1048576; return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+function fmtDate(s) { try { return new Date(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return ''; } }
 
-export default function LibraryPage(){
-  const [docs,setDocs]=useState(null);
-  const [q,setQ]=useState('');
-  useEffect(()=>{ fetch('/api/documents').then(r=>{ if(r.status===401){window.location.href='/signin';return null;} return r.json(); }).then(j=>{ if(j) setDocs(j.documents||[]); }).catch(()=>setDocs([])); },[]);
-  const list=(docs||[]).filter(d=>d.filename.toLowerCase().includes(q.toLowerCase()));
+export default function LibraryPage() {
+  const [tab, setTab] = useState('docs');
+  const [credits, setCredits] = useState(null);
+  const [docs, setDocs] = useState(null);
+  const [papers, setPapers] = useState(null);
+  const [shares, setShares] = useState(null);
+  const [q, setQ] = useState('');
+  useEffect(() => {
+    fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
+    fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => setDocs(j && j.documents ? j.documents : [])).catch(() => setDocs([]));
+    fetch('/api/studio/papers').then((r) => (r.ok ? r.json() : null)).then((j) => setPapers(j && j.papers ? j.papers : [])).catch(() => setPapers([]));
+    fetch('/api/studio/assignments').then((r) => (r.ok ? r.json() : null)).then((j) => setShares(j && j.assignments ? j.assignments : [])).catch(() => setShares([]));
+  }, []);
+  const ql = q.toLowerCase();
+  const TABS = [['docs', 'Documents', docs], ['papers', 'Question papers', papers], ['tests', 'Shared tests', shares]];
+  const card = { background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r-lg)', display: 'block', color: 'inherit', textDecoration: 'none' };
+  const empty = (msg, cta, href) => <div className="glass" style={{ padding: '44px 24px', textAlign: 'center', borderRadius: 'var(--r-lg)' }}><div style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 14 }}>{msg}</div>{cta && <a href={href} className="btn btn-iris">{cta}</a>}</div>;
   return (
-    <SiteShell active="">
-      <section className="spread" style={{padding:'48px 0 90px'}}>
-        <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',gap:16,flexWrap:'wrap',marginBottom:24}}>
-          <div>
-            <div className="section-eyebrow">Your library</div>
-            <h1 className="section-title" style={{fontSize:'clamp(30px,4vw,46px)',margin:'10px 0 0'}}>Documents</h1>
-          </div>
-          <div style={{display:'flex',gap:10,alignItems:'center'}}>
-            <input className="input" placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} style={{padding:'9px 12px',fontSize:13.5,minWidth:200}}/>
-            <a href="/workspace" className="btn btn-iris">+ Upload PDF</a>
-          </div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <AppNav active="library" credits={credits} />
+      <main style={{ maxWidth: 920, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>Library</h1>
+          <input className="input" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} style={{ padding: '8px 12px', fontSize: 13.5, minWidth: 200 }} />
         </div>
-        {docs===null && <div className="mono" style={{color:'var(--text-4)',fontSize:12}}>LOADING…</div>}
-        {docs && list.length===0 && (
-          <div className="glass" style={{padding:'46px 24px',textAlign:'center',borderRadius:'var(--r-lg)'}}>
-            <div style={{fontSize:30,marginBottom:10}}>📄</div>
-            <h3 style={{fontSize:20,fontWeight:600,margin:'0 0 6px'}}>{q?'No matches.':'No documents yet.'}</h3>
-            <p style={{color:'var(--text-3)',fontSize:14,margin:'0 0 18px'}}>{q?'Try a different search.':'Upload a PDF to start asking questions with cited answers.'}</p>
-            {!q && <a href="/workspace" className="btn btn-iris btn-lg">+ Upload your first PDF</a>}
-          </div>
-        )}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
-          {list.map(d=>(
-            <a key={d.id} href={`/workspace?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{padding:18,borderRadius:'var(--r-lg)',display:'block',color:'inherit'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10}}>
-                <div style={{width:40,height:40,borderRadius:10,background:'var(--glass-2)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:'var(--violet-2)',flexShrink:0}}>📄</div>
-                <span className="pill" style={{fontSize:10,padding:'3px 8px',color:d.status==='ready'?'var(--green)':'var(--text-3)'}}>{d.status}</span>
-              </div>
-              <div style={{fontSize:14.5,fontWeight:600,margin:'12px 0 4px',lineHeight:1.35,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.filename}</div>
-              <div className="mono" style={{fontSize:10.5,color:'var(--text-4)',letterSpacing:'0.06em',textTransform:'uppercase'}}>{d.pageCount?d.pageCount+' pp · ':''}{fmtSize(d.sizeBytes)}{d.createdAt?' · '+fmtDate(d.createdAt):''}</div>
-            </a>
-          ))}
-        </div>
-      </section>
-    </SiteShell>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>{TABS.map(([k, l, arr]) => <button key={k} onClick={() => setTab(k)} className={tab === k ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'}>{l}{arr ? ' (' + arr.length + ')' : ''}</button>)}</div>
+
+        {tab === 'docs' && (docs === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+          const list = docs.filter((d) => (d.filename || '').toLowerCase().includes(ql));
+          if (!list.length) return empty(q ? 'No matching documents.' : 'No documents yet.', q ? null : '+ Upload your first PDF', '/workspace');
+          return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((d) => (
+            <a key={d.id} href={`/workspace?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}><div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', flexShrink: 0 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg></div><span className="pill" style={{ fontSize: 10, padding: '3px 8px', color: d.status === 'ready' ? 'var(--green)' : 'var(--text-3)' }}>{d.status}</span></div>
+              <div style={{ fontSize: 14, fontWeight: 600, margin: '12px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}</div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.pageCount ? d.pageCount + ' pp · ' : ''}{fmtSize(d.sizeBytes)}{d.createdAt ? ' · ' + fmtDate(d.createdAt) : ''}</div>
+            </a>))}</div>;
+        })())}
+
+        {tab === 'papers' && (papers === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+          const list = papers.filter((p) => (p.title || '').toLowerCase().includes(ql));
+          if (!list.length) return empty(q ? 'No matching papers.' : 'No saved papers yet.', q ? null : '+ Generate a paper', '/studio');
+          return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((p) => (
+            <a key={p.id} href={`/studio?paper=${p.id}`} className="glass hover-glow" style={{ ...card, padding: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', marginBottom: 12 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg></div>
+              <div style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{p.numQuestions} Qs{p.examStyle ? ' · ' + p.examStyle : ''}{p.createdAt ? ' · ' + fmtDate(p.createdAt) : ''}</div>
+            </a>))}</div>;
+        })())}
+
+        {tab === 'tests' && (shares === null ? <div className="mono" style={{ color: 'var(--text-4)', fontSize: 12 }}>LOADING…</div> : (() => {
+          const list = shares.filter((s) => (s.title || '').toLowerCase().includes(ql));
+          if (!list.length) return empty(q ? 'No matching tests.' : 'No shared tests yet.', q ? null : 'Go to Studio', '/studio');
+          return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{list.map((s) => (
+            <div key={s.id} className="glass" style={{ padding: '12px 16px', borderRadius: 'var(--r-lg)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span style={{ flex: 1, minWidth: 160, fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</span>
+              <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>{s.attempts} attempts{s.attempts ? ' · avg ' + s.avgPct + '%' : ''}</span>
+              <a href={'/t/' + s.token} target="_blank" rel="noreferrer" className="btn btn-glass btn-sm">Open</a>
+              <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + s.token); }} className="btn btn-glass btn-sm">Copy link</button>
+            </div>))}</div>;
+        })())}
+      </main>
+    </div>
   );
 }
