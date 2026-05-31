@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { verifyWebhookSignature } from '@/lib/razorpay';
 import { addCredits } from '@/lib/credits';
+import { sendMail } from '@/lib/email';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function POST(req) {
@@ -14,11 +15,11 @@ export async function POST(req) {
     if (evt.event === 'payment.captured') { orderId = evt.payload?.payment?.entity?.order_id; paymentId = evt.payload?.payment?.entity?.id; }
     else if (evt.event === 'order.paid') { orderId = evt.payload?.order?.entity?.id; paymentId = evt.payload?.payment?.entity?.id; }
     if (orderId) {
-      const rows = await query("SELECT id, user_id, credits, status FROM purchases WHERE razorpay_order_id = ?", [orderId]);
+      const rows = await query("SELECT p.id, p.user_id, p.credits, p.amount_inr, p.status, u.email FROM purchases p JOIN users u ON u.id = p.user_id WHERE p.razorpay_order_id = ?", [orderId]);
       const p = rows[0];
       if (p && p.status !== 'paid') {
         const upd = await query("UPDATE purchases SET status = 'paid', razorpay_payment_id = ? WHERE id = ? AND status <> 'paid'", [paymentId || null, p.id]);
-        if (upd.affectedRows === 1) await addCredits(p.user_id, p.credits, 'purchase', 'purchase', p.id);
+        if (upd.affectedRows === 1) { await addCredits(p.user_id, p.credits, 'purchase', 'purchase', p.id); sendMail({ to: p.email, subject: 'Your CHATWITHPDFAI receipt', text: `Receipt - ${p.credits} credits for INR ${p.amount_inr}. Payment ${paymentId}.`, html: `<p>Thanks for your purchase.</p><p style="font-size:16px"><b>${p.credits} credits</b> &mdash; <b>&#8377;${p.amount_inr}</b></p><p style="color:#666;font-size:13px">Payment ID: ${paymentId}</p>` }).catch((e) => console.error('[receipt webhook] mail failed', e.message)); }
       }
     }
     return NextResponse.json({ ok: true });

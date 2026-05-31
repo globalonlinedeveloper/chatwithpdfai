@@ -333,8 +333,8 @@ export default function StudioPage() {
             </div>
             <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Sections &mdash; {totalQ} questions {'·'} {totalMarks} marks</div>
             {sections.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 7, flexWrap: 'wrap' }} data-testid="section-row">
-                <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" className="input" style={{ flex: 1, minWidth: 120, fontSize: 12.5, padding: '7px 10px' }} />
+              <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 7 }} data-testid="section-row">
+                <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" className="input" style={{ flex: 1, minWidth: 0, fontSize: 12.5, padding: '7px 10px' }} />
                 <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
                 <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: e.target.value })} style={{ ...ctrl, width: 50 }} /></label>
                 <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} value={s.marks} onChange={(e) => setSec(i, { marks: e.target.value })} style={{ ...ctrl, width: 46 }} /></label>

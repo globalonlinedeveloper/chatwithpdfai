@@ -218,26 +218,25 @@ export async function POST(req) {
     // Models often leave whole sections empty or omit them, so top up per requested section
     // (generating the right type) — not just the sections the model happened to return.
     let topUpCredits = 0;
-    for (let i = 0; i < outSections.length; i++) {
-      const want = sections[i].count;
-      if (outSections[i].questions.length > want) outSections[i].questions = outSections[i].questions.slice(0, want);
+    for (let i = 0; i < outSections.length; i++) { const w = sections[i].count; if (outSections[i].questions.length > w) outSections[i].questions = outSections[i].questions.slice(0, w); }
+    const baseExclude = [...new Set([...outSections.flatMap((s) => s.questions.map((q) => str(q.q || q.assertion, 160))).filter(Boolean), ...allExclude])].slice(0, 120);
+    async function fillSection(sec, want) {
       let guard = 0;
-      while (outSections[i].questions.length < want && guard++ < 3) {
-        const need = want - outSections[i].questions.length;
-        const haveStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q || q.assertion, 160))).filter(Boolean);
-        const exTop = [...new Set([...haveStems, ...allExclude])].slice(0, 120);
-        const tSys = buildSystem({ sections: [{ title: outSections[i].title, types: outSections[i].types, count: need, marks: outSections[i].marks }], difficulty, level, language, examStyle, grounded });
-        const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} ${outSections[i].types.join('/')} question(s) for the section "${outSections[i].title}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${exTop.join('\n- ')}${sourceNote}`;
+      while (sec.questions.length < want && guard++ < 3) {
+        const need = want - sec.questions.length;
+        const tSys = buildSystem({ sections: [{ title: sec.title, types: sec.types, count: need, marks: sec.marks }], difficulty, level, language, examStyle, grounded });
+        const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} ${sec.types.join('/')} question(s) for the section "${sec.title}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${baseExclude.join('\n- ')}${sourceNote}`;
         let tr;
         try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(6000, 500 * need + 900), temperature: 0.85, jsonMode: true }); }
         catch (e) { break; }
         topUpCredits += tr.credits || 0;
         let tp; try { tp = extractJson(tr.text); } catch (e) { break; }
-        const got = ((Array.isArray(tp.sections) && tp.sections[0] && Array.isArray(tp.sections[0].questions)) ? tp.sections[0].questions : (Array.isArray(tp.questions) ? tp.questions : [])).map(sanitize).filter(Boolean).filter((q) => outSections[i].types.includes(q.type));
+        const got = ((Array.isArray(tp.sections) && tp.sections[0] && Array.isArray(tp.sections[0].questions)) ? tp.sections[0].questions : (Array.isArray(tp.questions) ? tp.questions : [])).map(sanitize).filter(Boolean).filter((q) => sec.types.includes(q.type));
         if (!got.length) break;
-        outSections[i].questions = outSections[i].questions.concat(got).slice(0, want);
+        sec.questions = sec.questions.concat(got).slice(0, want);
       }
     }
+    await Promise.all(outSections.map((sec, i) => (sec.questions.length < sections[i].count ? fillSection(sec, sections[i].count) : Promise.resolve())));
     outSections = outSections.filter((s) => s.questions.length);
     if (!outSections.length) return NextResponse.json({ error: 'Could not generate questions — try a clearer topic.' }, { status: 502 });
 
