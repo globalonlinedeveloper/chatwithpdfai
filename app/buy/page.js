@@ -34,7 +34,7 @@ export default function BuyPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="buy" credits={balance} />
-      <main id="main-content" style={{ maxWidth: 880, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+      <main id="main" style={{ maxWidth: 880, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
         <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 6px' }}>Buy credits</h1>
         <p style={{ fontSize: 13.5, color: 'var(--text-3)', margin: '0 0 14px' }}>Pay-per-document. Credits never expire. No subscription.</p>
         <div className="pill" style={{ marginBottom: 24, padding: '6px 12px' }}>Current balance: <b style={{ margin: '0 4px' }} data-testid="balance">{balance == null ? '…' : balance.toLocaleString('en-IN')}</b> credits</div>

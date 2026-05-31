@@ -312,7 +312,7 @@ export default function StudioPage() {
           )}
         </aside>
 
-        <div id="main-content" className="studio-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+        <div id="main" className="studio-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
           <section className="no-print studio-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
             <div className="eyebrow" style={{ marginBottom: 10 }}>Build</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>

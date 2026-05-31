@@ -354,7 +354,7 @@ export default function WorkspacePage() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <AppNav active="chat" credits={credits} actions={<><button onClick={() => exportConversation(active, messages)} className="btn btn-glass btn-sm">Export ↓</button><button onClick={() => setShowUpload(true)} className="btn btn-iris btn-sm" data-testid="upload-open">+ Upload PDF</button></>} />
-      <div id="main-content" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+      <div id="main" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Sidebar docs={docs} activeId={activeId} onPick={setActiveId} onNew={() => { setActiveId(null); setMessages([]); }} onUpload={() => setShowUpload(true)} />
         {active ? (
           <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>

@@ -25,7 +25,7 @@ export default function LibraryPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="library" credits={credits} />
-      <main id="main-content" style={{ maxWidth: 920, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+      <main id="main" style={{ maxWidth: 920, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>Library</h1>
           <input className="input" aria-label="Search library" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} style={{ padding: '8px 12px', fontSize: 13.5, minWidth: 200 }} />

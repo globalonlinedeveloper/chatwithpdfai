@@ -44,7 +44,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="home" credits={credits} />
-      <main id="main-content" style={{ maxWidth: 860, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
+      <main id="main" style={{ maxWidth: 860, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
         {credits != null && credits < 10 && <div style={{ background: 'rgba(255,189,46,0.12)', border: '1px solid rgba(255,189,46,0.4)', borderRadius: 'var(--r)', padding: '10px 14px', marginBottom: 16, fontSize: 13.5, color: '#ffd27a', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}><span style={{ flex: 1, minWidth: 200 }}>You&rsquo;re low on credits ({credits} left).</span><a href="/buy" className="btn btn-glass btn-sm">Buy credits</a></div>}
         <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 3px' }}>Welcome back{name ? ', ' + name : ''}</h1>
         <div style={{ fontSize: 13.5, color: 'var(--text-3)', marginBottom: 24 }}>Pick a tool to get started.{credits != null ? ' You have ' + credits.toLocaleString('en-IN') + ' credits.' : ''}</div>

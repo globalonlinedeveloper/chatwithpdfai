@@ -48,7 +48,7 @@ export default function AccountPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="account" credits={credits} />
-      <main id="main-content" style={{ maxWidth: 760, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
+      <main id="main" style={{ maxWidth: 760, margin: '0 auto', width: '100%', padding: '28px 20px 60px' }}>
         <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 16px' }}>Account</h1>
         {user && !user.emailVerified && (
           <div style={{ background: 'rgba(255,189,46,0.12)', border: '1px solid rgba(255,189,46,0.4)', borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 20, fontSize: 13.5, color: '#ffd27a', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
