@@ -221,7 +221,7 @@ export default function StudioPage() {
   const [checked, setChecked] = useState(false);
   const [editAns, setEditAns] = useState(false);
 
-  useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
+  useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents.filter((d) => d.status === 'ready')); }).catch(() => {});
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
 
@@ -253,7 +253,7 @@ export default function StudioPage() {
       const r = await fetch('/api/studio/paper', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: t, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
-        if (r.status === 401) { window.location.href = '/signin'; return; }
+        if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
         if (r.status === 403) setNote('Please verify your email (check your inbox) before generating.');
         else if (r.status === 402) setNote('You are out of credits.');
         else setNote(j.error || 'Generation failed');

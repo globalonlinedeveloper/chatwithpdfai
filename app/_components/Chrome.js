@@ -11,7 +11,7 @@ const NAV = [
 export function Masthead({ active }) {
   const [scrolled, setScrolled] = useState(false);
   const [authed, setAuthed] = useState(false);
-  useEffect(() => { fetch('/api/auth/me').then((r) => setAuthed(r.ok)).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/auth/state').then((r) => (r.ok ? r.json() : null)).then((j) => setAuthed(!!(j && j.authed))).catch(() => {}); }, []);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener('scroll', onScroll);
@@ -26,7 +26,7 @@ export function Masthead({ active }) {
         </a>
         <nav className="nav">
           {NAV.map((n) => (
-            <a key={n.k} href={n.href} style={{ color: active === n.k ? 'var(--text)' : 'var(--text-2)' }}>{n.label}</a>
+            <a key={n.k} href={n.k === 'studio' && !authed ? '/signup?next=/studio' : n.href} style={{ color: active === n.k ? 'var(--text)' : 'var(--text-2)' }}>{n.label}</a>
           ))}
         </nav>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

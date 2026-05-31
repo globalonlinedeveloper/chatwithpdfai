@@ -24,7 +24,7 @@ export default function HomePage() {
   const [papers, setPapers] = useState([]);
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
+    fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     const a = fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { setName(String(j.user.name || j.user.email || '').split('@')[0]); setVerified(!!j.user.emailVerified); } }).catch(() => {});
     const b = fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents); }).catch(() => {});
     const c = fetch('/api/studio/papers').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.papers)) setPapers(j.papers); }).catch(() => {});

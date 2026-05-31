@@ -9,7 +9,7 @@ export default function BuyPage() {
   const [busy, setBusy] = useState('');
   useEffect(() => {
     const s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.async = true; document.body.appendChild(s);
-    fetch('/api/auth/me').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (!j) return; return fetch('/api/credits'); }).then((r) => (r ? r.json() : null)).then((j) => { if (j && j.ok) { setBalance(j.balance); setPacks(j.packs || []); } }).catch(() => {});
+    fetch('/api/auth/me').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (!j) return; return fetch('/api/credits'); }).then((r) => (r ? r.json() : null)).then((j) => { if (j && j.ok) { setBalance(j.balance); setPacks(j.packs || []); } }).catch(() => {});
   }, []);
   function buy(code) {
     setBusy(code); setStatus({ kind: '', msg: 'Starting checkout…' });

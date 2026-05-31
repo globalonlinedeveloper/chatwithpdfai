@@ -1,11 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthShell, StatusNote } from '../_components/AuthShell';
 
 export default function SignUpPage() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState('');
+  const [next, setNext] = useState('');
+  useEffect(() => { try { const n = new URLSearchParams(window.location.search).get('next'); if (n && n.startsWith('/') && !n.startsWith('//')) setNext(n); } catch (e) {} }, []);
   async function onSubmit(e) {
     e.preventDefault(); setBusy(true); setErr('');
     const f = new FormData(e.currentTarget);
@@ -19,7 +21,7 @@ export default function SignUpPage() {
   if (done) {
     return (
       <AuthShell title="Check your inbox." lede={`We sent a verification link to ${done}.`}
-        footer={<a href="/signin" style={{ color: 'var(--violet-2)' }}>← Back to sign in</a>}>
+        footer={<a href={'/signin' + (next ? '?next=' + encodeURIComponent(next) : '')} style={{ color: 'var(--violet-2)' }}>← Back to sign in</a>}>
         <div className="glass" style={{ padding: '20px 22px', borderRadius: 'var(--r-lg)', display: 'flex', gap: 14, alignItems: 'center' }}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--grad-iris-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20 }}>✉</div>
           <div>
@@ -27,13 +29,13 @@ export default function SignUpPage() {
             <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '2px 0 0' }}>Click the link in that email, then buy credits and upload your first PDF.</p>
           </div>
         </div>
-        <a href="/home" className="btn btn-glass" style={{ width: '100%', marginTop: 18, justifyContent: 'center' }}>Go to your dashboard →</a>
+        <a href={next || '/home'} className="btn btn-glass" style={{ width: '100%', marginTop: 18, justifyContent: 'center' }}>Go to your dashboard →</a>
       </AuthShell>
     );
   }
   return (
     <AuthShell title="Create your account." lede="Pay per document. No subscription, no card to start."
-      footer={<>Already have an account? <a href="/signin" style={{ color: 'var(--violet-2)' }}>Sign in →</a></>}>
+      footer={<>Already have an account? <a href={'/signin' + (next ? '?next=' + encodeURIComponent(next) : '')} style={{ color: 'var(--violet-2)' }}>Sign in →</a></>}>
       <form style={{ display: 'flex', flexDirection: 'column', gap: 12 }} onSubmit={onSubmit}>
         <label>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Full name</div>

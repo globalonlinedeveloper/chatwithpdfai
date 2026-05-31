@@ -2,6 +2,11 @@
 import { useState } from 'react';
 import { AuthShell, StatusNote } from '../_components/AuthShell';
 
+function safeNext() {
+  try { const n = new URLSearchParams(window.location.search).get('next'); if (n && n.startsWith('/') && !n.startsWith('//')) return n; } catch (e) {}
+  return '/home';
+}
+
 export default function SignInPage() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -11,7 +16,7 @@ export default function SignInPage() {
     try {
       const r = await fetch('/api/auth/signin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: f.get('email'), password: f.get('password') }) });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) { window.location.href = '/home'; return; }
+      if (r.ok) { window.location.href = safeNext(); return; }
       setErr(j.error || 'Sign-in failed'); setBusy(false);
     } catch (e2) { setErr(e2.message); setBusy(false); }
   }

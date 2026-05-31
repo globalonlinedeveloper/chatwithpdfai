@@ -19,7 +19,7 @@ export default function AccountPage() {
   const [purchases, setPurchases] = useState(null);
   const [delConfirm, setDelConfirm] = useState(''); const [delMsg, setDelMsg] = useState('');
   useEffect(() => {
-    fetch('/api/auth/me').then((r) => { if (r.status === 401) { window.location.href = '/signin'; return null; } return r.json(); }).then((j) => { if (j && j.user) { setUser(j.user); setName(j.user.name || ''); } }).catch(() => {});
+    fetch('/api/auth/me').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && j.user) { setUser(j.user); setName(j.user.name || ''); } }).catch(() => {});
     fetch('/api/credits').then((r) => r.json()).then((j) => { if (j && j.ok) setCredits(j.balance); }).catch(() => {});
     fetch('/api/credits/history').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j) setHistory(j.items || []); }).catch(() => setHistory([]));
     fetch('/api/payments/history').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j) setPurchases(j.items || []); }).catch(() => setPurchases([]));

@@ -335,7 +335,7 @@ export default function WorkspacePage() {
 
   async function loadDocs(selectId) {
     const d = await jget('/api/documents');
-    if (d.status === 401) { window.location.href = '/signin'; return; }
+    if (d.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
     const list = d.j.documents || [];
     setDocs(list);
     if (selectId) setActiveId(selectId);
