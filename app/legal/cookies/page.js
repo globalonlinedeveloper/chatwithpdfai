@@ -21,7 +21,7 @@ const SECTIONS = [
       ]},
       { id: "manage-control", title: " ", body: [{ h3: "Set your preferences" }] },
     ];
-export const metadata = { title: "cookies \u2014 CHATWITHPDFAI" };
+export const metadata = { title: "Cookie Policy \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={""} title={""} lede={""} lastUpdated={""} sections={SECTIONS} />;
 }

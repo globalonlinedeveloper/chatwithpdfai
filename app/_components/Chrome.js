@@ -111,7 +111,7 @@ export function CookieBanner() {
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>We use cookies</div>
             <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
-              Essential cookies keep you signed in. We never sell your data. <a href="/legal/cookies.html" style={{ color: 'var(--violet-2)', textDecoration: 'underline' }}>Read the policy</a>.
+              Essential cookies keep you signed in. We never sell your data. <a href="/legal/cookies" style={{ color: 'var(--violet-2)', textDecoration: 'underline' }}>Read the policy</a>.
             </p>
           </div>
         </div>

@@ -32,6 +32,11 @@ async function uploadDirFor(userId) {
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
+  const _u = await getCurrentUser(req);
+  if (!_u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
+  if (!_u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
+  const userId = _u.id;
+
   let form;
   try { form = await req.formData(); }
   catch { return NextResponse.json({ error: 'Expected multipart/form-data' }, { status: 400 }); }
@@ -53,10 +58,6 @@ export async function POST(req) {
     return NextResponse.json({ error: 'File is not a valid PDF' }, { status: 415 });
   }
 
-  const _u = await getCurrentUser(req);
-  if (!_u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
-  if (!_u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
-  const userId = _u.id;
   let documentId;
   try {
     const result = await enqueue(async () => {

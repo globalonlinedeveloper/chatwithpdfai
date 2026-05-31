@@ -155,6 +155,10 @@ async function verifyPass(sections) {
 
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const u = await getCurrentUser(req);
+  if (!u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
+  if (!u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
+  const userId = u.id;
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
@@ -172,10 +176,6 @@ export async function POST(req) {
   const documentId = Number(body.documentId) || 0;
   if (topic.length < 3 && !documentId) return NextResponse.json({ error: 'Please describe the topic, or pick a source document.' }, { status: 400 });
 
-  const u = await getCurrentUser(req);
-  if (!u) return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
-  if (!u.email_verified) return NextResponse.json({ error: 'Please verify your email before using the product' }, { status: 403 });
-  const userId = u.id;
   if (!(await rateLimit({ bucket: 'studio_paper', ip: 'u' + userId, max: 30, windowMin: 60 }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   const topicKey = (topic || '').toLowerCase().slice(0, 80);

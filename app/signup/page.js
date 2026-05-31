@@ -55,7 +55,7 @@ export default function SignUpPage() {
         </button>
         <StatusNote kind="bad">{err}</StatusNote>
         <p style={{ fontSize: 11.5, color: 'var(--text-4)', margin: '8px 0 0', lineHeight: 1.5 }}>
-          By signing up you agree to our <a href="/legal/terms.html" style={{ color: 'var(--text-3)', textDecoration: 'underline' }}>Terms</a> and <a href="/legal/privacy.html" style={{ color: 'var(--text-3)', textDecoration: 'underline' }}>Privacy</a>. We never train on your files.
+          By signing up you agree to our <a href="/legal/terms" style={{ color: 'var(--text-3)', textDecoration: 'underline' }}>Terms</a> and <a href="/legal/privacy" style={{ color: 'var(--text-3)', textDecoration: 'underline' }}>Privacy</a>. We never train on your files.
         </p>
       </form>
     </AuthShell>

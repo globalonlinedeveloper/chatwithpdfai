@@ -8,6 +8,8 @@ const { useState: uS4 } = React;
 // PRICING
 // ============================================================
 function Pricing() {
+  const [authed, setAuthed] = uS4(false);
+  React.useEffect(() => { fetch('/api/auth/state').then((r) => (r.ok ? r.json() : null)).then((j) => setAuthed(!!(j && j.authed))).catch(() => {}); }, []);
   const packs = [
     { code: 'reader', name: 'Reader', price: 399, credits: 50, desc: 'Trying it out' },
     { code: 'practice', name: 'Practice', price: 999, credits: 200, desc: 'Most popular', featured: true },
@@ -38,7 +40,7 @@ function Pricing() {
                   <li key={ft} style={{ padding: "8px 0", borderTop: "1px solid var(--stroke-1)", fontSize: 13.5, color: "var(--text-2)", display: "flex", gap: 10 }}><span style={{ color: "var(--green)", flexShrink: 0 }}>✓</span><span>{ft}</span></li>
                 ))}
               </ul>
-              <a href="/buy" className={p.featured ? "btn btn-iris" : "btn btn-glass"} style={{ width: "100%", justifyContent: "center" }}>Buy {p.name} →</a>
+              <a href={authed ? "/buy" : "/signup?next=/buy"} className={p.featured ? "btn btn-iris" : "btn btn-glass"} style={{ width: "100%", justifyContent: "center" }}>Buy {p.name} →</a>
             </div>
           ))}
         </div>
