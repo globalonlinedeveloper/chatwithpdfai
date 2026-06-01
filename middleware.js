@@ -20,5 +20,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/home', '/question-paper-generator', '/chat-with-pdf', '/library', '/account', '/buy'],
+  matcher: ['/dashboard', '/question-paper-generator', '/chat-with-pdf', '/library', '/account', '/buy'],
 };

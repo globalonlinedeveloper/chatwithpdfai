@@ -35,6 +35,7 @@ const nextConfig = {
       { source: '/papers', destination: '/question-paper-generator', permanent: true },
       { source: '/workspace', destination: '/chat-with-pdf', permanent: true },
       { source: '/chat', destination: '/chat-with-pdf', permanent: true },
+      { source: '/home', destination: '/dashboard', permanent: true },
       { source: '/api/studio/:path*', destination: '/api/papers/:path*', permanent: false },
       { source: '/api/papers/papers', destination: '/api/papers/library', permanent: false },
       { source: '/api/papers/paper', destination: '/api/papers/generate', permanent: false },

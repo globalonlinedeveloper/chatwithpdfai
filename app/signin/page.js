@@ -4,7 +4,7 @@ import { AuthShell, StatusNote } from '../_components/AuthShell';
 
 function safeNext() {
   try { const n = new URLSearchParams(window.location.search).get('next'); if (n && n.startsWith('/') && !n.startsWith('//')) return n; } catch (e) {}
-  return '/home';
+  return '/dashboard';
 }
 
 export default function SignInPage() {

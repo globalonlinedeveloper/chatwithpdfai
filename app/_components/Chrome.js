@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 const NAV = [
-  { label: 'Home', href: '/', k: 'home' },
+  { label: 'Features', href: '/#features', k: 'features' },
   { label: 'Tools', href: '/tools', k: 'tools' },
   { label: 'Pricing', href: '/pricing', k: 'pricing' },
   { label: 'Help', href: '/help', k: 'help' },
@@ -30,7 +30,7 @@ export function Masthead({ active }) {
           ))}
         </nav>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {authed ? <a href="/home" className="btn btn-iris btn-sm">Go to app →</a> : <><a href="/signin" className="btn btn-ghost btn-sm">Sign in</a><a href="/signup" className="btn btn-iris btn-sm">Try free →</a></>}
+          {authed ? <a href="/dashboard" className="btn btn-iris btn-sm">Go to app →</a> : <><a href="/signin" className="btn btn-ghost btn-sm">Sign in</a><a href="/signup" className="btn btn-iris btn-sm">Try free →</a></>}
         </div>
       </div>
     </header>
