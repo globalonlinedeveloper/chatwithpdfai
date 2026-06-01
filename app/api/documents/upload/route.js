@@ -9,6 +9,7 @@ import { embed, vectorToSqlText } from '@/lib/llm/embed';
 import { documents } from '@/lib/store/documents';
 import { enqueue } from '@/lib/queue';
 import { getCurrentUser } from '@/lib/auth';
+import { query } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -56,6 +57,12 @@ export async function POST(req) {
   if (buf.length > MAX_BYTES) return NextResponse.json({ error: 'File exceeds the 50 MB limit' }, { status: 413 });
   if (buf.subarray(0, 5).toString('latin1') !== '%PDF-') {
     return NextResponse.json({ error: 'File is not a valid PDF' }, { status: 415 });
+  }
+
+  const force = new URL(req.url).searchParams.get('force') === '1';
+  if (!force) {
+    const dup = await query('SELECT id FROM pdf_documents WHERE user_id = ? AND original_filename = ? AND file_size_bytes = ? AND status = ? ORDER BY id DESC LIMIT 1', [userId, filename, buf.length, 'ready']);
+    if (dup && dup[0]) return NextResponse.json({ error: 'You already uploaded this file.', duplicate: true, existingId: dup[0].id, filename }, { status: 409 });
   }
 
   let documentId;

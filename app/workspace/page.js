@@ -258,15 +258,18 @@ function UploadModal({ open, onClose, onUploaded }) {
   const [stage, setStage] = useState('drop');
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
+  const [dup, setDup] = useState(null);
+  const [pending, setPending] = useState(null);
   const fileRef = useRef(null);
-  useEffect(() => { if (open) { setStage('drop'); setErr(''); setName(''); } }, [open]);
-  async function start(file) {
+  useEffect(() => { if (open) { setStage('drop'); setErr(''); setName(''); setDup(null); setPending(null); } }, [open]);
+  async function start(file, force) {
     if (!file) return;
     setName(file.name); setStage('uploading'); setErr('');
     try {
       const fd = new FormData(); fd.append('file', file);
-      const r = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+      const r = await fetch('/api/documents/upload' + (force ? '?force=1' : ''), { method: 'POST', body: fd });
       const j = await r.json().catch(() => ({}));
+      if (r.status === 409 && j.duplicate) { setDup({ id: j.existingId, name: file.name }); setPending(file); setStage('duplicate'); return; }
       if (!r.ok) { setErr(r.status === 403 ? 'Verify your email before uploading (check your inbox).' : (j.error || 'Upload failed')); setStage('drop'); return; }
       setStage('done'); onUploaded && onUploaded(j.document);
     } catch (e) { setErr(e.message); setStage('drop'); }
@@ -304,6 +307,17 @@ function UploadModal({ open, onClose, onUploaded }) {
               <h3 style={{ fontSize: 22, fontWeight: 600, margin: '4px 0 6px' }}>{name} is ready.</h3>
               <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 22px' }}>Text extracted and indexed. Start asking questions.</p>
               <button onClick={onClose} className="btn btn-iris btn-lg" style={{ width: '100%', justifyContent: 'center' }}>Open & start chatting →</button>
+            </div>
+          )}
+          {stage === 'duplicate' && (
+            <div style={{ textAlign: 'center', padding: '10px 0' }}>
+              <div style={{ width: 56, height: 56, margin: '0 auto 16px', borderRadius: 14, background: 'rgba(255,189,46,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#ffd27a' }}>!</div>
+              <h3 style={{ fontSize: 19, fontWeight: 600, margin: '4px 0 6px' }}>Looks like a duplicate</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 20px' }}>You already uploaded <strong style={{ color: 'var(--text)' }}>{name}</strong>. Open the existing one, or upload a fresh copy anyway.</p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => { window.location.href = '/workspace?doc=' + dup.id; }} className="btn btn-iris" style={{ flex: 1, justifyContent: 'center' }}>Open existing</button>
+                <button onClick={() => start(pending, true)} className="btn btn-glass" style={{ flex: 1, justifyContent: 'center' }}>Upload anyway</button>
+              </div>
             </div>
           )}
         </div>

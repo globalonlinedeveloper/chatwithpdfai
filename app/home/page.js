@@ -4,15 +4,26 @@ import AppNav from '../_components/AppNav';
 
 const DOC_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M9 13h6M9 17h4" /></svg>;
 const PAPER_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h4" /></svg>;
+const DOC_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg>;
+const PAPER_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg>;
+const TEST_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>;
 
-function Tile({ href, icon, title, desc, cta }) {
+function relTime(s) { if (!s) return ''; const d = new Date(s); const sec = (Date.now() - d.getTime()) / 1000; if (sec < 60) return 'just now'; if (sec < 3600) return Math.floor(sec / 60) + 'm ago'; if (sec < 86400) return Math.floor(sec / 3600) + 'h ago'; if (sec < 604800) return Math.floor(sec / 86400) + 'd ago'; try { return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return ''; } }
+function fmtSize(b) { if (!b) return ''; const mb = b / 1048576; return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+function greet() { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+
+function Tile({ icon, title, desc, openHref, openLabel, newHref, newLabel, sub }) {
   return (
-    <a href={href} className="glass" style={{ display: 'block', padding: '20px 22px', borderRadius: 'var(--r-xl)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--stroke-2)' }}>
+    <div className="glass" style={{ padding: '20px 22px', borderRadius: 'var(--r-xl)', border: '1px solid var(--stroke-2)', display: 'flex', flexDirection: 'column' }}>
       <div style={{ width: 46, height: 46, borderRadius: 12, background: 'var(--grad-iris-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>{icon}</div>
       <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 5 }}>{title}</div>
-      <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5, marginBottom: 16 }}>{desc}</div>
-      <div style={{ fontSize: 13, color: 'var(--violet-2)' }}>{cta} {'→'}</div>
-    </a>
+      <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5 }}>{desc}</div>
+      <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 8, minHeight: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub || ''}</div>
+      <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+        <a href={openHref} className="btn btn-iris btn-sm">{openLabel}</a>
+        <a href={newHref} className="btn btn-glass btn-sm">{newLabel}</a>
+      </div>
+    </div>
   );
 }
 
@@ -22,15 +33,21 @@ export default function HomePage() {
   const [verified, setVerified] = useState(true);
   const [docs, setDocs] = useState([]);
   const [papers, setPapers] = useState([]);
+  const [tests, setTests] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [copied, setCopied] = useState('');
   useEffect(() => {
     fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     const a = fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { setName(String(j.user.name || j.user.email || '').split('@')[0]); setVerified(!!j.user.emailVerified); } }).catch(() => {});
     const b = fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents); }).catch(() => {});
     const c = fetch('/api/papers/library').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.papers)) setPapers(j.papers); }).catch(() => {});
-    Promise.allSettled([a, b, c]).then(() => setLoaded(true));
+    const d = fetch('/api/papers/assignments').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.assignments)) setTests(j.assignments); }).catch(() => {});
+    Promise.allSettled([a, b, c, d]).then(() => setLoaded(true));
   }, []);
   const readyDocs = docs.filter((d) => d.status === 'ready');
+  const byDate = (arr, k) => arr.slice().sort((a, b) => new Date(b[k] || 0) - new Date(a[k] || 0));
+  const lastDoc = byDate(readyDocs, 'createdAt')[0];
+  const lastPaper = byDate(papers, 'createdAt')[0];
   const steps = [
     { done: verified, label: 'Verify your email', href: '/account', cta: 'Verify' },
     { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/workspace', cta: 'Upload' },
@@ -38,16 +55,39 @@ export default function HomePage() {
   ];
   const allDone = steps.every((s) => s.done);
   const recent = [
-    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', title: p.title, at: p.createdAt, href: '/papers?paper=' + p.id })),
-    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', title: d.filename, at: d.createdAt || d.uploadedAt, href: '/workspace?doc=' + d.id })),
-  ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 6);
+    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', label: 'Paper', icon: PAPER_S, title: p.title, at: p.createdAt, href: '/papers?paper=' + p.id, meta: p.numQuestions ? p.numQuestions + ' Qs' : '' })),
+    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', label: 'PDF', icon: DOC_S, title: d.filename, at: d.createdAt || d.uploadedAt, href: '/workspace?doc=' + d.id, meta: [d.pageCount ? d.pageCount + ' pp' : '', fmtSize(d.sizeBytes)].filter(Boolean).join(' · ') })),
+    ...tests.map((t) => ({ key: 't' + t.id, kind: 'test', label: 'Test', icon: TEST_S, title: t.title, at: t.createdAt, href: '/t/' + t.token, external: true, token: t.token, meta: t.attempts ? t.attempts + ' attempt' + (t.attempts > 1 ? 's' : '') : 'no attempts yet' })),
+  ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 8);
+  function copyLink(token) { try { navigator.clipboard.writeText(window.location.origin + '/t/' + token); setCopied(token); setTimeout(() => setCopied(''), 1500); } catch (e) {} }
+  let suggest = null;
+  if (loaded) {
+    if (readyDocs.length && !papers.length) suggest = { text: 'You have a document — turn it into a question paper.', href: '/papers', cta: 'Generate' };
+    else if (papers.length && !tests.length) suggest = { text: 'Share one of your papers as an online test for students.', href: '/papers', cta: 'Open' };
+  }
+  const stats = [
+    { label: 'Documents', value: readyDocs.length, href: '/library' },
+    { label: 'Question papers', value: papers.length, href: '/library' },
+    { label: 'Shared tests', value: tests.length, href: '/library' },
+    { label: 'Credits', value: credits == null ? '…' : credits.toLocaleString('en-IN'), href: '/buy' },
+  ];
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppNav active="home" credits={credits} />
-      <main id="main" style={{ maxWidth: 860, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
+      <main id="main" style={{ maxWidth: 980, margin: '0 auto', width: '100%', padding: '30px 20px 60px' }}>
         {credits != null && credits < 10 && <div style={{ background: 'rgba(255,189,46,0.12)', border: '1px solid rgba(255,189,46,0.4)', borderRadius: 'var(--r)', padding: '10px 14px', marginBottom: 16, fontSize: 13.5, color: '#ffd27a', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}><span style={{ flex: 1, minWidth: 200 }}>You&rsquo;re low on credits ({credits} left).</span><a href="/buy" className="btn btn-glass btn-sm">Buy credits</a></div>}
-        <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 3px' }}>Welcome back{name ? ', ' + name : ''}</h1>
-        <div style={{ fontSize: 13.5, color: 'var(--text-3)', marginBottom: 24 }}>Pick a tool to get started.{credits != null ? ' You have ' + credits.toLocaleString('en-IN') + ' credits.' : ''}</div>
+        <h1 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 3px' }}>{greet()}{name ? ', ' + name : ''}</h1>
+        <div style={{ fontSize: 13.5, color: 'var(--text-3)', marginBottom: 18 }}>Pick a tool to get started.{credits != null ? ' You have ' + credits.toLocaleString('en-IN') + ' credits.' : ''}</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 26 }}>
+          {stats.map((s) => (
+            <a key={s.label} href={s.href} className="glass" style={{ display: 'block', padding: '12px 16px', borderRadius: 'var(--r-lg)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--stroke-2)' }}>
+              <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.1 }}>{s.value}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 2 }}>{s.label}</div>
+            </a>
+          ))}
+        </div>
+
         {loaded && !allDone && (
           <div className="glass" style={{ border: '1px solid var(--stroke-2)', borderRadius: 'var(--r-lg)', padding: '16px 18px', marginBottom: 24 }} data-testid="onboarding">
             <div className="eyebrow" style={{ marginBottom: 8 }}>Get started ({steps.filter((s) => s.done).length}/3)</div>
@@ -60,20 +100,35 @@ export default function HomePage() {
             ))}
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginBottom: 30 }}>
-          <Tile href="/workspace" icon={DOC_ICON} title="Chat with PDF" desc="Upload a document and ask questions — answers cite the exact pages." cta={readyDocs.length ? ('Open · ' + readyDocs.length + ' document' + (readyDocs.length > 1 ? 's' : '')) : 'Upload your first PDF'} />
-          <Tile href="/papers" icon={PAPER_ICON} title="Generate question paper" desc="Build exam papers with answer keys — practice, print, or share as a test." cta={papers.length ? ('Open · ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Generate your first paper'} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: suggest ? 14 : 30 }}>
+          <Tile icon={DOC_ICON} title="Chat with PDF" desc="Upload a document and ask questions — answers cite the exact pages." openHref="/workspace" openLabel={readyDocs.length ? ('Open · ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open'} newHref="/workspace" newLabel="+ Upload PDF" sub={lastDoc ? ('Last: ' + lastDoc.filename + ' · ' + relTime(lastDoc.createdAt)) : ''} />
+          <Tile icon={PAPER_ICON} title="Generate question paper" desc="Build exam papers with answer keys — practice, print, or share as a test." openHref="/papers" openLabel={papers.length ? ('Open · ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open'} newHref="/papers" newLabel="+ New paper" sub={lastPaper ? ('Last: ' + lastPaper.title + ' · ' + relTime(lastPaper.createdAt)) : ''} />
         </div>
+
+        {suggest && (
+          <div className="glass" style={{ border: '1px solid var(--stroke-2)', borderRadius: 'var(--r-lg)', padding: '12px 16px', marginBottom: 30, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ flex: 1, minWidth: 200, fontSize: 13.5, color: 'var(--text-2)' }}><span className="mono" style={{ fontSize: 10.5, color: 'var(--violet-2)', letterSpacing: '0.08em', marginRight: 8 }}>SUGGESTED</span>{suggest.text}</span>
+            <a href={suggest.href} className="btn btn-glass btn-sm">{suggest.cta}</a>
+          </div>
+        )}
+
         {recent.length > 0 && (
           <>
-            <div className="eyebrow" style={{ marginBottom: 10 }}>Recent</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div className="eyebrow">Recent</div>
+              <a href="/library" style={{ fontSize: 12.5, color: 'var(--violet-2)', textDecoration: 'none' }}>View all in Library →</a>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               {recent.map((r) => (
-                <a key={r.key} href={r.href} className="glass" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 'var(--r)', textDecoration: 'none', color: 'var(--text)' }}>
-                  <span style={{ width: 24, height: 24, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)' }}>{r.kind === 'paper' ? PAPER_ICON_S : DOC_ICON_S}</span>
-                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 13.5 }}>{r.title}</span>
-                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-4)' }}>{r.kind}</span>
-                </a>
+                <div key={r.key} className="glass" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 'var(--r)' }}>
+                  <span style={{ width: 24, height: 24, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)' }}>{r.icon}</span>
+                  <a href={r.href} {...(r.external ? { target: '_blank', rel: 'noreferrer' } : {})} style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'var(--text)' }}>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 13.5 }}>{r.title}</div>
+                    <div className="mono" style={{ fontSize: 10.5, color: 'var(--text-4)', marginTop: 2 }}>{r.label}{r.meta ? ' · ' + r.meta : ''}{r.at ? ' · ' + relTime(r.at) : ''}</div>
+                  </a>
+                  {r.kind === 'test' && <button onClick={() => copyLink(r.token)} className="btn btn-glass btn-sm" style={{ fontSize: 11.5 }}>{copied === r.token ? 'Copied' : 'Copy link'}</button>}
+                </div>
               ))}
             </div>
           </>
@@ -82,5 +137,3 @@ export default function HomePage() {
     </div>
   );
 }
-const DOC_ICON_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg>;
-const PAPER_ICON_S = <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg>;
