@@ -15,7 +15,7 @@ export default function LibraryPage() {
   useEffect(() => {
     fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => setDocs(j && j.documents ? j.documents : [])).catch(() => setDocs([]));
-    fetch('/api/papers/papers').then((r) => (r.ok ? r.json() : null)).then((j) => setPapers(j && j.papers ? j.papers : [])).catch(() => setPapers([]));
+    fetch('/api/papers/library').then((r) => (r.ok ? r.json() : null)).then((j) => setPapers(j && j.papers ? j.papers : [])).catch(() => setPapers([]));
     fetch('/api/papers/assignments').then((r) => (r.ok ? r.json() : null)).then((j) => setShares(j && j.assignments ? j.assignments : [])).catch(() => setShares([]));
   }, []);
   const ql = q.toLowerCase();

@@ -27,7 +27,7 @@ export default function HomePage() {
     fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     const a = fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { setName(String(j.user.name || j.user.email || '').split('@')[0]); setVerified(!!j.user.emailVerified); } }).catch(() => {});
     const b = fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents); }).catch(() => {});
-    const c = fetch('/api/papers/papers').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.papers)) setPapers(j.papers); }).catch(() => {});
+    const c = fetch('/api/papers/library').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.papers)) setPapers(j.papers); }).catch(() => {});
     Promise.allSettled([a, b, c]).then(() => setLoaded(true));
   }, []);
   const readyDocs = docs.filter((d) => d.status === 'ready');
