@@ -5,8 +5,8 @@ export default function ToolCardClient({ tool: t }) {
   const live = t.status === 'live';
   const [authed, setAuthed] = useState(null);
   useEffect(() => { if (live) fetch('/api/auth/state').then((r) => (r.ok ? r.json() : null)).then((j) => setAuthed(!!(j && j.authed))).catch(() => setAuthed(false)); }, [live]);
-  const href = live ? (authed ? t.appHref : '/tools/' + t.slug) : '#';
-  const cta = !live ? null : (authed ? 'Open →' : 'Learn more →');
+  const href = live ? (authed ? t.appHref : '/signup?next=' + encodeURIComponent(t.appHref)) : '#';
+  const cta = !live ? null : (authed ? 'Open →' : 'Try free →');
   const style = { display: 'block', padding: 20, borderRadius: 'var(--r-xl)', color: 'inherit', textDecoration: 'none', border: '1px solid var(--stroke-2)', opacity: live ? 1 : 0.65 };
   const inner = (
     <>

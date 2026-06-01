@@ -4,12 +4,11 @@ import { liveTools } from '@/lib/tools';
 
 export default function AppNav({ active, credits, actions }) {
   const [menu, setMenu] = useState(false);
-  const [toolsMenu, setToolsMenu] = useState(false);
   const [initials, setInitials] = useState('');
   useEffect(() => {
     fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { const s = String(j.user.name || j.user.email || '?').trim(); setInitials(s.slice(0, 1).toUpperCase()); } }).catch(() => {});
-    const close = () => { setMenu(false); setToolsMenu(false); };
-    const onKey = (e) => { if (e.key === 'Escape') { setMenu(false); setToolsMenu(false); } };
+    const close = () => setMenu(false);
+    const onKey = (e) => { if (e.key === 'Escape') setMenu(false); };
     window.addEventListener('click', close);
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('click', close); window.removeEventListener('keydown', onKey); };
@@ -23,16 +22,7 @@ export default function AppNav({ active, credits, actions }) {
       <a href="/home" className="brand" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center' }}><span className="brand-mark" style={{ width: 22, height: 22, fontSize: 11 }}>{'◇'}</span>chatwithpdfai<span className="domain">.com</span></a>
       <nav style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <a href="/home" style={navStyle(active === 'home')}>Home</a>
-        <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-          <button onClick={() => setToolsMenu((v) => !v)} aria-haspopup="true" aria-expanded={toolsMenu} style={{ ...navStyle(toolsActive), border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Tools <span style={{ fontSize: 9, opacity: 0.7 }}>{'\u25BE'}</span></button>
-          {toolsMenu && (
-            <div className="glass" role="menu" style={{ position: 'absolute', left: 0, top: 36, minWidth: 210, borderRadius: 'var(--r)', padding: 5, zIndex: 50 }}>
-              {liveTools().map((t) => <a key={t.slug} href={t.appHref} role="menuitem" style={mItem}>{t.name}</a>)}
-              <div style={{ borderTop: '1px solid var(--stroke-1)', margin: '4px 0' }} />
-              <a href="/tools" role="menuitem" style={mItem}>{'All tools \u2192'}</a>
-            </div>
-          )}
-        </div>
+        <a href="/tools" style={navStyle(toolsActive)}>Tools</a>
         <a href="/library" style={navStyle(active === 'library')}>Library</a>
       </nav>
       <div style={{ flex: 1 }} />
