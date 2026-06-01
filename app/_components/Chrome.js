@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 const NAV = [
   { label: 'Product', href: '/#how', k: 'product' },
-  { label: 'Studio', href: '/studio', k: 'studio' },
+  { label: 'Question papers', href: '/papers', k: 'papers' },
   { label: 'Pricing', href: '/pricing', k: 'pricing' },
   { label: 'Help', href: '/help', k: 'help' },
 ];
@@ -26,7 +26,7 @@ export function Masthead({ active }) {
         </a>
         <nav className="nav">
           {NAV.map((n) => (
-            <a key={n.k} href={n.k === 'studio' && !authed ? '/signup?next=/studio' : n.href} style={{ color: active === n.k ? 'var(--text)' : 'var(--text-2)' }}>{n.label}</a>
+            <a key={n.k} href={n.k === 'papers' && !authed ? '/signup?next=/papers' : n.href} style={{ color: active === n.k ? 'var(--text)' : 'var(--text-2)' }}>{n.label}</a>
           ))}
         </nav>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

@@ -34,11 +34,11 @@ export default function HomePage() {
   const steps = [
     { done: verified, label: 'Verify your email', href: '/account', cta: 'Verify' },
     { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/workspace', cta: 'Upload' },
-    { done: papers.length > 0, label: 'Generate your first question paper', href: '/studio', cta: 'Generate' },
+    { done: papers.length > 0, label: 'Generate your first question paper', href: '/papers', cta: 'Generate' },
   ];
   const allDone = steps.every((s) => s.done);
   const recent = [
-    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', title: p.title, at: p.createdAt, href: '/studio?paper=' + p.id })),
+    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', title: p.title, at: p.createdAt, href: '/papers?paper=' + p.id })),
     ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', title: d.filename, at: d.createdAt || d.uploadedAt, href: '/workspace?doc=' + d.id })),
   ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 6);
   return (
@@ -62,7 +62,7 @@ export default function HomePage() {
         )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginBottom: 30 }}>
           <Tile href="/workspace" icon={DOC_ICON} title="Chat with PDF" desc="Upload a document and ask questions — answers cite the exact pages." cta={readyDocs.length ? ('Open · ' + readyDocs.length + ' document' + (readyDocs.length > 1 ? 's' : '')) : 'Upload your first PDF'} />
-          <Tile href="/studio" icon={PAPER_ICON} title="Generate question paper" desc="Build exam papers with answer keys — practice, print, or share as a test." cta={papers.length ? ('Open · ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Generate your first paper'} />
+          <Tile href="/papers" icon={PAPER_ICON} title="Generate question paper" desc="Build exam papers with answer keys — practice, print, or share as a test." cta={papers.length ? ('Open · ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Generate your first paper'} />
         </div>
         {recent.length > 0 && (
           <>

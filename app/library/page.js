@@ -45,9 +45,9 @@ export default function LibraryPage() {
 
         {tab === 'papers' && (papers === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = papers.filter((p) => (p.title || '').toLowerCase().includes(ql));
-          if (!list.length) return empty(q ? 'No matching papers.' : 'No saved papers yet.', q ? null : '+ Generate a paper', '/studio');
+          if (!list.length) return empty(q ? 'No matching papers.' : 'No saved papers yet.', q ? null : '+ Generate a paper', '/papers');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((p) => (
-            <a key={p.id} href={`/studio?paper=${p.id}`} className="glass hover-glow" style={{ ...card, padding: 16 }}>
+            <a key={p.id} href={`/papers?paper=${p.id}`} className="glass hover-glow" style={{ ...card, padding: 16 }}>
               <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', marginBottom: 12 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{p.numQuestions} Qs{p.examStyle ? ' · ' + p.examStyle : ''}{p.createdAt ? ' · ' + fmtDate(p.createdAt) : ''}</div>
@@ -56,7 +56,7 @@ export default function LibraryPage() {
 
         {tab === 'tests' && (shares === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = shares.filter((s) => (s.title || '').toLowerCase().includes(ql));
-          if (!list.length) return empty(q ? 'No matching tests.' : 'No shared tests yet.', q ? null : 'Go to Studio', '/studio');
+          if (!list.length) return empty(q ? 'No matching tests.' : 'No shared tests yet.', q ? null : 'Go to question papers', '/papers');
           return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{list.map((s) => (
             <div key={s.id} className="glass" style={{ padding: '12px 16px', borderRadius: 'var(--r-lg)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <span style={{ flex: 1, minWidth: 160, fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</span>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { grade, isAuto, correctText, studentSafe, flatQs } from '@/app/studio/grade';
+import { grade, isAuto, correctText, studentSafe, flatQs } from '@/app/papers/grade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

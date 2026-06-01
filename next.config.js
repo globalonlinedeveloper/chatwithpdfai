@@ -31,6 +31,7 @@ const nextConfig = {
 
   async redirects() {
     return [
+      { source: '/studio', destination: '/papers', permanent: true },
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/signin.html', destination: '/signin', permanent: true },
       { source: '/signup.html', destination: '/signup', permanent: true },

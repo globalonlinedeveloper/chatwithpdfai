@@ -189,7 +189,7 @@ function EditAnswerControl({ q, gi, onPatch }) {
   return <span style={{ fontSize: 12, color: 'var(--text-3)' }}>(not editable)</span>;
 }
 
-export default function StudioPage() {
+export default function PapersPage() {
   const [cat, setCat] = useState('programming');
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
@@ -272,7 +272,7 @@ export default function StudioPage() {
 
   return (
     <div id="studio-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <AppNav active="studio" credits={credits} />
+      <AppNav active="papers" credits={credits} />
 
       <div className="studio-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <aside className="no-print studio-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
