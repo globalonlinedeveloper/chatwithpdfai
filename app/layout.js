@@ -1,3 +1,5 @@
+import Analytics from './_components/Analytics';
+
 export const metadata = {
   metadataBase: new URL('https://chatwithpdfai.com'),
   title: 'CHATWITHPDFAI — Read every PDF at light speed',
@@ -39,6 +41,7 @@ export default function RootLayout({ children }) {
         <a className="skip-link" href="#main">Skip to content</a>
         <div className="aurora-bg" aria-hidden="true"></div>
         {children}
+        <Analytics />
       </body>
     </html>
   );

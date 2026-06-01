@@ -10,6 +10,7 @@ import { documents } from '@/lib/store/documents';
 import { enqueue } from '@/lib/queue';
 import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { recordEvent } from '@/lib/analytics';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -96,6 +97,7 @@ export async function POST(req) {
       }));
       await documents.insertPages(documentId, pageRows);
       await documents.updateDocument(documentId, { status: 'ready', page_count: pageCount });
+      await recordEvent({ kind: 'upload', req, userId });
       return { pageCount, embeddedPages: pageRows.length, model, mocked };
     });
 

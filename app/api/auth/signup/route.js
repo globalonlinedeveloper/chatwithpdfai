@@ -4,6 +4,7 @@ import { query } from '@/lib/db';
 import { isEmail, clip, getClientIp } from '@/lib/validate';
 import { rateLimit } from '@/lib/ratelimit';
 import { hashPassword, createSession, sessionCookie } from '@/lib/auth';
+import { recordEvent } from '@/lib/analytics';
 import { sendMail } from '@/lib/email';
 import { verifyEmailHtml } from '@/lib/emailTemplates';
 export const runtime = 'nodejs';
@@ -32,6 +33,7 @@ export async function POST(req) {
     sendMail({ to: email, subject: 'Verify your CHATWITHPDFAI email', text: 'Welcome! Verify your email: ' + _site + '/api/auth/verify?token=' + vtoken, html: verifyEmailHtml({ link: _site + '/api/auth/verify?token=' + vtoken, name }) }).catch((e) => console.error('[signup] verify email failed', e.message));
     const res = NextResponse.json({ ok: true, user: { id: r.insertId, email, name } });
     res.cookies.set(sessionCookie(token));
+    await recordEvent({ kind: 'signup', req, userId: r.insertId });
     return res;
   } catch (e) { console.error('[signup] failed', e); return NextResponse.json({ error: 'Could not create account' }, { status: 500 }); }
 }
