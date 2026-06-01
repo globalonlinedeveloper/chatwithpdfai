@@ -6,7 +6,6 @@ import { Pricing, Security, FAQ } from './_components/landing/closing';
 
 export const metadata = {
   alternates: { canonical: '/' },
-  openGraph: { url: 'https://chatwithpdfai.com/' },
 };
 
 const jsonLd = {
