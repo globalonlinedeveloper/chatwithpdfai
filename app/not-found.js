@@ -9,7 +9,7 @@ export default function NotFound() {
         <p className="section-lede" style={{ margin: '0 auto 28px' }}>The page you're looking for moved or never existed.</p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="/" className="btn btn-iris btn-lg">← Back home</a>
-          <a href="/chat" className="btn btn-glass btn-lg">Open Chat</a>
+          <a href="/chat-with-pdf" className="btn btn-glass btn-lg">Open Chat</a>
         </div>
       </section>
     </SiteShell>

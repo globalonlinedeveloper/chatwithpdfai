@@ -52,24 +52,24 @@ export default function HomePage() {
   const lastPaper = byDate(papers, 'createdAt')[0];
   const steps = [
     { done: verified, label: 'Verify your email', href: '/account', cta: 'Verify' },
-    { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/chat', cta: 'Upload' },
-    { done: papers.length > 0, label: 'Generate your first question paper', href: '/papers', cta: 'Generate' },
+    { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/chat-with-pdf', cta: 'Upload' },
+    { done: papers.length > 0, label: 'Generate your first question paper', href: '/question-paper-generator', cta: 'Generate' },
   ];
   const allDone = steps.every((s) => s.done);
   const recent = [
-    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', label: 'Paper', icon: PAPER_S, title: p.title, at: p.createdAt, href: '/papers?paper=' + p.id, meta: p.numQuestions ? p.numQuestions + ' Qs' : '' })),
-    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', label: 'PDF', icon: DOC_S, title: d.filename, at: d.createdAt || d.uploadedAt, href: '/chat?doc=' + d.id, meta: [d.pageCount ? d.pageCount + ' pp' : '', fmtSize(d.sizeBytes)].filter(Boolean).join(' · ') })),
+    ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', label: 'Paper', icon: PAPER_S, title: p.title, at: p.createdAt, href: '/question-paper-generator?paper=' + p.id, meta: p.numQuestions ? p.numQuestions + ' Qs' : '' })),
+    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', label: 'PDF', icon: DOC_S, title: d.filename, at: d.createdAt || d.uploadedAt, href: '/chat-with-pdf?doc=' + d.id, meta: [d.pageCount ? d.pageCount + ' pp' : '', fmtSize(d.sizeBytes)].filter(Boolean).join(' · ') })),
     ...tests.map((t) => ({ key: 't' + t.id, kind: 'test', label: 'Test', icon: TEST_S, title: t.title, at: t.createdAt, href: '/t/' + t.token, external: true, token: t.token, meta: t.attempts ? t.attempts + ' attempt' + (t.attempts > 1 ? 's' : '') : 'no attempts yet' })),
   ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 8);
   function copyLink(token) { try { navigator.clipboard.writeText(window.location.origin + '/t/' + token); setCopied(token); setTimeout(() => setCopied(''), 1500); } catch (e) {} }
   let suggest = null;
   if (loaded) {
-    if (readyDocs.length && !papers.length) suggest = { text: 'You have a document — turn it into a question paper.', href: '/papers', cta: 'Generate' };
-    else if (papers.length && !tests.length) suggest = { text: 'Share one of your papers as an online test for students.', href: '/papers', cta: 'Open' };
+    if (readyDocs.length && !papers.length) suggest = { text: 'You have a document — turn it into a question paper.', href: '/question-paper-generator', cta: 'Generate' };
+    else if (papers.length && !tests.length) suggest = { text: 'Share one of your papers as an online test for students.', href: '/question-paper-generator', cta: 'Open' };
   }
   const tileMeta = {
-    'chat-with-pdf': { openLabel: readyDocs.length ? ('Open \u00b7 ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open', newHref: '/chat', newLabel: '+ Upload PDF', sub: lastDoc ? ('Last: ' + lastDoc.filename + ' \u00b7 ' + relTime(lastDoc.createdAt)) : '' },
-    'question-paper-generator': { openLabel: papers.length ? ('Open \u00b7 ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open', newHref: '/papers', newLabel: '+ New paper', sub: lastPaper ? ('Last: ' + lastPaper.title + ' \u00b7 ' + relTime(lastPaper.createdAt)) : '' },
+    'chat-with-pdf': { openLabel: readyDocs.length ? ('Open \u00b7 ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open', newHref: '/chat-with-pdf', newLabel: '+ Upload PDF', sub: lastDoc ? ('Last: ' + lastDoc.filename + ' \u00b7 ' + relTime(lastDoc.createdAt)) : '' },
+    'question-paper-generator': { openLabel: papers.length ? ('Open \u00b7 ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open', newHref: '/question-paper-generator', newLabel: '+ New paper', sub: lastPaper ? ('Last: ' + lastPaper.title + ' \u00b7 ' + relTime(lastPaper.createdAt)) : '' },
   };
   const stats = [
     { label: 'Documents', value: readyDocs.length, href: '/library' },
