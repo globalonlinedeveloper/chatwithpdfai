@@ -367,7 +367,7 @@ export default function ChatPage() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <AppNav active="chat" credits={credits} actions={<><button onClick={() => exportConversation(active, messages)} className="btn btn-glass btn-sm">Export ↓</button><button onClick={() => setShowUpload(true)} className="btn btn-iris btn-sm" data-testid="upload-open">+ Upload PDF</button></>} />
+      <AppNav active="chat" credits={credits} actions={<>{activeId ? <a href={'/question-paper-generator?doc=' + activeId} className="btn btn-glass btn-sm" title="Generate a question paper from this PDF" data-testid="make-paper">✦ Make a paper</a> : null}<button onClick={() => exportConversation(active, messages)} className="btn btn-glass btn-sm">Export ↓</button><button onClick={() => setShowUpload(true)} className="btn btn-iris btn-sm" data-testid="upload-open">+ Upload PDF</button></>} />
       <div id="main" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Sidebar docs={docs} activeId={activeId} onPick={setActiveId} onNew={() => { setActiveId(null); setMessages([]); }} onUpload={() => setShowUpload(true)} />
         {active ? (
