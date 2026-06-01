@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
+import AppFooter from '../_components/AppFooter';
 
 export default function BuyPage() {
   const [packs, setPacks] = useState(null);
@@ -53,6 +54,7 @@ export default function BuyPage() {
         {status.msg && <div data-testid="buy-status" style={{ marginTop: 20, fontSize: 14.5, color: status.kind === 'ok' ? 'var(--green)' : status.kind === 'bad' ? '#ffb4b4' : 'var(--text-2)' }}>{status.msg}</div>}
         <p className="mono" style={{ marginTop: 18, fontSize: 10.5, color: 'var(--text-4)', letterSpacing: '0.08em' }}>SECURE CHECKOUT VIA RAZORPAY</p>
       </main>
+      <AppFooter />
     </div>
   );
 }

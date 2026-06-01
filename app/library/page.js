@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
+import AppFooter from '../_components/AppFooter';
 
 function fmtSize(b) { if (!b) return ''; const mb = b / 1048576; return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
 function fmtDate(s) { try { return new Date(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return ''; } }
@@ -66,6 +67,7 @@ export default function LibraryPage() {
             </div>))}</div>;
         })())}
       </main>
+      <AppFooter />
     </div>
   );
 }

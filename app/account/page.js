@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
+import AppFooter from '../_components/AppFooter';
 
 function Row({ label, value, extra }) {
   return (<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--stroke-1)' }}><span className="eyebrow">{label}</span><span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text)' }}>{value}{extra}</span></div>);
@@ -124,6 +125,7 @@ export default function AccountPage() {
           </div>
         </>)}
       </main>
+      <AppFooter />
     </div>
   );
 }

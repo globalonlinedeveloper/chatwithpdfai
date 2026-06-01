@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
+import AppFooter from '../_components/AppFooter';
 import ToolIcon from '../_components/ToolIcon';
 import { liveTools } from '@/lib/tools';
 
@@ -139,6 +140,7 @@ export default function HomePage() {
           </>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }
