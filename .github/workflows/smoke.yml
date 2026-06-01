@@ -1,0 +1,26 @@
+name: Smoke (live canary)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Hostinger deploy to land
+        run: sleep 150
+      - name: Check key routes
+        run: |
+          set -e
+          B=https://chatwithpdfai.com
+          check(){ code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$B$1"); echo "$1 -> $code (want $2)"; [ "$code" = "$2" ]; }
+          check / 200
+          check /pricing 200
+          check /tools 200
+          check /guides 200
+          check /api/health 200
+          check /robots.txt 200
+          check /sitemap.xml 200
+          check /og-image.png 200
+          check /dashboard 307
+          echo "smoke ok"

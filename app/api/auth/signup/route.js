@@ -5,6 +5,7 @@ import { isEmail, clip, getClientIp } from '@/lib/validate';
 import { rateLimit } from '@/lib/ratelimit';
 import { hashPassword, createSession, sessionCookie } from '@/lib/auth';
 import { recordEvent } from '@/lib/analytics';
+import { addCredits } from '@/lib/credits';
 import { sendMail } from '@/lib/email';
 import { verifyEmailHtml } from '@/lib/emailTemplates';
 export const runtime = 'nodejs';
@@ -34,6 +35,8 @@ export async function POST(req) {
     const res = NextResponse.json({ ok: true, user: { id: r.insertId, email, name } });
     res.cookies.set(sessionCookie(token));
     await recordEvent({ kind: 'signup', req, userId: r.insertId });
+    const _starter = Math.max(0, parseInt(process.env.FREE_SIGNUP_CREDITS || '15', 10) || 0);
+    if (_starter > 0) await addCredits(r.insertId, _starter, 'signup_bonus', 'signup', r.insertId).catch(() => {});
     return res;
   } catch (e) { console.error('[signup] failed', e); return NextResponse.json({ error: 'Could not create account' }, { status: 500 }); }
 }
