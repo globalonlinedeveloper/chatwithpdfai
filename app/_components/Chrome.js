@@ -37,22 +37,8 @@ export function Masthead({ active }) {
   );
 }
 
-export function Footer({ minimal }) {
+export function Footer() {
   const year = new Date().getFullYear();
-  if (minimal) {
-    return (
-      <footer style={{ borderTop: '1px solid var(--stroke-1)', padding: '26px 0' }}>
-        <div className="spread" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, fontSize: 11, color: 'var(--text-4)' }}>
-          <span className="mono" style={{ letterSpacing: '0.08em' }}>© {year} CHATWITHPDFAI</span>
-          <div style={{ display: 'flex', gap: 18 }}>
-            <a href="/legal/privacy" style={{ color: 'var(--text-3)' }}>Privacy</a>
-            <a href="/legal/terms" style={{ color: 'var(--text-3)' }}>Terms</a>
-            <a href="/legal/security" style={{ color: 'var(--text-3)' }}>Security</a>
-          </div>
-        </div>
-      </footer>
-    );
-  }
   const cols = [
     { h: 'Product', l: [['Features', '/#features'], ['Pricing', '/pricing']] },
     { h: 'Company', l: [['Contact', '/contact']] },
@@ -137,12 +123,12 @@ export function PageHeader({ eyebrow, title, lede, align = 'left' }) {
   );
 }
 
-export default function SiteShell({ children, active, minimalFooter }) {
+export default function SiteShell({ children, active }) {
   return (
     <>
       <Masthead active={active} />
       <main id="main" style={{ minHeight: '60vh', overflowX: 'clip' }}>{children}</main>
-      <Footer minimal={minimalFooter} />
+      <Footer />
       <CookieBanner />
     </>
   );

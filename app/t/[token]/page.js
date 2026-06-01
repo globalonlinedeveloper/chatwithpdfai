@@ -108,6 +108,10 @@ export default function TakeTest({ params }) {
           {!result && <button onClick={submit} disabled={busy} className={busy ? 'btn btn-glass' : 'btn btn-iris'} data-testid="take-submit">{busy ? 'Submitting…' : 'Submit test'}</button>}
         </div>
       )}
+      <footer style={{ marginTop: 48, paddingTop: 20, borderTop: '1px solid var(--stroke-1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12, color: 'var(--text-4)' }}>
+        <span className="mono" style={{ letterSpacing: '0.08em' }}>© {new Date().getFullYear()} CHATWITHPDFAI</span>
+        <a href="/signup?next=/question-paper-generator" style={{ color: 'var(--violet-2)', textDecoration: 'none' }}>Make your own test {'→'}</a>
+      </footer>
     </div>
   );
 }
