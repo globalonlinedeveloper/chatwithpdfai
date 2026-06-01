@@ -1,31 +1,39 @@
 'use client';
 import { useState, useEffect } from 'react';
-
-const LINKS = [
-  { k: 'home', label: 'Home', href: '/home' },
-  { k: 'chat', label: 'Chat', href: '/workspace' },
-  { k: 'papers', label: 'Question papers', href: '/papers' },
-  { k: 'library', label: 'Library', href: '/library' },
-];
+import { liveTools } from '@/lib/tools';
 
 export default function AppNav({ active, credits, actions }) {
   const [menu, setMenu] = useState(false);
+  const [toolsMenu, setToolsMenu] = useState(false);
   const [initials, setInitials] = useState('');
   useEffect(() => {
     fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { const s = String(j.user.name || j.user.email || '?').trim(); setInitials(s.slice(0, 1).toUpperCase()); } }).catch(() => {});
-    const close = () => setMenu(false);
-    const onKey = (e) => { if (e.key === 'Escape') setMenu(false); };
+    const close = () => { setMenu(false); setToolsMenu(false); };
+    const onKey = (e) => { if (e.key === 'Escape') { setMenu(false); setToolsMenu(false); } };
     window.addEventListener('click', close);
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('click', close); window.removeEventListener('keydown', onKey); };
   }, []);
   async function signOut() { try { await fetch('/api/auth/signout', { method: 'POST' }); } catch (e) {} window.location.href = '/'; }
+  const navStyle = (on) => ({ fontSize: 13, padding: '5px 11px', borderRadius: 'var(--r)', textDecoration: 'none', color: on ? 'var(--text)' : 'var(--text-3)', background: on ? 'var(--glass-2)' : 'transparent' });
+  const toolsActive = liveTools().some((t) => t.navKey === active);
   const mItem = { display: 'block', padding: '7px 10px', fontSize: 13, color: 'var(--text-2)', textDecoration: 'none', borderRadius: 'var(--r)', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' };
   return (
     <header className="no-print appnav" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 14, rowGap: 8, flexWrap: 'wrap', borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.85)', backdropFilter: 'blur(20px) saturate(180%)', flexShrink: 0, zIndex: 30, position: 'relative' }}>
       <a href="/home" className="brand" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center' }}><span className="brand-mark" style={{ width: 22, height: 22, fontSize: 11 }}>{'◇'}</span>chatwithpdfai<span className="domain">.com</span></a>
-      <nav style={{ display: 'flex', gap: 2 }}>
-        {LINKS.map((l) => <a key={l.k} href={l.href} style={{ fontSize: 13, padding: '5px 11px', borderRadius: 'var(--r)', textDecoration: 'none', color: active === l.k ? 'var(--text)' : 'var(--text-3)', background: active === l.k ? 'var(--glass-2)' : 'transparent' }}>{l.label}</a>)}
+      <nav style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <a href="/home" style={navStyle(active === 'home')}>Home</a>
+        <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+          <button onClick={() => setToolsMenu((v) => !v)} aria-haspopup="true" aria-expanded={toolsMenu} style={{ ...navStyle(toolsActive), border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Tools <span style={{ fontSize: 9, opacity: 0.7 }}>{'\u25BE'}</span></button>
+          {toolsMenu && (
+            <div className="glass" role="menu" style={{ position: 'absolute', left: 0, top: 36, minWidth: 210, borderRadius: 'var(--r)', padding: 5, zIndex: 50 }}>
+              {liveTools().map((t) => <a key={t.slug} href={t.appHref} role="menuitem" style={mItem}>{t.name}</a>)}
+              <div style={{ borderTop: '1px solid var(--stroke-1)', margin: '4px 0' }} />
+              <a href="/tools" role="menuitem" style={mItem}>{'All tools \u2192'}</a>
+            </div>
+          )}
+        </div>
+        <a href="/library" style={navStyle(active === 'library')}>Library</a>
       </nav>
       <div style={{ flex: 1 }} />
       {actions}

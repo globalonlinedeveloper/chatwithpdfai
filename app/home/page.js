@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppNav from '../_components/AppNav';
+import ToolIcon from '../_components/ToolIcon';
+import { liveTools } from '@/lib/tools';
 
 const DOC_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M9 13h6M9 17h4" /></svg>;
 const PAPER_ICON = <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h4" /></svg>;
@@ -65,6 +67,10 @@ export default function HomePage() {
     if (readyDocs.length && !papers.length) suggest = { text: 'You have a document — turn it into a question paper.', href: '/papers', cta: 'Generate' };
     else if (papers.length && !tests.length) suggest = { text: 'Share one of your papers as an online test for students.', href: '/papers', cta: 'Open' };
   }
+  const tileMeta = {
+    'chat-with-pdf': { openLabel: readyDocs.length ? ('Open \u00b7 ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open', newHref: '/workspace', newLabel: '+ Upload PDF', sub: lastDoc ? ('Last: ' + lastDoc.filename + ' \u00b7 ' + relTime(lastDoc.createdAt)) : '' },
+    'question-paper-generator': { openLabel: papers.length ? ('Open \u00b7 ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open', newHref: '/papers', newLabel: '+ New paper', sub: lastPaper ? ('Last: ' + lastPaper.title + ' \u00b7 ' + relTime(lastPaper.createdAt)) : '' },
+  };
   const stats = [
     { label: 'Documents', value: readyDocs.length, href: '/library' },
     { label: 'Question papers', value: papers.length, href: '/library' },
@@ -102,8 +108,7 @@ export default function HomePage() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: suggest ? 14 : 30 }}>
-          <Tile icon={DOC_ICON} title="Chat with PDF" desc="Upload a document and ask questions — answers cite the exact pages." openHref="/workspace" openLabel={readyDocs.length ? ('Open · ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open'} newHref="/workspace" newLabel="+ Upload PDF" sub={lastDoc ? ('Last: ' + lastDoc.filename + ' · ' + relTime(lastDoc.createdAt)) : ''} />
-          <Tile icon={PAPER_ICON} title="Generate question paper" desc="Build exam papers with answer keys — practice, print, or share as a test." openHref="/papers" openLabel={papers.length ? ('Open · ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open'} newHref="/papers" newLabel="+ New paper" sub={lastPaper ? ('Last: ' + lastPaper.title + ' · ' + relTime(lastPaper.createdAt)) : ''} />
+          {liveTools().map((t) => { const m = tileMeta[t.slug] || {}; return <Tile key={t.slug} icon={<ToolIcon name={t.icon} size={22} stroke="#fff" />} title={t.name} desc={t.tagline} openHref={t.appHref} openLabel={m.openLabel || 'Open'} newHref={m.newHref || t.appHref} newLabel={m.newLabel || 'Open'} sub={m.sub || ''} />; })}
         </div>
 
         {suggest && (
