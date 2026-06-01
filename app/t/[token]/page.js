@@ -34,7 +34,7 @@ export default function TakeTest({ params }) {
 
   useEffect(() => {
     try { const raw = localStorage.getItem('cwpai_take_' + token); if (raw) setPrior(JSON.parse(raw)); } catch (e) {}
-    fetch('/api/studio/take?token=' + encodeURIComponent(token)).then((r) => r.json().then((j) => ({ ok: r.ok, j }))).then(({ ok, j }) => { if (ok && j.test) setTest(j.test); else setErr(j.error || 'Test not found'); }).catch((e) => setErr(e.message));
+    fetch('/api/papers/take?token=' + encodeURIComponent(token)).then((r) => r.json().then((j) => ({ ok: r.ok, j }))).then(({ ok, j }) => { if (ok && j.test) setTest(j.test); else setErr(j.error || 'Test not found'); }).catch((e) => setErr(e.message));
   }, [token]);
 
   const flat = test ? test.sections.flatMap((s) => s.questions) : [];
@@ -46,7 +46,7 @@ export default function TakeTest({ params }) {
     if (submittedRef.current) return;
     submittedRef.current = true; setBusy(true);
     try {
-      const r = await fetch('/api/studio/take', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, name: dataRef.current.name, answers: dataRef.current.answers }) });
+      const r = await fetch('/api/papers/take', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, name: dataRef.current.name, answers: dataRef.current.answers }) });
       const j = await r.json().catch(() => ({}));
       if (r.ok) { setResult(j); try { localStorage.setItem('cwpai_take_' + token, JSON.stringify({ score: j.score, total: j.total, at: Date.now() })); } catch (e) {} window.scrollTo({ top: 0, behavior: 'smooth' }); }
       else { setErr(j.error || 'Submit failed'); submittedRef.current = false; }
