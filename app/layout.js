@@ -1,7 +1,24 @@
 export const metadata = {
+  metadataBase: new URL('https://chatwithpdfai.com'),
   title: 'CHATWITHPDFAI — Read every PDF at light speed',
   description: 'Drop a PDF. Ask anything. Get cited answers in seconds. Pay per document, no subscription.',
+  applicationName: 'CHATWITHPDFAI',
+  keywords: ['chat with pdf', 'ask questions about pdf', 'pdf ai chat', 'cited pdf answers', 'question paper generator', 'pay per document'],
   icons: { icon: '/favicon.svg' },
+  openGraph: {
+    type: 'website',
+    siteName: 'CHATWITHPDFAI',
+    title: 'CHATWITHPDFAI — Read every PDF at light speed',
+    description: 'Drop a PDF. Ask anything. Get cited answers in seconds. Pay per document, no subscription.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'CHATWITHPDFAI — chat with any PDF and get cited answers' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CHATWITHPDFAI — Read every PDF at light speed',
+    description: 'Drop a PDF. Ask anything. Get cited answers in seconds.',
+    images: ['/og-image.png'],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }) {

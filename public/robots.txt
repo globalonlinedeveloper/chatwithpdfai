@@ -1,14 +1,9 @@
+# CHATWITHPDFAI
 User-agent: *
 Allow: /
 
-# Don't crawl shared chat snapshots (privacy)
-Disallow: /share.html
-Disallow: /s/
-
-# Authentication routes — no crawl
-Disallow: /auth/
-Disallow: /account.html
-Disallow: /checkout.html
-Disallow: /app.html
+# Don't crawl API endpoints or private shared test links
+Disallow: /api/
+Disallow: /t/
 
 Sitemap: https://chatwithpdfai.com/sitemap.xml

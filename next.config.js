@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
 
   // Hostinger prunes node_modules aggressively. These tell Next.js to keep deps
   // for our server-only routes. Add new entries whenever a route imports a new pkg.
