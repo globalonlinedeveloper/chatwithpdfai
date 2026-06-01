@@ -5,7 +5,7 @@ import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
 import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
 import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
-import { rateLimit } from '@/lib/ratelimit';
+import { rateLimit, recordHit } from '@/lib/ratelimit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -117,7 +117,7 @@ async function verifyPass(sections) {
       items.push({ i, kind: 'value', line: '[' + i + '] ' + q.q + '\nMarked correct: ' + q.answer });
     }
   });
-  if (!items.length) return { credits: 0, fixes: 0 };
+  if (!items.length) return { verified: false, credits: 0, fixes: 0 };
   const sys = 'You are a meticulous exam answer-checker. Work through EACH numbered item INDEPENDENTLY and from scratch BEFORE trusting the marked answer:\n'
     + '- code-output items: mentally execute the code line by line and state the exact output.\n'
     + '- numeric/fill items: compute or recall the exact value step by step.\n'
@@ -128,8 +128,8 @@ async function verifyPass(sections) {
     + 'Output ONLY JSON: {"fixes":[{"i":<index>,"answer":<text|true|false>}]}. Include every item you are correcting; if all marked answers are correct, return {"fixes":[]}.';
   let result;
   try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: Math.min(2600, 500 + 90 * items.length), temperature: 0.1, jsonMode: true, prefer: 'google' }); }
-  catch { return { credits: 0, fixes: 0 }; }
-  let parsed; try { parsed = extractJson(result.text); } catch { return { credits: result.credits || 0, fixes: 0 }; }
+  catch { return { verified: false, credits: 0, fixes: 0 }; }
+  let parsed; try { parsed = extractJson(result.text); } catch { return { verified: false, credits: result.credits || 0, fixes: 0 }; }
   const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
   const kindByIdx = new Map(items.map((x) => [x.i, x.kind]));
   let n = 0;
@@ -150,7 +150,7 @@ async function verifyPass(sections) {
       if (c && c !== String(q.answer)) { q.answer = c; n++; }
     }
   }
-  return { credits: result.credits || 0, fixes: n };
+  return { verified: true, credits: result.credits || 0, fixes: n };
 }
 
 export async function POST(req) {
@@ -176,7 +176,7 @@ export async function POST(req) {
   const documentId = Number(body.documentId) || 0;
   if (topic.length < 3 && !documentId) return NextResponse.json({ error: 'Please describe the topic, or pick a source document.' }, { status: 400 });
 
-  if (!(await rateLimit({ bucket: 'paper', ip: 'u' + userId, max: 30, windowMin: 60 }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
+  if (!(await rateLimit({ bucket: 'paper', ip: 'u' + userId, max: 30, windowMin: 60, record: false }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   const topicKey = (topic || '').toLowerCase().slice(0, 80);
   let dbSeen = [];
@@ -242,7 +242,7 @@ export async function POST(req) {
 
     let totalCredits = result.credits + topUpCredits;
     let verifyInfo = { verified: false, fixes: 0 };
-    if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: true, fixes: vr.fixes }; }
+    if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: vr.verified, fixes: vr.fixes }; }
     try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO paper_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
 
     const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
@@ -254,6 +254,7 @@ export async function POST(req) {
     const balance = creditsEnforced() ? await getBalance(userId) : null;
     const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
+    await recordHit({ bucket: 'paper', ip: 'u' + userId });
     return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic || sourceName, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance, provider: result.provider, model: result.model });
   } catch (e) {
     const status = e.statusCode || 500;
