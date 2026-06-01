@@ -21,7 +21,7 @@ export default function AppNav({ active, credits, actions }) {
     <header className="no-print appnav" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 14, rowGap: 8, flexWrap: 'wrap', borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.85)', backdropFilter: 'blur(20px) saturate(180%)', flexShrink: 0, zIndex: 30, position: 'relative' }}>
       <a href="/home" className="brand" style={{ fontSize: 14, display: 'inline-flex', alignItems: 'center' }}><span className="brand-mark" style={{ width: 22, height: 22, fontSize: 11 }}>{'◇'}</span>chatwithpdfai<span className="domain">.com</span></a>
       <nav style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <a href="/home" style={navStyle(active === 'home')}>Home</a>
+        <a href="/home" style={navStyle(active === 'home')}>Dashboard</a>
         <a href="/tools" style={navStyle(toolsActive)}>Tools</a>
         <a href="/library" style={navStyle(active === 'library')}>Library</a>
       </nav>

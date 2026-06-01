@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 const NAV = [
-  { label: 'Product', href: '/#how', k: 'product' },
+  { label: 'Home', href: '/', k: 'home' },
   { label: 'Tools', href: '/tools', k: 'tools' },
   { label: 'Pricing', href: '/pricing', k: 'pricing' },
   { label: 'Help', href: '/help', k: 'help' },

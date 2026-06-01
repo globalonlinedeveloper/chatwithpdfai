@@ -6,7 +6,7 @@ import { Pricing, Security, FAQ } from './_components/landing/closing';
 
 export default function Home() {
   return (
-    <SiteShell active="product">
+    <SiteShell active="home">
       <Hero />
       <HowItWorks />
       <LivePreview />
