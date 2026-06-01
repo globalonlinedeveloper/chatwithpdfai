@@ -42,7 +42,7 @@ export function Footer() {
   const cols = [
     { h: 'Product', l: [['Features', '/#features'], ['Pricing', '/pricing']] },
     { h: 'Company', l: [['Contact', '/contact']] },
-    { h: 'Resources', l: [['Help', '/help'], ['Privacy', '/legal/privacy'], ['Terms', '/legal/terms'], ['Security', '/legal/security'], ['DPA', '/legal/dpa'], ['Cookies', '/legal/cookies']] },
+    { h: 'Resources', l: [['Guides', '/guides'], ['Help', '/help'], ['Privacy', '/legal/privacy'], ['Terms', '/legal/terms'], ['Security', '/legal/security'], ['DPA', '/legal/dpa'], ['Cookies', '/legal/cookies']] },
   ];
   return (
     <footer style={{ borderTop: '1px solid var(--stroke-1)', padding: '60px 0 30px', marginTop: 80 }}>
