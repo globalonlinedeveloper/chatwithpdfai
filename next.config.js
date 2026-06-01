@@ -32,6 +32,7 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/studio', destination: '/papers', permanent: true },
+      { source: '/workspace', destination: '/chat', permanent: true },
       { source: '/api/studio/:path*', destination: '/api/papers/:path*', permanent: false },
       { source: '/api/papers/papers', destination: '/api/papers/library', permanent: false },
       { source: '/api/papers/paper', destination: '/api/papers/generate', permanent: false },
@@ -55,8 +56,8 @@ const nextConfig = {
       { source: '/contact.html', destination: '/contact', permanent: true },
       { source: '/manifesto.html', destination: '/', permanent: true },
       { source: '/blog.html', destination: '/', permanent: true },
-      { source: '/chat.html', destination: '/workspace', permanent: true },
-      { source: '/upload.html', destination: '/workspace', permanent: true },
+      { source: '/chat.html', destination: '/chat', permanent: true },
+      { source: '/upload.html', destination: '/chat', permanent: true },
       { source: '/search.html', destination: '/', permanent: true },
       { source: '/invoice.html', destination: '/', permanent: true },
       { source: '/webhooks.html', destination: '/', permanent: true },

@@ -315,7 +315,7 @@ function UploadModal({ open, onClose, onUploaded }) {
               <h3 style={{ fontSize: 19, fontWeight: 600, margin: '4px 0 6px' }}>Looks like a duplicate</h3>
               <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 20px' }}>You already uploaded <strong style={{ color: 'var(--text)' }}>{name}</strong>. Open the existing one, or upload a fresh copy anyway.</p>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => { window.location.href = '/workspace?doc=' + dup.id; }} className="btn btn-iris" style={{ flex: 1, justifyContent: 'center' }}>Open existing</button>
+                <button onClick={() => { window.location.href = '/chat?doc=' + dup.id; }} className="btn btn-iris" style={{ flex: 1, justifyContent: 'center' }}>Open existing</button>
                 <button onClick={() => start(pending, true)} className="btn btn-glass" style={{ flex: 1, justifyContent: 'center' }}>Upload anyway</button>
               </div>
             </div>
@@ -339,7 +339,7 @@ function EmptyState({ onUpload }) {
   );
 }
 
-export default function WorkspacePage() {
+export default function ChatPage() {
   const [docs, setDocs] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [credits, setCredits] = useState(null);

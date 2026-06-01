@@ -34,9 +34,9 @@ export default function LibraryPage() {
 
         {tab === 'docs' && (docs === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
           const list = docs.filter((d) => (d.filename || '').toLowerCase().includes(ql));
-          if (!list.length) return empty(q ? 'No matching documents.' : 'No documents yet.', q ? null : '+ Upload your first PDF', '/workspace');
+          if (!list.length) return empty(q ? 'No matching documents.' : 'No documents yet.', q ? null : '+ Upload your first PDF', '/chat');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((d) => (
-            <a key={d.id} href={`/workspace?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16 }}>
+            <a key={d.id} href={`/chat?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}><div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', flexShrink: 0 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg></div><span className="pill" style={{ fontSize: 10, padding: '3px 8px', color: d.status === 'ready' ? 'var(--green)' : 'var(--text-3)' }}>{d.status}</span></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '12px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.pageCount ? d.pageCount + ' pp · ' : ''}{fmtSize(d.sizeBytes)}{d.createdAt ? ' · ' + fmtDate(d.createdAt) : ''}</div>

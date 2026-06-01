@@ -52,13 +52,13 @@ export default function HomePage() {
   const lastPaper = byDate(papers, 'createdAt')[0];
   const steps = [
     { done: verified, label: 'Verify your email', href: '/account', cta: 'Verify' },
-    { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/workspace', cta: 'Upload' },
+    { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/chat', cta: 'Upload' },
     { done: papers.length > 0, label: 'Generate your first question paper', href: '/papers', cta: 'Generate' },
   ];
   const allDone = steps.every((s) => s.done);
   const recent = [
     ...papers.map((p) => ({ key: 'p' + p.id, kind: 'paper', label: 'Paper', icon: PAPER_S, title: p.title, at: p.createdAt, href: '/papers?paper=' + p.id, meta: p.numQuestions ? p.numQuestions + ' Qs' : '' })),
-    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', label: 'PDF', icon: DOC_S, title: d.filename, at: d.createdAt || d.uploadedAt, href: '/workspace?doc=' + d.id, meta: [d.pageCount ? d.pageCount + ' pp' : '', fmtSize(d.sizeBytes)].filter(Boolean).join(' · ') })),
+    ...readyDocs.map((d) => ({ key: 'd' + d.id, kind: 'document', label: 'PDF', icon: DOC_S, title: d.filename, at: d.createdAt || d.uploadedAt, href: '/chat?doc=' + d.id, meta: [d.pageCount ? d.pageCount + ' pp' : '', fmtSize(d.sizeBytes)].filter(Boolean).join(' · ') })),
     ...tests.map((t) => ({ key: 't' + t.id, kind: 'test', label: 'Test', icon: TEST_S, title: t.title, at: t.createdAt, href: '/t/' + t.token, external: true, token: t.token, meta: t.attempts ? t.attempts + ' attempt' + (t.attempts > 1 ? 's' : '') : 'no attempts yet' })),
   ].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0)).slice(0, 8);
   function copyLink(token) { try { navigator.clipboard.writeText(window.location.origin + '/t/' + token); setCopied(token); setTimeout(() => setCopied(''), 1500); } catch (e) {} }
@@ -68,7 +68,7 @@ export default function HomePage() {
     else if (papers.length && !tests.length) suggest = { text: 'Share one of your papers as an online test for students.', href: '/papers', cta: 'Open' };
   }
   const tileMeta = {
-    'chat-with-pdf': { openLabel: readyDocs.length ? ('Open \u00b7 ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open', newHref: '/workspace', newLabel: '+ Upload PDF', sub: lastDoc ? ('Last: ' + lastDoc.filename + ' \u00b7 ' + relTime(lastDoc.createdAt)) : '' },
+    'chat-with-pdf': { openLabel: readyDocs.length ? ('Open \u00b7 ' + readyDocs.length + ' doc' + (readyDocs.length > 1 ? 's' : '')) : 'Open', newHref: '/chat', newLabel: '+ Upload PDF', sub: lastDoc ? ('Last: ' + lastDoc.filename + ' \u00b7 ' + relTime(lastDoc.createdAt)) : '' },
     'question-paper-generator': { openLabel: papers.length ? ('Open \u00b7 ' + papers.length + ' paper' + (papers.length > 1 ? 's' : '')) : 'Open', newHref: '/papers', newLabel: '+ New paper', sub: lastPaper ? ('Last: ' + lastPaper.title + ' \u00b7 ' + relTime(lastPaper.createdAt)) : '' },
   };
   const stats = [
