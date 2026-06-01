@@ -271,11 +271,11 @@ export default function PapersPage() {
   const presets = (CATEGORIES.find((c) => c.k === cat) || {}).presets || [];
 
   return (
-    <div id="studio-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div id="papers-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <AppNav active="papers" credits={credits} />
 
-      <div className="studio-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <aside className="no-print studio-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
+      <div className="papers-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <aside className="no-print papers-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
           <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
           <div className="eyebrow" style={{ marginBottom: 8 }}>My library{library.length ? ' (' + library.length + ')' : ''}</div>
           {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (
@@ -312,8 +312,8 @@ export default function PapersPage() {
           )}
         </aside>
 
-        <div id="main" className="studio-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
-          <section className="no-print studio-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
+        <div id="main" className="papers-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+          <section className="no-print papers-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
             <div className="eyebrow" style={{ marginBottom: 10 }}>Build</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
             {presets.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{presets.map((p) => <button key={p.label} type="button" onClick={() => applyPreset(p)} className="chip" style={{ cursor: 'pointer', fontSize: 12 }} data-testid="preset">{p.label}</button>)}</div>}
@@ -355,7 +355,7 @@ export default function PapersPage() {
             <div className="mono" style={{ marginTop: 12, fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em' }}>Answers are AI-generated &mdash; spot-check before using in a real exam.</div>
           </section>
 
-          <section className="studio-preview" style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.5)' }}>
+          <section className="papers-preview" style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.5)' }}>
             {!paper ? (
               <div className="no-print" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: 'var(--text-4)' }}>
                 <div style={{ maxWidth: 360 }}>
@@ -413,7 +413,7 @@ export default function PapersPage() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `@media print { .no-print { display: none !important; } #studio-shell, .studio-body, .studio-main, .studio-preview, #result-top { height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; } html, body { height: auto !important; overflow: visible !important; background: #fff !important; } #paper-print { border: none !important; border-radius: 0 !important; box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; } #paper-print .q-block, #paper-print .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } #paper-print .section-head { break-after: avoid !important; page-break-after: avoid !important; } #paper-print .pagebreak { page-break-before: always !important; break-before: page !important; } } @media (max-width: 880px) { #studio-shell { height: auto !important; overflow: visible !important; } .studio-body, .studio-main { flex-direction: column !important; } .studio-aside, .studio-build, .studio-preview { width: 100% !important; flex-shrink: 1 !important; overflow: visible !important; border-right: none !important; border-bottom: 1px solid var(--stroke-1) !important; } }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `@media print { .no-print { display: none !important; } #papers-shell, .papers-body, .papers-main, .papers-preview, #result-top { height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; } html, body { height: auto !important; overflow: visible !important; background: #fff !important; } #paper-print { border: none !important; border-radius: 0 !important; box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; } #paper-print .q-block, #paper-print .key-item { break-inside: avoid !important; page-break-inside: avoid !important; } #paper-print .section-head { break-after: avoid !important; page-break-after: avoid !important; } #paper-print .pagebreak { page-break-before: always !important; break-before: page !important; } } @media (max-width: 880px) { #papers-shell { height: auto !important; overflow: visible !important; } .papers-body, .papers-main { flex-direction: column !important; } .papers-aside, .papers-build, .papers-preview { width: 100% !important; flex-shrink: 1 !important; overflow: visible !important; border-right: none !important; border-bottom: 1px solid var(--stroke-1) !important; } }` }} />
     </div>
   );
 }

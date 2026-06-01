@@ -5,7 +5,7 @@ import AppNav from '../_components/AppNav';
 function Row({ label, value, extra }) {
   return (<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--stroke-1)' }}><span className="eyebrow">{label}</span><span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text)' }}>{value}{extra}</span></div>);
 }
-const REASON = { studio_paper: 'Question paper', chat: 'Chat', purchase: 'Purchase', grant: 'Bonus', refund: 'Refund', adjust: 'Adjustment' };
+const REASON = { paper: 'Question paper', chat: 'Chat', purchase: 'Purchase', grant: 'Bonus', refund: 'Refund', adjust: 'Adjustment' };
 function fmt(s) { try { return new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } }
 
 export default function AccountPage() {

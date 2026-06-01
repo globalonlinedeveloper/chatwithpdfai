@@ -12,12 +12,12 @@ export async function GET(req) {
   if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id')) || 0;
   if (id) {
-    const rows = await query('SELECT payload FROM studio_papers WHERE id = ? AND user_id = ?', [id, u.id]);
+    const rows = await query('SELECT payload FROM papers WHERE id = ? AND user_id = ?', [id, u.id]);
     if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     let paper = null; try { paper = JSON.parse(rows[0].payload); } catch {}
     return NextResponse.json({ ok: true, paper });
   }
-  const rows = await query('SELECT id, title, exam_style, num_questions, created_at FROM studio_papers WHERE user_id = ? ORDER BY created_at DESC LIMIT 100', [u.id]);
+  const rows = await query('SELECT id, title, exam_style, num_questions, created_at FROM papers WHERE user_id = ? ORDER BY created_at DESC LIMIT 100', [u.id]);
   return NextResponse.json({ ok: true, papers: rows.map((r) => ({ id: r.id, title: r.title, examStyle: r.exam_style, numQuestions: r.num_questions, createdAt: r.created_at })) });
 }
 
@@ -33,9 +33,9 @@ export async function POST(req) {
   const nQ = paper.sections.reduce((n, s) => n + (Array.isArray(s.questions) ? s.questions.length : 0), 0);
   const payload = JSON.stringify(paper);
   if (payload.length > 2000000) return NextResponse.json({ error: 'Paper too large to save' }, { status: 413 });
-  const cnt = await query('SELECT COUNT(*) AS c FROM studio_papers WHERE user_id = ?', [u.id]);
+  const cnt = await query('SELECT COUNT(*) AS c FROM papers WHERE user_id = ?', [u.id]);
   if (cnt[0] && Number(cnt[0].c) >= 200) return NextResponse.json({ error: 'Library is full (200) — delete some papers first.' }, { status: 409 });
-  const r = await query('INSERT INTO studio_papers (user_id, title, exam_style, num_questions, payload) VALUES (?,?,?,?,?)', [u.id, title, examStyle, nQ, payload]);
+  const r = await query('INSERT INTO papers (user_id, title, exam_style, num_questions, payload) VALUES (?,?,?,?,?)', [u.id, title, examStyle, nQ, payload]);
   return NextResponse.json({ ok: true, id: r.insertId });
 }
 
@@ -45,6 +45,6 @@ export async function DELETE(req) {
   if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id')) || 0;
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  await query('DELETE FROM studio_papers WHERE id = ? AND user_id = ?', [id, u.id]);
+  await query('DELETE FROM papers WHERE id = ? AND user_id = ?', [id, u.id]);
   return NextResponse.json({ ok: true });
 }

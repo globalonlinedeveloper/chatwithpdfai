@@ -176,11 +176,11 @@ export async function POST(req) {
   const documentId = Number(body.documentId) || 0;
   if (topic.length < 3 && !documentId) return NextResponse.json({ error: 'Please describe the topic, or pick a source document.' }, { status: 400 });
 
-  if (!(await rateLimit({ bucket: 'studio_paper', ip: 'u' + userId, max: 30, windowMin: 60 }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
+  if (!(await rateLimit({ bucket: 'paper', ip: 'u' + userId, max: 30, windowMin: 60 }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   const topicKey = (topic || '').toLowerCase().slice(0, 80);
   let dbSeen = [];
-  try { const seen = await query('SELECT stem FROM studio_seen_questions WHERE user_id = ? AND topic_key = ? ORDER BY created_at DESC LIMIT 120', [userId, topicKey]); dbSeen = seen.map((r) => r.stem); } catch (e) {}
+  try { const seen = await query('SELECT stem FROM paper_seen_questions WHERE user_id = ? AND topic_key = ? ORDER BY created_at DESC LIMIT 120', [userId, topicKey]); dbSeen = seen.map((r) => r.stem); } catch (e) {}
   const allExclude = [...new Set([...exclude, ...dbSeen])].slice(0, 100);
 
   let sourceContext = '', grounded = false, sourceName = '';
@@ -243,21 +243,21 @@ export async function POST(req) {
     let totalCredits = result.credits + topUpCredits;
     let verifyInfo = { verified: false, fixes: 0 };
     if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: true, fixes: vr.fixes }; }
-    try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO studio_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
+    try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO paper_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
 
     const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
     const nQ = outSections.reduce((n, s) => n + s.questions.length, 0);
     const durationMin = Math.max(15, Math.round(nQ * 1.5));
 
     let credits = totalCredits;
-    if (creditsEnforced()) credits = await chargeCredits(userId, totalCredits, 'studio_paper', 'studio', null);
+    if (creditsEnforced()) credits = await chargeCredits(userId, totalCredits, 'paper', 'paper', null);
     const balance = creditsEnforced() ? await getBalance(userId) : null;
     const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
     return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic || sourceName, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance, provider: result.provider, model: result.model });
   } catch (e) {
     const status = e.statusCode || 500;
-    if (status >= 500) console.error('[studio/paper] failed', e);
+    if (status >= 500) console.error('[papers/paper] failed', e);
     return NextResponse.json({ error: status === 502 ? 'AI providers are unavailable right now.' : 'Generation failed' }, { status });
   }
 }
