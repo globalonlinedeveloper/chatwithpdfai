@@ -1,4 +1,5 @@
-import SiteShell, { PageHeader } from '../_components/Chrome';
+import ToolsShell from '../_components/ToolsShell';
+import { PageHeader } from '../_components/Chrome';
 import ToolCardClient from '../_components/ToolCardClient';
 import { TOOLS, CATEGORIES } from '@/lib/tools';
 
@@ -9,7 +10,7 @@ export const metadata = {
 
 export default function ToolsPage() {
   return (
-    <SiteShell active="tools">
+    <ToolsShell active="tools">
       <PageHeader eyebrow="Tools" title="Every PDF tool in one place" lede="Read, understand and create from your documents. Pay per use — no subscription." />
       <section className="spread" style={{ paddingBottom: 80 }}>
         {CATEGORIES.map((cat) => {
@@ -25,6 +26,6 @@ export default function ToolsPage() {
           );
         })}
       </section>
-    </SiteShell>
+    </ToolsShell>
   );
 }

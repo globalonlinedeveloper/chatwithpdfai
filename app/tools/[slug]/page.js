@@ -1,12 +1,9 @@
-import SiteShell from '../../_components/Chrome';
+import ToolsShell from '../../_components/ToolsShell';
 import ToolIcon from '../../_components/ToolIcon';
 import UseTool from '../../_components/UseTool';
-import { TOOLS, toolBySlug } from '@/lib/tools';
+import { toolBySlug } from '@/lib/tools';
 import { notFound } from 'next/navigation';
 
-export function generateStaticParams() {
-  return TOOLS.filter((t) => t.status === 'live').map((t) => ({ slug: t.slug }));
-}
 export function generateMetadata({ params }) {
   const t = toolBySlug(params.slug);
   if (!t) return { title: 'Tool — CHATWITHPDFAI' };
@@ -18,7 +15,7 @@ export default function ToolPage({ params }) {
   if (!t || t.status !== 'live') notFound();
   const ld = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: t.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
   return (
-    <SiteShell active="tools">
+    <ToolsShell active="tools">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <section style={{ padding: '60px 0 30px', position: 'relative', overflow: 'hidden' }}>
         <div className="section-blob" style={{ background: 'radial-gradient(circle, var(--violet), transparent 60%)', top: -100, right: -100, opacity: 0.3 }} />
@@ -60,6 +57,6 @@ export default function ToolPage({ params }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}><UseTool appHref={t.appHref} label={'Use ' + t.name} /></div>
         </div>
       </section>
-    </SiteShell>
+    </ToolsShell>
   );
 }

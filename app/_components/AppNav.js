@@ -2,11 +2,14 @@
 import { useState, useEffect } from 'react';
 import { liveTools } from '@/lib/tools';
 
-export default function AppNav({ active, credits, actions }) {
+export default function AppNav({ active, credits: creditsProp, actions }) {
   const [menu, setMenu] = useState(false);
   const [initials, setInitials] = useState('');
+  const [creditsSelf, setCreditsSelf] = useState(null);
+  const credits = creditsProp != null ? creditsProp : creditsSelf;
   useEffect(() => {
     fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { const s = String(j.user.name || j.user.email || '?').trim(); setInitials(s.slice(0, 1).toUpperCase()); } }).catch(() => {});
+    if (creditsProp == null) fetch('/api/credits').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && typeof j.balance === 'number') setCreditsSelf(j.balance); }).catch(() => {});
     const close = () => setMenu(false);
     const onKey = (e) => { if (e.key === 'Escape') setMenu(false); };
     window.addEventListener('click', close);
@@ -15,7 +18,7 @@ export default function AppNav({ active, credits, actions }) {
   }, []);
   async function signOut() { try { await fetch('/api/auth/signout', { method: 'POST' }); } catch (e) {} window.location.href = '/'; }
   const navStyle = (on) => ({ fontSize: 13, padding: '5px 11px', borderRadius: 'var(--r)', textDecoration: 'none', color: on ? 'var(--text)' : 'var(--text-3)', background: on ? 'var(--glass-2)' : 'transparent' });
-  const toolsActive = liveTools().some((t) => t.navKey === active);
+  const toolsActive = active === 'tools' || liveTools().some((t) => t.navKey === active);
   const mItem = { display: 'block', padding: '7px 10px', fontSize: 13, color: 'var(--text-2)', textDecoration: 'none', borderRadius: 'var(--r)', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' };
   return (
     <header className="no-print appnav" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 14, rowGap: 8, flexWrap: 'wrap', borderBottom: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.85)', backdropFilter: 'blur(20px) saturate(180%)', flexShrink: 0, zIndex: 30, position: 'relative' }}>
