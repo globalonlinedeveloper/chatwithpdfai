@@ -152,6 +152,9 @@ function EditAnswerControl({ q, gi, onPatch }) {
 export default function PapersPage() {
   const [bpKey, setBpKey] = useState('custom'); // selected exam-blueprint dropdown value ('custom' = define your own sections)
   const [asideOpen, setAsideOpen] = useState(true); // left papers panel collapse toggle
+  const [fullSize, setFullSize] = useState(false); // "Full real-size exam" toggle (batched generation)
+  const [fullConfirm, setFullConfirm] = useState(false); // showing the full-size confirm panel
+  const [fullProg, setFullProg] = useState(''); // batch progress text during full generation
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -267,6 +270,9 @@ export default function PapersPage() {
   const bpLabel = isBP ? bpKey.slice(bpKey.split('||')[0].length + 2) : '';
   const _bpPreset = isBP ? (CATEGORIES.find((x) => x.k === bpKey.split('||')[0]) || { presets: [] }).presets.find((p) => (bpKey.split('||')[0] + '||' + p.label) === bpKey) : null;
   const bpReal = (_bpPreset && _bpPreset.real) ? _bpPreset.real : '';
+  const bpFull = (_bpPreset && Array.isArray(_bpPreset.full)) ? _bpPreset.full : null;
+  const fullTotalQ = bpFull ? bpFull.reduce((a, s) => a + Number(s.count || 0), 0) : 0;
+  const fullBatches = bpFull ? bpFull.reduce((a, s) => a + Math.ceil(Number(s.count || 0) / 30), 0) : 0;
   const hasScope = topic.trim().length > 0;
   const fromPDF = Number(sourceDocId) > 0;
   const canGen = Boolean(isBP || fromPDF || hasScope);
@@ -282,6 +288,47 @@ export default function PapersPage() {
   // The set shown in the preview/print + driving the exporters. Falls back to the master.
   const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
   const activePaper = setsArr[curSet] || paper;
+  async function generateFull() {
+    if (!bpFull) { generate(); return; }
+    const MAXCHUNK = 30;
+    const plan = [];
+    bpFull.forEach((s, si) => { let rem = Number(s.count || 0); const type = (Array.isArray(s.types) ? s.types[0] : s.type) || 'mcq'; while (rem > 0) { const n = Math.min(MAXCHUNK, rem); plan.push({ si, title: s.title, type, marks: Number(s.marks || 1), count: n }); rem -= n; } });
+    const wantTotal = bpFull.reduce((a, s) => a + Number(s.count || 0), 0);
+    if (typeof credits === 'number' && credits < 1) { setNote("You're out of credits — buy a pack to generate."); return; }
+    cancelGenerate();
+    const controller = new AbortController(); abortRef.current = controller;
+    stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
+    setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper'); setCurSet(0);
+    const acc = bpFull.map(() => []); const seen = []; let used = 0; let bal = null; let failed = 0; let stopped = false;
+    try {
+      for (let b = 0; b < plan.length; b++) {
+        if (controller.signal.aborted) { stopped = true; break; }
+        const pp = plan[b];
+        setFullProg('Batch ' + (b + 1) + ' of ' + plan.length + ' \u2014 ' + pp.title);
+        const body = { topic: topic.trim(), examStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: false, documentId: sourceDocId };
+        let r, j;
+        try { r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(body) }); }
+        catch (e) { if (e && e.name === 'AbortError') { stopped = true; break; } failed++; continue; }
+        j = await r.json().catch(() => ({}));
+        if (!r.ok) { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; } if (r.status === 402) { setNote('Ran out of credits after ' + b + ' of ' + plan.length + ' batches.'); break; } failed++; continue; }
+        const qs = (j.paper && Array.isArray(j.paper.sections) && j.paper.sections[0] && Array.isArray(j.paper.sections[0].questions)) ? j.paper.sections[0].questions : [];
+        acc[pp.si] = acc[pp.si].concat(qs);
+        qs.forEach((q) => seen.push(String((q && (q.q || q.assertion)) || '').slice(0, 140)));
+        if (typeof j.credits === 'number') used += j.credits;
+        if (typeof j.balance === 'number') bal = j.balance;
+      }
+      const finalSections = bpFull.map((s, i) => ({ title: s.title, marks: Number(s.marks || 1), questions: acc[i] }));
+      const got = finalSections.reduce((a, s) => a + s.questions.length, 0);
+      if (got === 0) { setNote(stopped ? 'Generation cancelled.' : 'Could not generate the full paper — please try again.'); setBusy(false); stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; return; }
+      const totalMarks = finalSections.reduce((m, s) => m + s.questions.length * Number(s.marks || 1), 0);
+      const paperObj = { title: (examStyle || 'Full') + ' \u2014 full paper', examStyle, language, difficulty, institution, instructions, totalMarks, durationMin: Math.max(30, Math.round(got * 1.1)), sections: finalSections, verified: false, grounded: false, layout };
+      setPaper(paperObj); setUsed(used); if (bal != null) setCredits(bal);
+      if (got < wantTotal) setShortWarn('Built ' + got + ' of ' + wantTotal + ' questions' + (failed ? ' (' + failed + ' batch(es) failed)' : (stopped ? ' (stopped)' : '')) + '. Regenerate to fill the gaps.');
+      setBusy(false);
+      setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+    } catch (e) { setNote(e.message); setBusy(false); }
+    finally { stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; }
+  }
 
   return (
     <div id="papers-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -340,6 +387,7 @@ export default function PapersPage() {
             </select>
             <div data-testid="bp-note" style={{ fontSize: 11.5, marginTop: 7, marginBottom: bpReal ? 3 : 16, color: isBP ? 'var(--green)' : 'var(--text-3)' }}>{isBP ? '✓ blueprint-aligned — sections, marks & weights' : '✎ custom — you define the sections below'}</div>
             {bpReal ? <div data-testid="bp-real" style={{ fontSize: 11, color: 'var(--text-4)', marginBottom: 16 }}>Real exam: {bpReal} · builds a focused set you can scale up.</div> : null}
+            {bpFull ? <label data-testid="full-toggle" style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: 'var(--text-2)', margin: '-6px 0 16px', cursor: 'pointer' }}><input type="checkbox" checked={fullSize} onChange={(e) => { setFullSize(e.target.checked); setFullConfirm(false); }} /> Full real-size exam — {fullTotalQ} questions, in {fullBatches} batches{fullSize ? ' (uses more credits)' : ''}</label> : null}
             <div className="eyebrow" style={{ marginBottom: 8 }}>Content source</div>
             {docs.length > 0 ? (
               <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} aria-label="Content source" style={{ ...ctrl, width: '100%', minWidth: 0 }} data-testid="source-select">
@@ -379,7 +427,13 @@ export default function PapersPage() {
               <span style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }} title="Produce A/B/C… versions with questions and options shuffled (same answer key per set)"><span style={{ color: 'var(--text-3)' }}>Shuffled sets</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: 2 }}><button type="button" onClick={() => { setSets((v) => clampInt(v - 1, 1, 4)); setCurSet(0); }} disabled={sets <= 1} aria-label="Fewer sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-dec">−</button><span data-testid="sets-value" style={{ minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{sets}</span><button type="button" onClick={() => { setSets((v) => clampInt(v + 1, 1, 4)); setCurSet(0); }} disabled={sets >= 4} aria-label="More sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-inc">+</button></span></span>
             </div>
             <div data-testid="gen-explain" style={{ fontSize: 12, lineHeight: 1.45, minHeight: 17, margin: '14px 0 4px', color: canGen ? 'var(--text-3)' : '#ffb4b4' }}>{genExplain}</div>
-            <button onClick={generate} disabled={busy || !canGen} className={(busy || !canGen) ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 4, opacity: (!busy && !canGen) ? 0.6 : 1 }}>{busy ? 'Generating…' : '⚡ Generate paper'}</button>
+            <button onClick={() => { if (fullSize && bpFull) setFullConfirm(true); else generate(); }} disabled={busy || (!fullSize && !canGen)} className={(busy || (!fullSize && !canGen)) ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 4, opacity: (!busy && !fullSize && !canGen) ? 0.6 : 1 }}>{busy ? 'Generating…' : (fullSize && bpFull ? '⚡ Generate full paper · ' + fullBatches + ' batches' : '⚡ Generate paper')}</button>
+            {fullConfirm && !busy ? (
+              <div data-testid="full-confirm" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--violet)' }}>
+                <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginBottom: 8 }}>Build the full <b style={{ fontWeight: 600 }}>{fullTotalQ}-question</b> {examStyle} paper in {fullBatches} batches. This uses more credits than a focused set and can take a couple of minutes.</div>
+                <div style={{ display: 'flex', gap: 8 }}><button type="button" onClick={() => { setFullConfirm(false); generateFull(); }} className="btn btn-iris btn-sm" data-testid="full-go">Generate full paper</button><button type="button" onClick={() => setFullConfirm(false)} className="btn btn-glass btn-sm">Cancel</button></div>
+              </div>
+            ) : null}
             {note && <div style={{ marginTop: 12, fontSize: 13, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
             <div className="mono" style={{ marginTop: 12, fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em' }}>Answers are AI-generated &mdash; spot-check before using in a real exam.</div>
           </section>
@@ -391,7 +445,7 @@ export default function PapersPage() {
                   <div style={{ maxWidth: 380 }} data-testid="gen-progress" role="status" aria-live="polite">
                     <div className="qpg-spinner" style={{ width: 40, height: 40, margin: '0 auto 16px', borderRadius: '50%', border: '3px solid var(--stroke-2)', borderTopColor: 'var(--violet-2)' }} />
                     <div style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 4 }}>Generating your paper… <span className="mono" style={{ color: 'var(--text-3)' }}>{elapsed}s</span></div>
-                    <div style={{ fontSize: 12.5, marginBottom: 14 }}>Writing questions, then verifying the answer key — this usually takes 10–30s.</div>
+                    <div style={{ fontSize: 12.5, marginBottom: 14 }}>{fullProg || 'Writing questions, then verifying the answer key — this usually takes 10–30s.'}</div>
                     <button type="button" onClick={cancelGenerate} className="btn btn-glass btn-sm" data-testid="cancel-gen">Cancel</button>
                   </div>
                 ) : (
