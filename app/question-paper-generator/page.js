@@ -1,8 +1,9 @@
 'use client';
 import AppNav from '../_components/AppNav';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 import { grade, correctText } from './grade.js';
+import { deriveSets } from './sets.js';
 
 const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
 const ALL_TYPES = Object.keys(TYPE_LABELS);
@@ -196,6 +197,8 @@ export default function PapersPage() {
   const [note, setNote] = useState('');
   const [view, setView] = useState('paper');
   const [layout, setLayout] = useState('official');
+  const [sets, setSets] = useState(1); // number of shuffled sets to produce (1 = off)
+  const [curSet, setCurSet] = useState(0); // index of the set currently shown/printed
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
   const [editAns, setEditAns] = useState(false);
@@ -216,7 +219,7 @@ export default function PapersPage() {
   function delSec(i) { setSections((cur) => cur.length > 1 ? cur.filter((_, j) => j !== i) : cur); }
   function loadLibrary() { fetch('/api/papers/library').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.papers)) setLibrary(j.papers); }).catch(() => {}); }
   async function savePaper() { if (!paper) return; setSavedMsg('Saving\u2026'); try { const r = await fetch('/api/papers/library', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok) { setSavedMsg('Saved to library'); loadLibrary(); setTimeout(() => setSavedMsg(''), 2200); } else setSavedMsg(j.error || 'Save failed'); } catch (e) { setSavedMsg(e.message); } }
-  async function openPaper(id) { try { const r = await fetch('/api/papers/library?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && j.paper) { setPaper(j.paper); setLayout(j.paper.layout || 'official'); setView('paper'); setChecked(false); setAnswers({}); setUsed(null); setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); } } catch (e) {} }
+  async function openPaper(id) { try { const r = await fetch('/api/papers/library?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && j.paper) { setPaper(j.paper); setCurSet(0); setLayout(j.paper.layout || 'official'); setView('paper'); setChecked(false); setAnswers({}); setUsed(null); setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); } } catch (e) {} }
   async function delPaper(id) { try { await fetch('/api/papers/library?id=' + id, { method: 'DELETE' }); loadLibrary(); } catch (e) {} }
   function loadShares() { fetch('/api/papers/assignments').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.assignments)) setShares(j.assignments); }).catch(() => {}); }
   async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/papers/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
@@ -257,7 +260,8 @@ export default function PapersPage() {
         else setNote(j.error || 'Generation failed');
         setBusy(false); return;
       }
-      setPaper({ ...j.paper, layout }); setUsed(j.credits);
+      const master = { ...j.paper, layout };
+      setPaper(master); setUsed(j.credits); setCurSet(0);
       // Short-paper warning: the model sometimes returns fewer questions than requested.
       const got = ((j.paper && Array.isArray(j.paper.sections)) ? j.paper.sections : []).reduce((nn, s) => nn + ((s && Array.isArray(s.questions)) ? s.questions.length : 0), 0);
       if (requested && got < requested) setShortWarn('Generated ' + got + ' of ' + requested + ' questions — the model returned fewer for some sections. Try Regenerate or simpler sections.');
@@ -278,6 +282,9 @@ export default function PapersPage() {
 
   const ctrl = { padding: '7px 10px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12.5, fontFamily: 'inherit' };
   const presets = (CATEGORIES.find((c) => c.k === cat) || {}).presets || [];
+  // The set shown in the preview/print + driving the exporters. Falls back to the master.
+  const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
+  const activePaper = setsArr[curSet] || paper;
 
   return (
     <div id="papers-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -285,7 +292,7 @@ export default function PapersPage() {
 
       <div className="papers-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <aside className="no-print papers-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
-          <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
+          <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); setCurSet(0); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
           <div className="eyebrow" style={{ marginBottom: 8 }}>My library{library.length ? ' (' + library.length + ')' : ''}</div>
           {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
@@ -358,6 +365,7 @@ export default function PapersPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 12 }}>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
+              <span style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }} title="Produce A/B/C… versions with questions and options shuffled (same answer key per set)"><span style={{ color: 'var(--text-3)' }}>Shuffled sets</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: 2 }}><button type="button" onClick={() => { setSets((v) => clampInt(v - 1, 1, 4)); setCurSet(0); }} disabled={sets <= 1} aria-label="Fewer sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-dec">−</button><span data-testid="sets-value" style={{ minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{sets}</span><button type="button" onClick={() => { setSets((v) => clampInt(v + 1, 1, 4)); setCurSet(0); }} disabled={sets >= 4} aria-label="More sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-inc">+</button></span></span>
             </div>
             <button onClick={generate} disabled={busy} className={busy ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 16 }}>{busy ? 'Generating…' : 'Generate paper →'}</button>
             {note && <div style={{ marginTop: 12, fontSize: 13, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
@@ -391,7 +399,10 @@ export default function PapersPage() {
                     <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
                     <button onClick={() => { setView('practice'); setChecked(false); }} className={view === 'practice' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-practice">Practice</button>
                   </div>
-                  {view === 'paper' && <><label style={{ fontSize: 11.5, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 5 }}>Layout<select value={paper.layout || layout} onChange={(e) => { const v = e.target.value; setLayout(v); setPaper((pp) => pp ? { ...pp, layout: v } : pp); }} aria-label="Layout" style={{ padding: '5px 8px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12 }} data-testid="layout-select"><option value="official">Official</option><option value="clean">Clean</option><option value="compact">Compact</option></select></label><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} disabled={busy} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><button onClick={() => setEditAns((v) => !v)} className={editAns ? 'btn btn-iris' : 'btn btn-glass'} data-testid="edit-answers">{editAns ? 'Done editing' : 'Edit answers'}</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">{'✓'} answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(paper.title) + '.xml', toMoodleXML(paper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(paper.title) + '.gift.txt', toGIFT(paper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(paper.title) + '.csv', toCSV(paper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
+                  {setsArr.length > 1 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} data-testid="set-switcher"><span style={{ fontSize: 11.5, color: 'var(--text-3)', marginRight: 2 }}>Set</span><div style={{ display: 'flex', gap: 4, background: 'var(--glass-1)', borderRadius: 'var(--r)', padding: 3 }}>{setsArr.map((sp, i) => <button key={i} onClick={() => setCurSet(i)} className={curSet === i ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid={'set-tab-' + i} aria-pressed={curSet === i}>{sp.setLabel || String.fromCharCode(65 + i)}</button>)}</div></div>
+                  )}
+                  {view === 'paper' && <><label style={{ fontSize: 11.5, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 5 }}>Layout<select value={paper.layout || layout} onChange={(e) => { const v = e.target.value; setLayout(v); setPaper((pp) => pp ? { ...pp, layout: v } : pp); }} aria-label="Layout" style={{ padding: '5px 8px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12 }} data-testid="layout-select"><option value="official">Official</option><option value="clean">Clean</option><option value="compact">Compact</option></select></label><button onClick={() => window.print()} className="btn btn-iris" data-testid="save-pdf">Save as PDF / Print</button><button onClick={generate} disabled={busy} className="btn btn-glass">Regenerate</button><button onClick={savePaper} className="btn btn-glass" data-testid="save-library">+ Save to library</button><button onClick={shareTest} className="btn btn-glass" data-testid="share-test">Share as test</button><button onClick={() => setEditAns((v) => !v)} className={editAns ? 'btn btn-iris' : 'btn btn-glass'} data-testid="edit-answers">{editAns ? 'Done editing' : 'Edit answers'}</button><span className="mono" style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{includeKey ? 'teacher copy' : 'student copy'}{used != null ? ' · used ' + used + ' CR' : ''}</span>{paper.verified && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="verified">{'✓'} answers verified{paper.fixes ? ' (' + paper.fixes + ' corrected)' : ''}</span>}<span style={{ fontSize: 11.5, color: 'var(--text-3)', marginLeft: 4 }}>Export:</span><button onClick={() => downloadText(slug(activePaper.title) + (setsArr.length > 1 ? '-' + (activePaper.setLabel || '') : '') + '.xml', toMoodleXML(activePaper), 'application/xml')} className="btn btn-glass btn-sm" data-testid="export-xml">Moodle XML</button><button onClick={() => downloadText(slug(activePaper.title) + (setsArr.length > 1 ? '-' + (activePaper.setLabel || '') : '') + '.gift.txt', toGIFT(activePaper))} className="btn btn-glass btn-sm" data-testid="export-gift">GIFT</button><button onClick={() => downloadText(slug(activePaper.title) + (setsArr.length > 1 ? '-' + (activePaper.setLabel || '') : '') + '.csv', toCSV(activePaper), 'text/csv')} className="btn btn-glass btn-sm" data-testid="export-csv">CSV</button>{savedMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--green)' }} data-testid="saved-msg">{savedMsg}</span>}{shareMsg && <span className="mono" style={{ fontSize: 11, color: 'var(--violet-2)' }} data-testid="share-msg">{shareMsg}</span>}</>}
                   {view === 'practice' && (checked
                     ? <><span style={{ fontSize: 15, fontWeight: 600 }} data-testid="score">Score {correctN} / {autoTotal}{autoTotal ? ' (' + Math.round(100 * correctN / autoTotal) + '%)' : ''}</span>{writtenN > 0 && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>+ {writtenN} written to self-check</span>}<button onClick={() => { setChecked(false); setAnswers({}); }} className="btn btn-glass btn-sm">Try again</button></>
                     : <button onClick={() => setChecked(true)} className="btn btn-iris" data-testid="check-answers">Check answers</button>)}
@@ -412,7 +423,7 @@ export default function PapersPage() {
                 )}
                 {view === 'paper' ? (
                   <div id="paper-print" style={{ background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)' }}>
-                    <PaperView paper={paper} layout={paper.layout || layout} includeKey={includeKey} />
+                    <PaperView paper={activePaper} layout={paper.layout || layout} includeKey={includeKey} />
                   </div>
                 ) : (
                   <div className="glass" style={{ padding: '24px 26px', borderRadius: 'var(--r-lg)', maxWidth: 760, margin: '0 auto' }}>
