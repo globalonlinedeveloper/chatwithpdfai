@@ -194,7 +194,7 @@ export default function PapersPage() {
 
   useEffect(() => { try { const d = Number(new URLSearchParams(window.location.search).get('doc')) || 0; if (d) setSourceDocId(d); } catch (e) {} }, []);
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
-    fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents.filter((d) => d.status === 'ready')); }).catch(() => {});
+    fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) { const _seen = new Set(); setDocs(j.documents.filter((d) => d.status === 'ready').filter((d) => { const k = (d.filename || '') + '|' + (d.sizeBytes || 0); if (_seen.has(k)) return false; _seen.add(k); return true; })); } }).catch(() => {});
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }

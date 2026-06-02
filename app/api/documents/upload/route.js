@@ -62,7 +62,7 @@ export async function POST(req) {
 
   const force = new URL(req.url).searchParams.get('force') === '1';
   if (!force) {
-    const dup = await query('SELECT id FROM pdf_documents WHERE user_id = ? AND original_filename = ? AND file_size_bytes = ? AND status = ? ORDER BY id DESC LIMIT 1', [userId, filename, buf.length, 'ready']);
+    const dup = await query("SELECT id FROM pdf_documents WHERE user_id = ? AND original_filename = ? AND file_size_bytes = ? AND status IN ('ready','processing') ORDER BY id DESC LIMIT 1", [userId, filename, buf.length]);
     if (dup && dup[0]) return NextResponse.json({ error: 'You already uploaded this file.', duplicate: true, existingId: dup[0].id, filename }, { status: 409 });
   }
 
