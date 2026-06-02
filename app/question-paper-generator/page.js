@@ -509,12 +509,14 @@ export default function PapersPage() {
               </div>
             ) : (<>
               {sections.map((s, i) => (
-                <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 7 }} data-testid="section-row">
-                  <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" aria-label="Section title" className="input" style={{ flex: 1, minWidth: 0, fontSize: 12.5, padding: '7px 10px' }} />
-                  <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} aria-label="Question type" style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
-                  <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: clampInt(e.target.value, 1, 30) })} aria-label="Questions in section" className="qpg-num" style={{ ...ctrl, width: 58 }} /></label>
-                  <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} step={0.5} value={s.marks} onChange={(e) => setSec(i, { marks: clampHalf(e.target.value, 1, 20) })} aria-label="Marks per question" className="qpg-num" style={{ ...ctrl, width: 58 }} /></label>
-                  <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 7, padding: '8px 9px', background: 'var(--glass-1)', border: '1px solid var(--stroke-1)', borderRadius: 'var(--r)' }} data-testid="section-row">
+                  <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" aria-label="Section title" className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 12.5, padding: '7px 10px' }} />
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} aria-label="Question type" style={{ ...ctrl, flex: 1, minWidth: 0 }}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
+                    <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: clampInt(e.target.value, 1, 30) })} aria-label="Questions in section" className="qpg-num" style={{ ...ctrl, width: 58 }} /></label>
+                    <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} step={0.5} value={s.marks} onChange={(e) => setSec(i, { marks: clampHalf(e.target.value, 1, 20) })} aria-label="Marks per question" className="qpg-num" style={{ ...ctrl, width: 58 }} /></label>
+                    <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
+                  </div>
                 </div>
               ))}
               <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
