@@ -7,6 +7,10 @@ import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
 import { rateLimit, recordHit } from '@/lib/ratelimit';
 import { langInstr as langInstrFor, isLang } from '@/lib/languages';
+// Same-language default query for PDF retrieval when Scope is blank — improves
+// grounding precision for Indic-language source documents (embeddings are multilingual).
+const DEFAULT_RETRIEVAL_Q = { en: 'key concepts, definitions, facts and important points', ta: 'முக்கியக் கருத்துகள், வரையறைகள், உண்மைகள் மற்றும் முக்கியத் தகவல்கள்', hi: 'मुख्य अवधारणाएँ, परिभाषाएँ, तथ्य और महत्वपूर्ण बिंदु' };
+function retrievalDefaultQuery(language) { const base = String(language || 'en').split('-')[0]; return DEFAULT_RETRIEVAL_Q[base] || DEFAULT_RETRIEVAL_Q.en; }
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -194,7 +198,7 @@ export async function POST(req) {
     if (doc.status !== 'ready') return NextResponse.json({ error: 'That document is still processing' }, { status: 409 });
     sourceName = doc.original_filename || '';
     let pages = [];
-    try { pages = await retrievePagesMulti({ documentIds: [documentId], query: topic || 'key concepts, definitions, facts and important points', topK: 14 }); } catch (e) { pages = []; }
+    try { pages = await retrievePagesMulti({ documentIds: [documentId], query: topic || retrievalDefaultQuery(language), topK: 14 }); } catch (e) { pages = []; }
     if (!pages.length) return NextResponse.json({ error: 'No readable content found in that document' }, { status: 409 });
     sourceContext = pages.map((p) => `[p.${p.page_number}] ${String(p.text).slice(0, 1000)}`).join('\n\n');
     grounded = true;

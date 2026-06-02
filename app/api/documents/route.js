@@ -38,6 +38,7 @@ export async function GET(req) {
       pageCount: r.page_count ?? 0,
       sizeBytes: r.file_size_bytes ?? 0,
       createdAt: r.created_at,
+      lang: r.lang || 'en',
     }));
     return NextResponse.json({ ok: true, documents: docs });
   } catch (e) {
