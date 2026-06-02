@@ -273,6 +273,8 @@ export default function PapersPage() {
   const bpFull = (_bpPreset && Array.isArray(_bpPreset.full)) ? _bpPreset.full : null;
   const fullTotalQ = bpFull ? bpFull.reduce((a, s) => a + Number(s.count || 0), 0) : 0;
   const fullBatches = bpFull ? bpFull.reduce((a, s) => a + Math.ceil(Number(s.count || 0) / 30), 0) : 0;
+  const isFullRO = Boolean(fullSize && bpFull);
+  const dispTotalMarks = isFullRO ? bpFull.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0) : totalMarks;
   const hasScope = topic.trim().length > 0;
   const fromPDF = Number(sourceDocId) > 0;
   const canGen = Boolean(isBP || fromPDF || hasScope);
@@ -404,17 +406,29 @@ export default function PapersPage() {
               <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" aria-label="Institution or exam name" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
               <input value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Instructions (optional)" aria-label="Instructions" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
             </div>
-            <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Sections &mdash; {totalQ} questions {'·'} {totalMarks} marks</div>
-            {sections.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 7 }} data-testid="section-row">
-                <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" aria-label="Section title" className="input" style={{ flex: 1, minWidth: 0, fontSize: 12.5, padding: '7px 10px' }} />
-                <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} aria-label="Question type" style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
-                <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: clampInt(e.target.value, 1, 30) })} aria-label="Questions in section" style={{ ...ctrl, width: 50 }} /></label>
-                <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} value={s.marks} onChange={(e) => setSec(i, { marks: clampInt(e.target.value, 1, 20) })} aria-label="Marks per question" style={{ ...ctrl, width: 46 }} /></label>
-                <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
+            <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Sections &mdash; {isFullRO ? fullTotalQ : totalQ} questions {'·'} {dispTotalMarks} marks{isFullRO ? ' · full real size' : ''}</div>
+            {isFullRO ? (
+              <div data-testid="full-sections">
+                {bpFull.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '8px 11px', background: 'var(--glass-1)', border: '1px solid var(--stroke-1)', borderRadius: 'var(--r)', marginBottom: 6 }} data-testid="section-row">
+                    <span style={{ fontSize: 12.5, color: 'var(--text-2)' }}>{s.title}</span>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-4)', whiteSpace: 'nowrap' }}>{TYPE_LABELS[(Array.isArray(s.types) ? s.types[0] : s.type)] || 'Multiple choice'} {'·'} {s.count} {'×'} {s.marks}</span>
+                  </div>
+                ))}
+                <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>Real exam structure &mdash; built in {fullBatches} batches. Uncheck &ldquo;Full real-size&rdquo; above to edit sections.</div>
               </div>
-            ))}
-            <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
+            ) : (<>
+              {sections.map((s, i) => (
+                <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 7 }} data-testid="section-row">
+                  <input value={s.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Section title" aria-label="Section title" className="input" style={{ flex: 1, minWidth: 0, fontSize: 12.5, padding: '7px 10px' }} />
+                  <select value={s.type} onChange={(e) => setSec(i, { type: e.target.value })} aria-label="Question type" style={ctrl}>{ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}</select>
+                  <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Qs <input type="number" min={1} max={30} value={s.count} onChange={(e) => setSec(i, { count: clampInt(e.target.value, 1, 30) })} aria-label="Questions in section" style={{ ...ctrl, width: 50 }} /></label>
+                  <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} value={s.marks} onChange={(e) => setSec(i, { marks: clampInt(e.target.value, 1, 20) })} aria-label="Marks per question" style={{ ...ctrl, width: 46 }} /></label>
+                  <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
+                </div>
+              ))}
+              <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
+            </>)}
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
               <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} aria-label="Difficulty" style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
               <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
