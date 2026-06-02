@@ -157,12 +157,16 @@ function EditAnswerControl({ q, gi, onPatch }) {
 function OMRSheet({ paper }) {
   const qs = (paper.sections || []).flatMap((s) => s.questions);
   const circle = (lbl) => <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 17, height: 17, borderRadius: '50%', border: '1px solid #333', fontSize: 9, marginRight: 5 }}>{lbl}</span>;
-  const row = (q, n) => {
+  const cell = (label, opts, key) => (<div key={key} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0', fontSize: 12, breakInside: 'avoid' }}><span style={{ minWidth: 30, fontWeight: 600 }}>{label}</span>{opts ? opts.map((o) => <span key={o}>{circle(o)}</span>) : <span style={{ borderBottom: '1px solid #999', flex: 1, minWidth: 90 }}>&nbsp;</span>}</div>);
+  const rows = [];
+  qs.forEach((q, i) => {
+    const n = i + 1;
+    if (q.type === 'case') { (Array.isArray(q.sub) ? q.sub : []).forEach((sq, si) => { const o = (sq.options || []).map((_, j) => String.fromCharCode(65 + j)); rows.push(cell(n + '(' + ROMAN[si] + ')', o.length ? o : ['A', 'B', 'C', 'D'], n + '-' + si)); }); return; }
     let opts = null;
-    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion' || q.type === 'multi') opts = q.options.map((_, i) => String.fromCharCode(65 + i));
+    if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion' || q.type === 'multi') opts = q.options.map((_, j) => String.fromCharCode(65 + j));
     else if (q.type === 'tf') opts = ['T', 'F'];
-    return (<div key={n} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0', fontSize: 12, breakInside: 'avoid' }}><span style={{ minWidth: 26, fontWeight: 600 }}>{n}.</span>{opts ? opts.map((o) => <span key={o}>{circle(o)}</span>) : <span style={{ borderBottom: '1px solid #999', flex: 1, minWidth: 90 }}>&nbsp;</span>}</div>);
-  };
+    rows.push(cell(n + '.', opts, String(n)));
+  });
   return (
     <div>
       <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: 10, marginBottom: 12 }}>
@@ -174,7 +178,7 @@ function OMRSheet({ paper }) {
         <span>Name: ____________________________</span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Roll no.<span style={{ display: 'inline-flex', gap: 3 }}>{[0, 1, 2, 3, 4, 5].map((i) => <span key={i} style={{ width: 16, height: 20, border: '1px solid #999', borderRadius: 2, display: 'inline-block' }} />)}</span></span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 30px' }}>{qs.map((q, i) => row(q, i + 1))}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 30px' }}>{rows}</div>
       <div style={{ fontSize: 10.5, color: '#888', marginTop: 14 }}>Fill one bubble completely per question with blue/black ballpoint. Write-in lines are for fill / numeric / short-answer items.</div>
     </div>
   );
