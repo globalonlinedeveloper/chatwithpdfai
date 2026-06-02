@@ -546,7 +546,7 @@ export default function PapersPage() {
                   <div style={{ maxWidth: 380 }} data-testid="gen-progress" role="status" aria-live="polite">
                     <div className="qpg-spinner" style={{ width: 40, height: 40, margin: '0 auto 16px', borderRadius: '50%', border: '3px solid var(--stroke-2)', borderTopColor: 'var(--violet-2)' }} />
                     <div style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 4 }}>Generating your paper… <span className="mono" style={{ color: 'var(--text-3)' }}>{elapsed}s</span></div>
-                    <div style={{ fontSize: 12.5, marginBottom: 14 }}>{fullProg || 'Writing questions, then verifying the answer key — this usually takes 10–30s.'}</div>
+                    <div style={{ fontSize: 12.5, marginBottom: 14 }}>{fullProg || (verify ? 'Writing questions, then verifying the answer key — this usually takes 10–30s.' : 'Writing your questions — this usually takes 10–30s.')}</div>
                     <button type="button" onClick={cancelGenerate} className="btn btn-glass btn-sm" data-testid="cancel-gen">Cancel</button>
                   </div>
                 ) : (
