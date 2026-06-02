@@ -151,6 +151,7 @@ function EditAnswerControl({ q, gi, onPatch }) {
 
 export default function PapersPage() {
   const [bpKey, setBpKey] = useState('custom'); // selected exam-blueprint dropdown value ('custom' = define your own sections)
+  const [asideOpen, setAsideOpen] = useState(true); // left papers panel collapse toggle
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -285,7 +286,8 @@ export default function PapersPage() {
       <AppNav active="papers" credits={credits} />
 
       <div className="papers-body" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <aside className="no-print papers-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
+        <aside className="no-print papers-aside" style={{ width: 248, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', background: 'rgba(5,6,20,0.6)', backdropFilter: 'blur(20px) saturate(180%)', display: asideOpen ? 'flex' : 'none', flexDirection: 'column', overflowY: 'auto', padding: '14px 12px' }}>
+          <button type="button" onClick={() => setAsideOpen(false)} aria-label="Hide papers panel" title="Hide panel" data-testid="aside-hide" className="btn btn-glass btn-sm" style={{ alignSelf: 'flex-end', padding: '2px 9px', marginBottom: 8 }}>«</button>
           <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); setCurSet(0); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
           <div className="eyebrow" style={{ marginBottom: 8 }}>My library{library.length ? ' (' + library.length + ')' : ''}</div>
           {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (
@@ -323,7 +325,8 @@ export default function PapersPage() {
         </aside>
 
         <div id="main" className="papers-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
-          <section className="no-print papers-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
+          <section className="no-print papers-build" style={{ width: asideOpen ? 472 : 660, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
+            {!asideOpen && <button type="button" onClick={() => setAsideOpen(true)} aria-label="Show papers panel" title="Show library & papers" data-testid="aside-show" className="btn btn-glass btn-sm" style={{ marginBottom: 12, padding: '3px 10px' }}>» Library &amp; papers</button>}
             <div className="eyebrow" style={{ marginBottom: 8 }}>Structure &mdash; exam blueprint</div>
             <select value={bpKey} onChange={(e) => chooseBlueprint(e.target.value)} aria-label="Exam blueprint" data-testid="blueprint" style={{ ...ctrl, width: '100%', padding: '9px 11px', fontSize: 13 }}>
               <option value="custom">Custom paper &mdash; define your own sections</option>
