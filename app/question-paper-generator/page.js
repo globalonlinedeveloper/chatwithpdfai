@@ -265,6 +265,8 @@ export default function PapersPage() {
   const ctrl = { padding: '7px 10px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12.5, fontFamily: 'inherit' };
   const isBP = Boolean(bpKey && bpKey !== 'custom');
   const bpLabel = isBP ? bpKey.slice(bpKey.split('||')[0].length + 2) : '';
+  const _bpPreset = isBP ? (CATEGORIES.find((x) => x.k === bpKey.split('||')[0]) || { presets: [] }).presets.find((p) => (bpKey.split('||')[0] + '||' + p.label) === bpKey) : null;
+  const bpReal = (_bpPreset && _bpPreset.real) ? _bpPreset.real : '';
   const hasScope = topic.trim().length > 0;
   const fromPDF = Number(sourceDocId) > 0;
   const canGen = Boolean(isBP || fromPDF || hasScope);
@@ -336,7 +338,8 @@ export default function PapersPage() {
                 </optgroup>
               ))}
             </select>
-            <div data-testid="bp-note" style={{ fontSize: 11.5, margin: '7px 0 16px', color: isBP ? 'var(--green)' : 'var(--text-3)' }}>{isBP ? '✓ blueprint-aligned — sections, marks & weights' : '✎ custom — you define the sections below'}</div>
+            <div data-testid="bp-note" style={{ fontSize: 11.5, marginTop: 7, marginBottom: bpReal ? 3 : 16, color: isBP ? 'var(--green)' : 'var(--text-3)' }}>{isBP ? '✓ blueprint-aligned — sections, marks & weights' : '✎ custom — you define the sections below'}</div>
+            {bpReal ? <div data-testid="bp-real" style={{ fontSize: 11, color: 'var(--text-4)', marginBottom: 16 }}>Real exam: {bpReal} · builds a focused set you can scale up.</div> : null}
             <div className="eyebrow" style={{ marginBottom: 8 }}>Content source</div>
             {docs.length > 0 ? (
               <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} aria-label="Content source" style={{ ...ctrl, width: '100%', minWidth: 0 }} data-testid="source-select">
