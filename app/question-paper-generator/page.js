@@ -157,6 +157,10 @@ export default function PapersPage() {
   const [fullProg, setFullProg] = useState(''); // batch progress text during full generation
   const [uploading, setUploading] = useState(false); // direct PDF upload in progress
   const [uploadMsg, setUploadMsg] = useState(''); // upload status message
+  const [srcOpen, setSrcOpen] = useState(false); // content-source picker open
+  const [srcQuery, setSrcQuery] = useState(''); // source search text
+  const [srcLoading, setSrcLoading] = useState(false); // source search in flight
+  const [selectedDoc, setSelectedDoc] = useState(null); // chosen source doc (for the chip)
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -194,17 +198,21 @@ export default function PapersPage() {
   const timerRef = useRef(null); // setInterval id for the elapsed counter
   const headingRef = useRef(null); // result heading, focused when a paper first appears
   const fileRef = useRef(null); // hidden file input for direct PDF upload
+  const srcBoxRef = useRef(null); // source picker container (click-outside)
 
-  useEffect(() => { try { const d = Number(new URLSearchParams(window.location.search).get('doc')) || 0; if (d) setSourceDocId(d); } catch (e) {} }, []);
+  useEffect(() => { try { const d = Number(new URLSearchParams(window.location.search).get('doc')) || 0; if (d) { setSourceDocId(d); fetch('/api/documents/' + d).then((r) => r.ok ? r.json() : null).then((j) => { if (j && j.document) setSelectedDoc({ id: j.document.id, filename: j.document.filename, pageCount: j.document.pageCount, sizeBytes: j.document.sizeBytes }); }).catch(() => {}); } } catch (e) {} }, []);
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
-    fetch('/api/documents').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.documents)) { const _seen = new Set(); setDocs(j.documents.filter((d) => d.status === 'ready').filter((d) => { const k = (d.filename || '') + '|' + (d.sizeBytes || 0); if (_seen.has(k)) return false; _seen.add(k); return true; })); } }).catch(() => {});
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
+  useEffect(() => {
+    if (!srcOpen) return; let live = true; setSrcLoading(true);
+    const t = setTimeout(() => { const q = srcQuery.trim(); fetch('/api/documents?limit=30' + (q ? '&q=' + encodeURIComponent(q) : '')).then((r) => r.ok ? r.json() : null).then((j) => { if (!live) return; const list = (j && Array.isArray(j.documents)) ? j.documents : []; const seen = new Set(); const uniq = list.filter((d) => d.status === 'ready').filter((d) => { const k = (d.filename || '') + '|' + (d.sizeBytes || 0); if (seen.has(k)) return false; seen.add(k); return true; }); setDocs(uniq); setSrcLoading(false); }).catch(() => { if (live) { setDocs([]); setSrcLoading(false); } }); }, 220);
+    return () => { live = false; clearTimeout(t); };
+  }, [srcQuery, srcOpen]);
+  useEffect(() => { if (!srcOpen) return; function onDown(e) { if (srcBoxRef.current && !srcBoxRef.current.contains(e.target)) setSrcOpen(false); } document.addEventListener('mousedown', onDown); return () => document.removeEventListener('mousedown', onDown); }, [srcOpen]);
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
   function chooseBlueprint(v) { setBpKey(v); if (!v || v === 'custom') { setExamStyle(''); return; } const ck = v.split('||')[0]; const lbl = v.slice(ck.length + 2); const c = CATEGORIES.find((x) => x.k === ck); const p = c && c.presets.find((x) => x.label === lbl); if (p) { applyPreset(p); } }
-  async function refreshDocs(selectId) {
-    try { const r = await fetch('/api/documents'); const j = await r.json().catch(() => ({})); if (j && Array.isArray(j.documents)) { const seen = new Set(); const uniq = j.documents.filter((d) => d.status === 'ready').filter((d) => { const k = (d.filename || '') + '|' + (d.sizeBytes || 0); if (seen.has(k)) return false; seen.add(k); return true; }); setDocs(uniq); if (selectId) setSourceDocId(Number(selectId)); } } catch (e) {}
-  }
+  function selectSource(doc) { if (!doc) { setSelectedDoc(null); setSourceDocId(0); } else { setSelectedDoc({ id: doc.id, filename: doc.filename, pageCount: doc.pageCount, sizeBytes: doc.sizeBytes }); setSourceDocId(Number(doc.id)); } setSrcOpen(false); setSrcQuery(''); }
   async function uploadSource(file) {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith('.pdf')) { setUploadMsg('Please choose a PDF file.'); return; }
@@ -215,10 +223,10 @@ export default function PapersPage() {
       const r = await fetch('/api/documents/upload', { method: 'POST', body: fd });
       const j = await r.json().catch(() => ({}));
       if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
-      if (r.status === 409 && j.duplicate && j.existingId) { await refreshDocs(j.existingId); setUploadMsg('Already in your library \u2014 selected it as the source.'); setUploading(false); return; }
+      if (r.status === 409 && j.duplicate && j.existingId) { selectSource({ id: j.existingId, filename: j.filename || file.name }); setUploadMsg('Already in your library \u2014 selected it as the source.'); setUploading(false); return; }
       if (!r.ok) { setUploadMsg(r.status === 403 ? 'Please verify your email before uploading.' : (j.error || 'Upload failed.')); setUploading(false); return; }
       const id = j.document && j.document.id;
-      await refreshDocs(id);
+      selectSource(j.document || { id, filename: file.name });
       setUploadMsg('Added \u201c' + ((j.document && j.document.filename) || file.name) + '\u201d \u2014 now grounding from it.');
       setUploading(false);
     } catch (e) { setUploadMsg('Upload failed: ' + (e.message || 'error')); setUploading(false); }
@@ -415,20 +423,27 @@ export default function PapersPage() {
             {bpReal ? <div data-testid="bp-real" style={{ fontSize: 11, color: 'var(--text-4)', marginBottom: 16 }}>Real exam: {bpReal} · builds a focused set you can scale up.</div> : null}
             {bpFull ? <label data-testid="full-toggle" style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: 'var(--text-2)', margin: '-6px 0 16px', cursor: 'pointer' }}><input type="checkbox" checked={fullSize} onChange={(e) => { setFullSize(e.target.checked); setFullConfirm(false); }} /> Full real-size exam — {fullTotalQ} questions, in {fullBatches} batches{fullSize ? ' (uses more credits)' : ''}</label> : null}
             <div className="eyebrow" style={{ marginBottom: 8 }}>Content source</div>
-            {docs.length > 0 ? (
-              <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} aria-label="Content source" style={{ ...ctrl, width: '100%', minWidth: 0 }} data-testid="source-select">
-                <option value={0}>From scratch (topic / blueprint only)</option>
-                {docs.map((d) => <option key={d.id} value={d.id}>Grounded in: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
-              </select>
-            ) : (
-              <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Generate from scratch, or upload a PDF below to ground the paper in your own material.</div>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+            <div ref={srcBoxRef} style={{ position: 'relative' }}>
+              <button type="button" onClick={() => setSrcOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={srcOpen} data-testid="source-trigger" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', padding: '9px 11px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid ' + (srcOpen ? 'var(--violet)' : 'var(--stroke-2)'), color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                {selectedDoc ? (<><span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Grounded in: {selectedDoc.filename}{selectedDoc.pageCount ? ' (' + selectedDoc.pageCount + ' pp)' : ''}</span><span role="button" tabIndex={0} aria-label="Clear source" data-testid="source-clear" onClick={(e) => { e.stopPropagation(); selectSource(null); }} style={{ color: 'var(--text-3)', padding: '0 4px' }}>✕</span></>) : (<span style={{ flex: 1, color: 'var(--text-3)' }}>From scratch (topic / blueprint only)</span>)}
+                <span style={{ color: 'var(--text-3)' }}>{srcOpen ? '▴' : '▾'}</span>
+              </button>
+              {srcOpen ? (
+                <div data-testid="source-panel" style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, zIndex: 40, background: '#0b0d22', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', boxShadow: '0 14px 36px rgba(0,0,0,0.55)', overflow: 'hidden' }}>
+                  <input autoFocus value={srcQuery} onChange={(e) => setSrcQuery(e.target.value)} placeholder="Search your PDFs…" aria-label="Search your PDFs" data-testid="source-search" style={{ width: '100%', boxSizing: 'border-box', border: 'none', borderBottom: '1px solid var(--stroke-1)', background: 'transparent', color: 'var(--text)', fontSize: 13, padding: '10px 11px', fontFamily: 'inherit', outline: 'none' }} />
+                  <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+                    <button type="button" onClick={() => selectSource(null)} data-testid="source-scratch" style={{ width: '100%', textAlign: 'left', display: 'block', padding: '9px 11px', background: Number(sourceDocId) === 0 ? 'var(--glass-2)' : 'transparent', border: 'none', borderBottom: '1px solid var(--stroke-1)', color: 'var(--text-2)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>From scratch (topic / blueprint only)</button>
+                    {srcLoading ? (<div style={{ padding: '10px 11px', fontSize: 12, color: 'var(--text-4)' }}>Searching…</div>) : (docs.length === 0 ? (<div style={{ padding: '10px 11px', fontSize: 12, color: 'var(--text-4)' }}>{srcQuery.trim() ? 'No PDFs match.' : 'No PDFs yet — upload one below.'}</div>) : docs.map((d) => (
+                      <button key={d.id} type="button" onClick={() => selectSource(d)} data-testid="source-item" style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 11px', background: Number(sourceDocId) === Number(d.id) ? 'var(--glass-2)' : 'transparent', border: 'none', borderBottom: '1px solid var(--stroke-1)', color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}><span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}</span>{d.pageCount ? <span style={{ fontSize: 11, color: 'var(--text-4)', whiteSpace: 'nowrap' }}>{d.pageCount} pp</span> : null}</button>
+                    )))}
+                  </div>
+                  <button type="button" onClick={() => { if (fileRef.current) fileRef.current.click(); }} disabled={uploading} data-testid="upload-pdf" style={{ width: '100%', textAlign: 'left', display: 'block', padding: '10px 11px', background: 'var(--glass-1)', border: 'none', borderTop: '1px solid var(--stroke-2)', color: 'var(--violet-2)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>{uploading ? 'Uploading…' : '↑ Upload a new PDF…'}</button>
+                </div>
+              ) : null}
               <input ref={fileRef} type="file" accept="application/pdf,.pdf" onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) uploadSource(f); }} style={{ display: 'none' }} data-testid="source-file" aria-hidden="true" tabIndex={-1} />
-              <button type="button" onClick={() => { if (fileRef.current) fileRef.current.click(); }} disabled={uploading} className="btn btn-glass btn-sm" data-testid="upload-pdf">{uploading ? 'Uploading\u2026' : '\u2191 Upload a PDF'}</button>
-              {uploadMsg ? <span data-testid="upload-msg" style={{ fontSize: 11.5, color: uploading ? 'var(--text-3)' : 'var(--text-2)' }}>{uploadMsg}</span> : null}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-4)', margin: '7px 0 16px' }}>Structure + source combine &mdash; e.g. a CBSE blueprint grounded in your own PDF.</div>
+            {uploadMsg ? <div data-testid="upload-msg" style={{ fontSize: 11.5, color: uploading ? 'var(--text-3)' : 'var(--text-2)', marginTop: 6 }}>{uploadMsg}</div> : null}
+            <div style={{ fontSize: 11, color: 'var(--text-4)', margin: '10px 0 16px' }}>Structure + source combine &mdash; e.g. a CBSE blueprint grounded in your own PDF.</div>
             <div className="eyebrow" style={{ marginBottom: 8 }}>Scope (optional)</div>
             <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Narrow to a chapter or topic — leave blank to use the full blueprint or PDF" aria-label="Scope" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 54, fontFamily: 'inherit', padding: '10px 13px' }} />
             <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>

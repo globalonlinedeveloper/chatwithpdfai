@@ -26,7 +26,11 @@ export async function GET(req) {
     const _u = await getCurrentUser(req);
     if (!_u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
     const userId = _u.id;
-    const rows = await documents.listDocuments(userId);
+    const url = new URL(req.url);
+    const q = (url.searchParams.get('q') || '').trim().slice(0, 120);
+    const lim = parseInt(url.searchParams.get('limit') || '0', 10);
+    const limit = Number.isFinite(lim) && lim > 0 ? Math.min(lim, 50) : 0;
+    const rows = await documents.listDocuments(userId, { q: q || undefined, limit: limit || undefined });
     const docs = rows.map((r) => ({
       id: r.id,
       filename: r.original_filename,
