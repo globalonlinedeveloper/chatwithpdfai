@@ -177,7 +177,7 @@ export async function POST(req) {
   const documentId = Number(body.documentId) || 0;
   if (topic.length < 3 && !documentId) return NextResponse.json({ error: 'Please describe the topic, or pick a source document.' }, { status: 400 });
 
-  if (!(await rateLimit({ bucket: 'paper', ip: 'u' + userId, max: 30, windowMin: 60, record: false }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
+  if (!(await rateLimit({ bucket: 'paper', ip: 'u' + userId, max: 60, windowMin: 60, record: false }))) return NextResponse.json({ error: 'Too many generations in the last hour — please wait a bit.' }, { status: 429 });
   if (creditsEnforced()) { const bal = await getBalance(userId); if (bal < 1) return NextResponse.json({ error: 'Insufficient credits — buy a pack to continue.' }, { status: 402 }); }
   const topicKey = (topic || '').toLowerCase().slice(0, 80);
   let dbSeen = [];

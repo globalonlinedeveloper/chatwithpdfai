@@ -161,6 +161,7 @@ export default function PapersPage() {
   const [srcQuery, setSrcQuery] = useState(''); // source search text
   const [srcLoading, setSrcLoading] = useState(false); // source search in flight
   const [selectedDoc, setSelectedDoc] = useState(null); // chosen source doc (for the chip)
+  const [bpTopic, setBpTopic] = useState(''); // blueprint's built-in syllabus (drives generation; kept out of the user Scope field)
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -210,8 +211,8 @@ export default function PapersPage() {
   }, [srcQuery, srcOpen]);
   useEffect(() => { if (!srcOpen) return; function onDown(e) { if (srcBoxRef.current && !srcBoxRef.current.contains(e.target)) setSrcOpen(false); } document.addEventListener('mousedown', onDown); return () => document.removeEventListener('mousedown', onDown); }, [srcOpen]);
 
-  function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
-  function chooseBlueprint(v) { setBpKey(v); if (!v || v === 'custom') { setExamStyle(''); return; } const ck = v.split('||')[0]; const lbl = v.slice(ck.length + 2); const c = CATEGORIES.find((x) => x.k === ck); const p = c && c.presets.find((x) => x.label === lbl); if (p) { applyPreset(p); } }
+  function applyPreset(p) { setExamStyle(p.examStyle); setBpTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
+  function chooseBlueprint(v) { setBpKey(v); setTopic(''); setFullSize(false); setFullConfirm(false); if (!v || v === 'custom') { setExamStyle(''); setBpTopic(''); setSections([{ title: 'Section A', type: 'mcq', count: 10, marks: 1 }]); return; } const ck = v.split('||')[0]; const lbl = v.slice(ck.length + 2); const c = CATEGORIES.find((x) => x.k === ck); const p = c && c.presets.find((x) => x.label === lbl); if (p) { applyPreset(p); } }
   function selectSource(doc) { if (!doc) { setSelectedDoc(null); setSourceDocId(0); } else { setSelectedDoc({ id: doc.id, filename: doc.filename, pageCount: doc.pageCount, sizeBytes: doc.sizeBytes }); setSourceDocId(Number(doc.id)); } setSrcOpen(false); setSrcQuery(''); }
   async function uploadSource(file) {
     if (!file) return;
@@ -255,20 +256,20 @@ export default function PapersPage() {
     if (abortRef.current) { try { abortRef.current.abort(); } catch (e) {} }
   }
   async function generate() {
-    const t = topic.trim();
-    if (t.length < 3 && !sourceDocId) { setNote('Describe a topic, or pick a source document.'); return; }
-    // Pre-flight: if we already know the balance is empty, don't make users wait for a 402.
+    const eff = (topic.trim() || bpTopic || '').trim();
+    if (eff.length < 3 && !sourceDocId) { setNote('Describe a topic, pick a blueprint, or attach a PDF.'); return; }
     if (typeof credits === 'number' && credits < 1) { setNote("You're out of credits — buy a pack to generate."); return; }
-    // Abort any previous in-flight request, then start a fresh controller + ~90s timeout.
+    const requested = sections.reduce((nn, s) => nn + Number(s.count || 0), 0);
+    // A single AI call is capped at ~40 questions server-side; bigger papers (custom or blueprint) go through the batched generator.
+    if (requested > 40) { setFullConfirm(false); return runBatched(sections.map((s) => ({ title: s.title, type: s.type, count: Number(s.count), marks: Number(s.marks) })), examStyle || 'Custom paper', verify, eff); }
     cancelGenerate();
     const controller = new AbortController();
     abortRef.current = controller;
     const timeout = setTimeout(() => { try { controller.abort(); } catch (e) {} }, 90000);
-    const requested = sections.reduce((nn, s) => nn + Number(s.count || 0), 0);
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper');
     try {
-      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: t, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
+      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
@@ -322,24 +323,23 @@ export default function PapersPage() {
   // The set shown in the preview/print + driving the exporters. Falls back to the master.
   const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
   const activePaper = setsArr[curSet] || paper;
-  async function generateFull() {
-    if (!bpFull) { generate(); return; }
+  async function runBatched(sectionList, label, verifyFlag, effTopic) {
     const MAXCHUNK = 30;
     const plan = [];
-    bpFull.forEach((s, si) => { let rem = Number(s.count || 0); const type = (Array.isArray(s.types) ? s.types[0] : s.type) || 'mcq'; while (rem > 0) { const n = Math.min(MAXCHUNK, rem); plan.push({ si, title: s.title, type, marks: Number(s.marks || 1), count: n }); rem -= n; } });
-    const wantTotal = bpFull.reduce((a, s) => a + Number(s.count || 0), 0);
+    sectionList.forEach((s, si) => { let rem = Number(s.count || 0); const type = (Array.isArray(s.types) ? s.types[0] : s.type) || 'mcq'; while (rem > 0) { const n = Math.min(MAXCHUNK, rem); plan.push({ si, title: s.title, type, marks: Number(s.marks || 1), count: n }); rem -= n; } });
+    const wantTotal = sectionList.reduce((a, s) => a + Number(s.count || 0), 0);
     if (typeof credits === 'number' && credits < 1) { setNote("You're out of credits — buy a pack to generate."); return; }
     cancelGenerate();
     const controller = new AbortController(); abortRef.current = controller;
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper'); setCurSet(0);
-    const acc = bpFull.map(() => []); const seen = []; let used = 0; let bal = null; let failed = 0; let stopped = false;
+    const acc = sectionList.map(() => []); const seen = [...prevStems]; let used = 0; let bal = null; let failed = 0; let stopped = false; let allVerified = !!verifyFlag;
     try {
       for (let b = 0; b < plan.length; b++) {
         if (controller.signal.aborted) { stopped = true; break; }
         const pp = plan[b];
         setFullProg('Batch ' + (b + 1) + ' of ' + plan.length + ' \u2014 ' + pp.title);
-        const body = { topic: topic.trim(), examStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: false, documentId: sourceDocId };
+        const body = { topic: effTopic, examStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: !!verifyFlag, documentId: sourceDocId };
         let r, j;
         try { r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(body) }); }
         catch (e) { if (e && e.name === 'AbortError') { stopped = true; break; } failed++; continue; }
@@ -350,19 +350,22 @@ export default function PapersPage() {
         qs.forEach((q) => seen.push(String((q && (q.q || q.assertion)) || '').slice(0, 140)));
         if (typeof j.credits === 'number') used += j.credits;
         if (typeof j.balance === 'number') bal = j.balance;
+        if (verifyFlag && !(j.paper && j.paper.verified)) allVerified = false;
       }
-      const finalSections = bpFull.map((s, i) => ({ title: s.title, marks: Number(s.marks || 1), questions: acc[i] }));
+      const finalSections = sectionList.map((s, i) => ({ title: s.title, marks: Number(s.marks || 1), questions: acc[i] }));
       const got = finalSections.reduce((a, s) => a + s.questions.length, 0);
-      if (got === 0) { setNote(stopped ? 'Generation cancelled.' : 'Could not generate the full paper — please try again.'); setBusy(false); stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; return; }
-      const totalMarks = finalSections.reduce((m, s) => m + s.questions.length * Number(s.marks || 1), 0);
-      const paperObj = { title: (examStyle || 'Full') + ' \u2014 full paper', examStyle, language, difficulty, institution, instructions, totalMarks, durationMin: Math.max(30, Math.round(got * 1.1)), sections: finalSections, verified: false, grounded: false, layout };
+      if (got === 0) { setNote(stopped ? 'Generation cancelled.' : 'Could not generate the paper — please try again.'); setBusy(false); stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; return; }
+      const tMarks = finalSections.reduce((m, s) => m + s.questions.length * Number(s.marks || 1), 0);
+      const paperObj = { title: ((label || 'Full') + ' \u2014 full paper'), examStyle, language, difficulty, institution, instructions, totalMarks: tMarks, durationMin: Math.max(15, Math.round(got * 1.5)), sections: finalSections, verified: (verifyFlag && allVerified), grounded: Number(sourceDocId) > 0, sourceName: (selectedDoc && selectedDoc.filename) || '', layout };
       setPaper(paperObj); setUsed(used); if (bal != null) setCredits(bal);
+      setPrevStems(seen.slice(-80));
       if (got < wantTotal) setShortWarn('Built ' + got + ' of ' + wantTotal + ' questions' + (failed ? ' (' + failed + ' batch(es) failed)' : (stopped ? ' (stopped)' : '')) + '. Regenerate to fill the gaps.');
       setBusy(false);
       setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
     } catch (e) { setNote(e.message); setBusy(false); }
     finally { stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; }
   }
+  function generateFull() { if (!bpFull) { generate(); return; } return runBatched(bpFull, bpLabel, verify, (topic.trim() || bpTopic)); }
 
   return (
     <div id="papers-shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
