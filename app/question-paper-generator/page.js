@@ -4,31 +4,10 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 import { grade, correctText } from './grade.js';
 import { deriveSets } from './sets.js';
+import { CATEGORIES } from '@/lib/blueprints';
 
 const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
 const ALL_TYPES = Object.keys(TYPE_LABELS);
-const CATEGORIES = [
-  { k: 'exams', label: 'Govt / competitive exams', presets: [
-    { label: 'TNPSC Group 4', examStyle: 'TNPSC Group 4', topic: 'TNPSC Group 4 general studies — Indian polity, history, geography, science and current affairs', sections: [{ title: 'Part A — General studies', type: 'mcq', count: 15, marks: 1 }, { title: 'Part B — Assertion & reason', type: 'assertion', count: 5, marks: 2 }] },
-    { label: 'UPSC Prelims GS', examStyle: 'UPSC Prelims', topic: 'UPSC Civil Services Prelims — General Studies Paper I', sections: [{ title: 'General studies', type: 'mcq', count: 20, marks: 2 }] },
-  ] },
-  { k: 'programming', label: 'Programming & IT', presets: [
-    { label: 'Java — OOP & collections', examStyle: 'Java', topic: 'Core Java — OOP, collections, exceptions, generics and streams', sections: [{ title: 'Part A — Concepts', type: 'mcq', count: 8, marks: 1 }, { title: 'Part B — Code output', type: 'code', count: 4, marks: 2 }, { title: 'Part C — Short answer', type: 'short', count: 3, marks: 3 }] },
-    { label: 'Python basics', examStyle: 'Python', topic: 'Python fundamentals — data types, control flow, functions, lists and dicts', sections: [{ title: 'Part A — Concepts', type: 'mcq', count: 10, marks: 1 }, { title: 'Part B — Output', type: 'code', count: 5, marks: 2 }] },
-    { label: 'AWS Solutions Architect', examStyle: 'AWS Certified Solutions Architect Associate', topic: 'AWS SAA — EC2, S3, VPC, IAM, RDS, autoscaling and the well-architected framework', sections: [{ title: 'Domain questions', type: 'mcq', count: 12, marks: 1 }, { title: 'Multi-response', type: 'multi', count: 3, marks: 2 }] },
-    { label: 'SQL', examStyle: 'SQL', topic: 'SQL — joins, group by, subqueries, indexing and normalization', sections: [{ title: 'Concepts', type: 'mcq', count: 8, marks: 1 }, { title: 'Query output', type: 'code', count: 4, marks: 2 }] },
-  ] },
-  { k: 'school', label: 'School (CBSE / State)', presets: [
-    { label: 'Class 10 Science', examStyle: 'CBSE Class 10', topic: 'CBSE Class 10 Science — physics, chemistry and biology', sections: [{ title: 'Section A — MCQ', type: 'mcq', count: 10, marks: 1 }, { title: 'Section B — Assertion & reason', type: 'assertion', count: 4, marks: 1 }, { title: 'Section C — Short answer', type: 'short', count: 4, marks: 3 }, { title: 'Section D — Long answer', type: 'long', count: 2, marks: 5 }] },
-  ] },
-  { k: 'medical', label: 'Medical & nursing', presets: [
-    { label: 'NEET Biology', examStyle: 'NEET', topic: 'NEET Biology — human physiology, genetics, ecology and cell biology', sections: [{ title: 'Biology', type: 'mcq', count: 15, marks: 4 }] },
-  ] },
-  { k: 'languages', label: 'Languages', presets: [
-    { label: 'English grammar', examStyle: 'English', topic: 'English grammar — tenses, prepositions, articles and sentence correction', sections: [{ title: 'Grammar MCQ', type: 'mcq', count: 10, marks: 1 }, { title: 'Fill the blanks', type: 'fill', count: 5, marks: 1 }] },
-  ] },
-  { k: 'custom', label: 'Custom', presets: [] },
-];
 const LETTER = (i) => String.fromCharCode(97 + i);
 const ROMAN = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
 const rights = (pairs) => [...pairs.map((p) => p.r)].sort((a, b) => String(a).localeCompare(String(b)));
@@ -342,7 +321,7 @@ export default function PapersPage() {
                 </select>
               </div>
             )}
-            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Describe the topic or syllabus &mdash; e.g. Core Java: OOP, collections, exceptions" aria-label="Topic or syllabus" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 60, fontFamily: 'inherit', padding: '10px 13px' }} />
+            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Topic or syllabus — or leave blank when a blueprint or PDF gives the content" aria-label="Topic / scope" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 60, fontFamily: 'inherit', padding: '10px 13px' }} />
             <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
               <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" aria-label="Institution or exam name" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
               <input value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Instructions (optional)" aria-label="Instructions" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
