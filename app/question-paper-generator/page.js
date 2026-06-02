@@ -150,7 +150,7 @@ function EditAnswerControl({ q, gi, onPatch }) {
 }
 
 export default function PapersPage() {
-  const [cat, setCat] = useState('programming');
+  const [bpKey, setBpKey] = useState('custom'); // selected exam-blueprint dropdown value ('custom' = define your own sections)
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -194,6 +194,7 @@ export default function PapersPage() {
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
+  function chooseBlueprint(v) { setBpKey(v); if (!v || v === 'custom') { setExamStyle(''); return; } const ck = v.split('||')[0]; const lbl = v.slice(ck.length + 2); const c = CATEGORIES.find((x) => x.k === ck); const p = c && c.presets.find((x) => x.label === lbl); if (p) { applyPreset(p); } }
   function setSec(i, patch) { setSections((cur) => cur.map((s, j) => j === i ? { ...s, ...patch } : s)); }
   function addSec() { setSections((cur) => [...cur, { title: 'Section ' + String.fromCharCode(65 + cur.length), type: 'mcq', count: 5, marks: 1 }]); }
   function delSec(i) { setSections((cur) => cur.length > 1 ? cur.filter((_, j) => j !== i) : cur); }
@@ -261,7 +262,20 @@ export default function PapersPage() {
   }
 
   const ctrl = { padding: '7px 10px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', color: 'var(--text)', fontSize: 12.5, fontFamily: 'inherit' };
-  const presets = (CATEGORIES.find((c) => c.k === cat) || {}).presets || [];
+  const isBP = Boolean(bpKey && bpKey !== 'custom');
+  const bpLabel = isBP ? bpKey.slice(bpKey.split('||')[0].length + 2) : '';
+  const hasScope = topic.trim().length > 0;
+  const fromPDF = Number(sourceDocId) > 0;
+  const canGen = Boolean(isBP || fromPDF || hasScope);
+  const _sc = topic.trim();
+  const _scShort = _sc.length > 44 ? _sc.slice(0, 44) + '…' : _sc;
+  const genExplain = !canGen
+    ? 'Pick an exam blueprint, attach a PDF, or describe a topic in Scope to begin.'
+    : isBP
+      ? ('Will build a ' + bpLabel + ' paper' + (fromPDF ? ', grounded in your PDF (answers cite the page)' : '') + '.')
+      : (fromPDF
+        ? ('Will build your sections, grounded in your PDF' + (hasScope ? ' on “' + _scShort + '”' : '') + '.')
+        : ('Will build your sections on “' + _scShort + '”.'));
   // The set shown in the preview/print + driving the exporters. Falls back to the master.
   const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
   const activePaper = setsArr[curSet] || paper;
@@ -310,19 +324,28 @@ export default function PapersPage() {
 
         <div id="main" className="papers-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
           <section className="no-print papers-build" style={{ width: 472, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
-            <div className="eyebrow" style={{ marginBottom: 10 }}>Build</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{CATEGORIES.map((c) => <button key={c.k} type="button" onClick={() => setCat(c.k)} className="chip" style={{ cursor: 'pointer', fontSize: 12, background: cat === c.k ? 'var(--glass-2)' : 'transparent', color: cat === c.k ? 'var(--text)' : 'var(--text-3)', borderColor: cat === c.k ? 'var(--violet)' : 'var(--stroke-2)' }}>{c.label}</button>)}</div>
-            {presets.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>{presets.map((p) => <button key={p.label} type="button" onClick={() => applyPreset(p)} className="chip" style={{ cursor: 'pointer', fontSize: 12 }} data-testid="preset">{p.label}</button>)}</div>}
-            {docs.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Source</span>
-                <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} aria-label="Source document" style={{ ...ctrl, minWidth: 200 }} data-testid="source-select">
-                  <option value={0}>From scratch (topic only)</option>
-                  {docs.map((d) => <option key={d.id} value={d.id}>From: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
-                </select>
-              </div>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Structure &mdash; exam blueprint</div>
+            <select value={bpKey} onChange={(e) => chooseBlueprint(e.target.value)} aria-label="Exam blueprint" data-testid="blueprint" style={{ ...ctrl, width: '100%', padding: '9px 11px', fontSize: 13 }}>
+              <option value="custom">Custom paper &mdash; define your own sections</option>
+              {CATEGORIES.filter((c) => c.presets && c.presets.length > 0).map((c) => (
+                <optgroup key={c.k} label={c.label}>
+                  {c.presets.map((p) => <option key={c.k + '||' + p.label} value={c.k + '||' + p.label}>{p.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <div data-testid="bp-note" style={{ fontSize: 11.5, margin: '7px 0 16px', color: isBP ? 'var(--green)' : 'var(--text-3)' }}>{isBP ? '✓ blueprint-aligned — sections, marks & weights' : '✎ custom — you define the sections below'}</div>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Content source</div>
+            {docs.length > 0 ? (
+              <select value={sourceDocId} onChange={(e) => setSourceDocId(Number(e.target.value))} aria-label="Content source" style={{ ...ctrl, width: '100%', minWidth: 0 }} data-testid="source-select">
+                <option value={0}>From scratch (topic / blueprint only)</option>
+                {docs.map((d) => <option key={d.id} value={d.id}>Grounded in: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
+              </select>
+            ) : (
+              <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>From scratch. Upload a PDF in Chat to ground a paper in your own material.</div>
             )}
-            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Topic or syllabus — or leave blank when a blueprint or PDF gives the content" aria-label="Topic / scope" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 60, fontFamily: 'inherit', padding: '10px 13px' }} />
+            <div style={{ fontSize: 11, color: 'var(--text-4)', margin: '7px 0 16px' }}>Structure + source combine &mdash; e.g. a CBSE blueprint grounded in your own PDF.</div>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>Scope (optional)</div>
+            <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Narrow to a chapter or topic — leave blank to use the full blueprint or PDF" aria-label="Scope" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 54, fontFamily: 'inherit', padding: '10px 13px' }} />
             <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
               <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Institution / exam name (optional)" aria-label="Institution or exam name" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
               <input value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Instructions (optional)" aria-label="Instructions" className="input" style={{ flex: 1, minWidth: 170, fontSize: 12.5, padding: '8px 12px' }} />
@@ -340,14 +363,17 @@ export default function PapersPage() {
             <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
               <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} aria-label="Difficulty" style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
-              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label><label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Language<select value={language} onChange={(e) => setLanguage(e.target.value)} aria-label="Language" style={ctrl}>{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}</select></label>
+              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
             </div>
+            <div className="eyebrow" style={{ margin: '16px 0 8px' }}>Language</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }} data-testid="lang-pills">{LANGUAGES.map((l) => <button key={l.code} type="button" onClick={() => setLanguage(l.code)} className="chip" aria-pressed={language === l.code} style={{ cursor: 'pointer', fontSize: 12, background: language === l.code ? 'rgba(183,106,255,0.16)' : 'transparent', color: language === l.code ? 'var(--text)' : 'var(--text-3)', borderColor: language === l.code ? 'var(--violet)' : 'var(--stroke-2)' }}>{l.label}</button>)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 12 }}>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
               <span style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }} title="Produce A/B/C… versions with questions and options shuffled (same answer key per set)"><span style={{ color: 'var(--text-3)' }}>Shuffled sets</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: 2 }}><button type="button" onClick={() => { setSets((v) => clampInt(v - 1, 1, 4)); setCurSet(0); }} disabled={sets <= 1} aria-label="Fewer sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-dec">−</button><span data-testid="sets-value" style={{ minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{sets}</span><button type="button" onClick={() => { setSets((v) => clampInt(v + 1, 1, 4)); setCurSet(0); }} disabled={sets >= 4} aria-label="More sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-inc">+</button></span></span>
             </div>
-            <button onClick={generate} disabled={busy} className={busy ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 16 }}>{busy ? 'Generating…' : 'Generate paper →'}</button>
+            <div data-testid="gen-explain" style={{ fontSize: 12, lineHeight: 1.45, minHeight: 17, margin: '14px 0 4px', color: canGen ? 'var(--text-3)' : '#ffb4b4' }}>{genExplain}</div>
+            <button onClick={generate} disabled={busy || !canGen} className={(busy || !canGen) ? 'btn btn-glass' : 'btn btn-iris'} data-testid="gen-paper" style={{ width: '100%', marginTop: 4, opacity: (!busy && !canGen) ? 0.6 : 1 }}>{busy ? 'Generating…' : '⚡ Generate paper'}</button>
             {note && <div style={{ marginTop: 12, fontSize: 13, color: '#ffb4b4' }}>{note} {note.includes('credits') && <a href="/buy" style={{ color: 'var(--violet-2)' }}>Buy credits →</a>}</div>}
             <div className="mono" style={{ marginTop: 12, fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em' }}>Answers are AI-generated &mdash; spot-check before using in a real exam.</div>
           </section>
