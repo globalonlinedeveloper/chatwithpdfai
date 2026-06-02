@@ -14,6 +14,7 @@ export function grade(q, ua) {
     case 'fill': { const u = normFill(ua); return !!u && String(q.answer).split('|').some((a) => normFill(a) === u); }
     case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) { const tol = Math.max(0.001, Math.abs(y) * 0.005); return Math.abs(x - y) <= tol; } return !!norm(ua) && norm(ua) === norm(q.answer); }
     case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => rs[ua[pi]] === p.r); }
+    case 'case': return null;
     default: return null;
   }
 }
@@ -26,6 +27,7 @@ export function correctText(q) {
     case 'fill': return q.answer;
     case 'numeric': return String(q.answer) + (q.unit ? ' ' + q.unit : '');
     case 'match': return q.pairs.map((p) => p.l + ' -> ' + p.r).join(', ');
+    case 'case': return (q.sub || []).map((sq, si) => (si + 1) + '. (' + L(sq.answer) + ') ' + (sq.options || [])[sq.answer]).join('   ');
     case 'short': case 'long': return q.modelAnswer || '';
     default: return '';
   }
@@ -39,6 +41,7 @@ export function studentSafe(paper) {
     if (q.type === 'assertion') { b.assertion = q.assertion; b.reason = q.reason; b.options = q.options; }
     if (q.type === 'numeric') b.unit = q.unit;
     if (q.type === 'match') { b.lefts = q.pairs.map((p) => p.l); b.choices = rights(q.pairs); }
+    if (q.type === 'case') b.sub = (q.sub || []).map((sq) => ({ q: sq.q, options: sq.options }));
     return b;
   };
   return { title: paper.title, examStyle: paper.examStyle, institution: paper.institution, durationMin: paper.durationMin, totalMarks: paper.totalMarks, sections: (paper.sections || []).map((s) => ({ title: s.title, marks: s.marks, questions: (s.questions || []).map(stripQ) })) };

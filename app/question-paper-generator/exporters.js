@@ -1,6 +1,6 @@
 // Client-side exporters: turn a generated paper into LMS-importable files.
 const L = (i) => String.fromCharCode(97 + i);
-function flatQs(paper) { return (paper.sections || []).flatMap((s) => s.questions); }
+function flatQs(paper) { return (paper.sections || []).flatMap((s) => s.questions).flatMap((q) => q.type === 'case' ? (q.sub || []).map((sq) => ({ type: 'mcq', q: (q.q ? q.q + ' \u2014 ' : '') + sq.q, options: sq.options, answer: sq.answer, explanation: sq.explanation })) : [q]); }
 function gift(s) { return String(s == null ? '' : s).replace(/([~=#{}:\\])/g, '\\$1').replace(/\r?\n/g, ' '); }
 function xe(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function stemOf(q) { return q.type === 'assertion' ? `Assertion (A): ${q.assertion}  Reason (R): ${q.reason}` : (q.q || ''); }
@@ -49,6 +49,7 @@ export function toCSV(paper) {
     else if (q.type === 'tf') ans = q.answer ? 'True' : 'False';
     else if (q.type === 'fill' || q.type === 'numeric') ans = q.answer;
     else if (q.type === 'match') ans = q.pairs.map((p) => p.l + '=' + p.r).join('; ');
+    else if (q.type === 'case') ans = (q.sub || []).map((sq, si) => (si + 1) + ':' + L(sq.answer)).join(' ');
     else ans = q.modelAnswer || '';
     rows.push([n, sec.title || '', q.type, stemOf(q), (q.options || []).map((o, oi) => L(oi) + ') ' + o).join(' | '), ans, q.explanation || '', q.page || '']);
   }));

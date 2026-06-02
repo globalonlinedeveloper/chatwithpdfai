@@ -7,7 +7,7 @@ import { deriveSets } from './sets.js';
 import { CATEGORIES } from '@/lib/blueprints';
 import { LANGUAGES } from '@/lib/languages';
 
-const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
+const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', case: 'Case study', code: 'Code output' };
 const ALL_TYPES = Object.keys(TYPE_LABELS);
 const LETTER = (i) => String.fromCharCode(97 + i);
 const ROMAN = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
@@ -31,6 +31,7 @@ function renderBody(q) {
     case 'match': { const rs = rights(q.pairs); return <>{qt}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px', marginTop: 8, fontSize: 13.5 }}><div>{q.pairs.map((p, pi) => <div key={pi}>{ROMAN[pi]}. {p.l}</div>)}</div><div>{rs.map((r, ri) => <div key={ri}>({LETTER(ri)}) {r}</div>)}</div></div></>; }
     case 'short': return <>{qt}<div style={{ marginTop: 8, height: 40, borderBottom: '1px solid #ccc' }}></div></>;
     case 'long': return <>{qt}<div style={{ marginTop: 8, height: 84, borderBottom: '1px solid #ccc' }}></div></>;
+    case 'case': return <>{qt}<div style={{ marginTop: 4 }}>{(q.sub || []).map((sq, si) => <div key={si} style={{ marginTop: si ? 10 : 6 }}><div style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>({ROMAN[si]}) {sq.q}</div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 20px', marginTop: 4 }}>{(sq.options || []).map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap' }}>({LETTER(oi)}) {o}</div>)}</div></div>)}</div></>;
     default: return qt;
   }
 }
@@ -98,6 +99,7 @@ function PromptStem({ q }) {
   if (q.type === 'code') return <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: 'var(--glass-1)', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: '2px 0 0', color: 'var(--text)' }}>{q.q}</pre>;
   if (q.type === 'assertion') return <div><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {q.assertion}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {q.reason}</div></div>;
   if (q.type === 'match') return <span style={{ fontWeight: 600 }}>Match the following</span>;
+  if (q.type === 'case') return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{q.q}</span>;
   return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{q.q}</span>;
 }
 function PracticeInput({ q, ua, checked, onAns }) {
@@ -131,9 +133,11 @@ function PracticeInput({ q, ua, checked, onAns }) {
         </select>
       </div>))}</div>;
   }
+  if (q.type === 'case') { const ans = (ua && typeof ua === 'object' && !Array.isArray(ua)) ? ua : {}; return <div style={{ marginTop: 8, display: 'grid', gap: 12 }}>{(q.sub || []).map((sq, si) => <div key={si}><div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 4 }}>({ROMAN[si]}) {sq.q}</div><div style={{ display: 'grid', gap: 6 }}>{(sq.options || []).map((o, oi) => { const st = checked ? (oi === sq.answer ? 'correct' : (ans[si] === oi ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>({LETTER(oi)}) {o}</span>, ans[si] === oi, st, () => onAns({ ...ans, [si]: oi }))}</div>; })}</div>{checked && sq.explanation ? <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-3)' }}>{sq.explanation}</div> : null}</div>)}</div>; }
   return <textarea value={ua || ''} disabled={checked} onChange={(e) => onAns(e.target.value)} placeholder="Write your answer (self-assessed)" aria-label="Your answer" className="input" style={{ marginTop: 8, width: '100%', minHeight: 60, resize: 'vertical', fontFamily: 'inherit', fontSize: 13.5, padding: '9px 12px' }} />;
 }
 function Feedback({ q, ua }) {
+  if (q.type === 'case') return null;
   if (!isAuto(q)) return <div style={{ marginTop: 8, fontSize: 12.5, color: 'var(--text-2)', background: 'var(--glass-1)', borderLeft: '2px solid var(--violet)', padding: '8px 11px' }}><b style={{ fontWeight: 600 }}>Model answer:</b> {q.modelAnswer}{q.explanation ? ' — ' + q.explanation : ''}</div>;
   const ok = grade(q, ua) === true;
   return <div style={{ marginTop: 8, fontSize: 12.5, color: ok ? 'var(--green)' : '#ffb4b4' }}><b style={{ fontWeight: 600 }}>{ok ? '✓ Correct' : '✗ Correct answer:'}</b> {ok ? '' : correctText(q)}{q.explanation ? <span style={{ color: 'var(--text-3)' }}> — {q.explanation}</span> : null}</div>;
@@ -146,6 +150,7 @@ function EditAnswerControl({ q, gi, onPatch }) {
   if (q.type === 'multi') return <span style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap' }}>{q.options.map((o, oi) => { const on = Array.isArray(q.answers) && q.answers.includes(oi); return <label key={oi} style={{ fontSize: 12.5, color: 'var(--text-2)' }}><input type="checkbox" checked={on} onChange={() => onPatch(gi, { answers: on ? q.answers.filter((x) => x !== oi) : [...(q.answers || []), oi] })} /> {LETTER(oi)}</label>; })}</span>;
   if (q.type === 'fill' || q.type === 'numeric') return <input value={q.answer || ''} onChange={(e) => onPatch(gi, { answer: e.target.value })} aria-label="Correct answer" className="input" style={{ minWidth: 180, fontSize: 12.5, padding: '6px 10px' }} />;
   if (q.type === 'short' || q.type === 'long') return <input value={q.modelAnswer || ''} onChange={(e) => onPatch(gi, { modelAnswer: e.target.value })} aria-label="Model answer" className="input" style={{ minWidth: 300, fontSize: 12.5, padding: '6px 10px' }} />;
+  if (q.type === 'case') return <span style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>{(q.sub || []).map((sq, si) => <label key={si} style={{ fontSize: 12, color: 'var(--text-2)' }}>{ROMAN[si]}: <select value={sq.answer} onChange={(e) => onPatch(gi, { sub: q.sub.map((x, j) => j === si ? { ...x, answer: Number(e.target.value) } : x) })} style={sel}>{(sq.options || []).map((o, oi) => <option key={oi} value={oi}>{LETTER(oi)}</option>)}</select></label>)}</span>;
   return <span style={{ fontSize: 12, color: 'var(--text-3)' }}>(not editable)</span>;
 }
 
@@ -278,9 +283,9 @@ export default function PapersPage() {
   const totalQ = sections.reduce((n, s) => n + Number(s.count || 0), 0);
   const totalMarks = sections.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0);
   const flat = paper ? paper.sections.flatMap((s) => s.questions) : [];
-  const autoTotal = flat.filter(isAuto).length;
-  const correctN = checked ? flat.filter((q, gi) => isAuto(q) && grade(q, answers[gi]) === true).length : 0;
-  const writtenN = flat.length - autoTotal;
+  const autoTotal = flat.reduce((n, q) => n + (q.type === 'case' ? (Array.isArray(q.sub) ? q.sub.length : 0) : (isAuto(q) ? 1 : 0)), 0);
+  const correctN = checked ? flat.reduce((n, q, gi) => { if (q.type === 'case') { const ua = answers[gi] || {}; return n + (q.sub || []).reduce((m, sq, si) => m + (ua[si] === sq.answer ? 1 : 0), 0); } return n + ((isAuto(q) && grade(q, answers[gi]) === true) ? 1 : 0); }, 0) : 0;
+  const writtenN = flat.filter((q) => !isAuto(q) && q.type !== 'case').length;
 
   function stopTimer() { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }
   function cancelGenerate() {

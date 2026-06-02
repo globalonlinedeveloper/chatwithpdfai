@@ -22,6 +22,7 @@ const TYPE_SCHEMA = {
   numeric: 'numeric: {"type":"numeric","q":"...","answer":<number>,"unit":"<optional>","explanation":"..."}',
   short: 'short: {"type":"short","q":"...","modelAnswer":"<concise model answer>"}',
   long: 'long: {"type":"long","q":"...","modelAnswer":"<key points>"}',
+  case: 'case (reading comprehension / case study): {"type":"case","q":"<a 3-6 sentence passage or real-world scenario>","sub":[{"q":"<sub-question answerable only from the passage>","options":["o1","o2","o3","o4"],"answer":<index 0-3>,"explanation":"..."} (exactly 4 sub-questions)]}',
   code: 'code: {"type":"code","q":"What is the output?\\n<code>","options":["o1","o2","o3","o4"],"answer":<0-3>,"explanation":"..."}',
 };
 const ALL_TYPES = Object.keys(TYPE_SCHEMA);
@@ -84,6 +85,7 @@ function sanitize(q) {
   if (type === 'numeric') return { ...base, answer: str(q.answer, 80), unit: str(q.unit, 40) };
   if (type === 'match') { const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(p && p.r, 200) })).filter((p) => p.l && p.r) : []; if (pairs.length < 2) return null; return { ...base, pairs }; }
   if (type === 'assertion') { const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(o, 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true']; return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) }; }
+  if (type === 'case') { const sub = (Array.isArray(q.sub) ? q.sub : []).slice(0, 6).map((x) => { const options = Array.isArray(x && x.options) ? x.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; return { q: str(x && x.q, 700), options, answer: clampIdx(x && x.answer, options.length), explanation: str(x && x.explanation, 400) }; }).filter(Boolean); if (sub.length < 2) return null; return { ...base, sub }; }
   if (type === 'short' || type === 'long') return { ...base, modelAnswer: str(q.modelAnswer || q.answer, 1500) };
   return base;
 }
