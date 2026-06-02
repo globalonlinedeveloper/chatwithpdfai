@@ -155,6 +155,8 @@ export default function PapersPage() {
   const [fullSize, setFullSize] = useState(false); // "Full real-size exam" toggle (batched generation)
   const [fullConfirm, setFullConfirm] = useState(false); // showing the full-size confirm panel
   const [fullProg, setFullProg] = useState(''); // batch progress text during full generation
+  const [uploading, setUploading] = useState(false); // direct PDF upload in progress
+  const [uploadMsg, setUploadMsg] = useState(''); // upload status message
   const [examStyle, setExamStyle] = useState('');
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
@@ -191,6 +193,7 @@ export default function PapersPage() {
   const abortRef = useRef(null); // in-flight AbortController so Cancel can abort
   const timerRef = useRef(null); // setInterval id for the elapsed counter
   const headingRef = useRef(null); // result heading, focused when a paper first appears
+  const fileRef = useRef(null); // hidden file input for direct PDF upload
 
   useEffect(() => { try { const d = Number(new URLSearchParams(window.location.search).get('doc')) || 0; if (d) setSourceDocId(d); } catch (e) {} }, []);
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
@@ -199,6 +202,27 @@ export default function PapersPage() {
 
   function applyPreset(p) { setExamStyle(p.examStyle); setTopic(p.topic); setSections(p.sections.map((s) => ({ ...s }))); }
   function chooseBlueprint(v) { setBpKey(v); if (!v || v === 'custom') { setExamStyle(''); return; } const ck = v.split('||')[0]; const lbl = v.slice(ck.length + 2); const c = CATEGORIES.find((x) => x.k === ck); const p = c && c.presets.find((x) => x.label === lbl); if (p) { applyPreset(p); } }
+  async function refreshDocs(selectId) {
+    try { const r = await fetch('/api/documents'); const j = await r.json().catch(() => ({})); if (j && Array.isArray(j.documents)) { const seen = new Set(); const uniq = j.documents.filter((d) => d.status === 'ready').filter((d) => { const k = (d.filename || '') + '|' + (d.sizeBytes || 0); if (seen.has(k)) return false; seen.add(k); return true; }); setDocs(uniq); if (selectId) setSourceDocId(Number(selectId)); } } catch (e) {}
+  }
+  async function uploadSource(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) { setUploadMsg('Please choose a PDF file.'); return; }
+    if (file.size > 50 * 1024 * 1024) { setUploadMsg('That PDF is over the 50 MB limit.'); return; }
+    setUploading(true); setUploadMsg('Uploading & reading \u201c' + file.name + '\u201d \u2014 this can take a moment\u2026');
+    try {
+      const fd = new FormData(); fd.append('file', file);
+      const r = await fetch('/api/documents/upload', { method: 'POST', body: fd });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
+      if (r.status === 409 && j.duplicate && j.existingId) { await refreshDocs(j.existingId); setUploadMsg('Already in your library \u2014 selected it as the source.'); setUploading(false); return; }
+      if (!r.ok) { setUploadMsg(r.status === 403 ? 'Please verify your email before uploading.' : (j.error || 'Upload failed.')); setUploading(false); return; }
+      const id = j.document && j.document.id;
+      await refreshDocs(id);
+      setUploadMsg('Added \u201c' + ((j.document && j.document.filename) || file.name) + '\u201d \u2014 now grounding from it.');
+      setUploading(false);
+    } catch (e) { setUploadMsg('Upload failed: ' + (e.message || 'error')); setUploading(false); }
+  }
   function setSec(i, patch) { setSections((cur) => cur.map((s, j) => j === i ? { ...s, ...patch } : s)); }
   function addSec() { setSections((cur) => [...cur, { title: 'Section ' + String.fromCharCode(65 + cur.length), type: 'mcq', count: 5, marks: 1 }]); }
   function delSec(i) { setSections((cur) => cur.length > 1 ? cur.filter((_, j) => j !== i) : cur); }
@@ -397,8 +421,13 @@ export default function PapersPage() {
                 {docs.map((d) => <option key={d.id} value={d.id}>Grounded in: {d.filename}{d.pageCount ? ' (' + d.pageCount + ' pp)' : ''}</option>)}
               </select>
             ) : (
-              <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>From scratch. Upload a PDF in Chat to ground a paper in your own material.</div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Generate from scratch, or upload a PDF below to ground the paper in your own material.</div>
             )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              <input ref={fileRef} type="file" accept="application/pdf,.pdf" onChange={(e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) uploadSource(f); }} style={{ display: 'none' }} data-testid="source-file" aria-hidden="true" tabIndex={-1} />
+              <button type="button" onClick={() => { if (fileRef.current) fileRef.current.click(); }} disabled={uploading} className="btn btn-glass btn-sm" data-testid="upload-pdf">{uploading ? 'Uploading\u2026' : '\u2191 Upload a PDF'}</button>
+              {uploadMsg ? <span data-testid="upload-msg" style={{ fontSize: 11.5, color: uploading ? 'var(--text-3)' : 'var(--text-2)' }}>{uploadMsg}</span> : null}
+            </div>
             <div style={{ fontSize: 11, color: 'var(--text-4)', margin: '7px 0 16px' }}>Structure + source combine &mdash; e.g. a CBSE blueprint grounded in your own PDF.</div>
             <div className="eyebrow" style={{ marginBottom: 8 }}>Scope (optional)</div>
             <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={2} placeholder="Narrow to a chapter or topic — leave blank to use the full blueprint or PDF" aria-label="Scope" className="input" data-testid="topic" style={{ width: '100%', resize: 'vertical', minHeight: 54, fontFamily: 'inherit', padding: '10px 13px' }} />
