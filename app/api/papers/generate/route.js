@@ -6,6 +6,7 @@ import { getReadyDocuments, retrievePagesMulti } from '@/lib/store/chat';
 import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
 import { rateLimit, recordHit } from '@/lib/ratelimit';
+import { langInstr as langInstrFor, isLang } from '@/lib/languages';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ function buildSystem({ sections, difficulty, level, language, examStyle, grounde
   const used = [...new Set(sections.flatMap((s) => s.types))];
   const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
   const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
-  const langInstr = language === 'ta-en' ? 'Write each question and option in Tamil first, then its English translation on the next line in parentheses. Keep explanations in English.' : 'Write everything in clear English.';
+  const langInstr = langInstrFor(language);
   return `You are an expert exam question-paper setter${examStyle ? ' preparing a ' + examStyle + '-style paper' : ''}.
 ${langInstr}
 Difficulty: ${DIFF[difficulty] || DIFF.mixed}.${level ? ' Target level: ' + level + '.' : ''}
@@ -168,7 +169,7 @@ export async function POST(req) {
   const institution = str(body.institution, 100).trim();
   const instructions = str(body.instructions, 400).trim();
   const difficulty = ['easy', 'medium', 'hard', 'mixed'].includes(body.difficulty) ? body.difficulty : 'mixed';
-  const language = body.language === 'ta-en' ? 'ta-en' : 'en';
+  const language = isLang(body.language) ? body.language : 'en';
   const sections = normalizeSections(body);
   const nonce = str(body.nonce, 40);
   const exclude = Array.isArray(body.exclude) ? body.exclude.slice(0, 80).map((s) => str(s, 140)).filter(Boolean) : [];

@@ -5,6 +5,7 @@ import { toGIFT, toMoodleXML, toCSV, downloadText, slug } from './exporters';
 import { grade, correctText } from './grade.js';
 import { deriveSets } from './sets.js';
 import { CATEGORIES } from '@/lib/blueprints';
+import { LANGUAGES } from '@/lib/languages';
 
 const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', code: 'Code output' };
 const ALL_TYPES = Object.keys(TYPE_LABELS);
@@ -157,7 +158,7 @@ export default function PapersPage() {
   const [sections, setSections] = useState([{ title: 'Section A', type: 'mcq', count: 10, marks: 1 }]);
   const [difficulty, setDifficulty] = useState('mixed');
   const [level, setLevel] = useState('');
-  const [language] = useState('en'); // English only; bilingual (ta-en) backend kept dormant/reversible
+  const [language, setLanguage] = useState('en');
   const [includeKey, setIncludeKey] = useState(true);
   const [verify, setVerify] = useState(true);
   const [prevStems, setPrevStems] = useState([]);
@@ -339,7 +340,7 @@ export default function PapersPage() {
             <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
               <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} aria-label="Difficulty" style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
-              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
+              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label><label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Language<select value={language} onChange={(e) => setLanguage(e.target.value)} aria-label="Language" style={ctrl}>{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}</select></label>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 12 }}>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
