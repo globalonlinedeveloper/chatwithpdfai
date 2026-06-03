@@ -197,10 +197,11 @@ export default function PapersPage() {
     const controller = new AbortController(); abortRef.current = controller;
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper'); setCurSet(0);
-    const acc = sectionList.map(() => []); const seen = [...prevStems]; let used = 0; let bal = null; let failed = 0; let stopped = false; let allVerified = !!verifyFlag;
+    const acc = sectionList.map(() => []); const seen = [...prevStems]; let used = 0; let bal = null; let failed = 0; let stopped = false; let allVerified = !!verifyFlag; const deadline = Date.now() + 8 * 60 * 1000;
     try {
       for (let b = 0; b < plan.length; b++) {
         if (controller.signal.aborted) { stopped = true; break; }
+        if (Date.now() > deadline) { stopped = true; setNote('Stopped after 8 minutes to avoid a runaway generation — Regenerate to fill the rest.'); break; }
         const pp = plan[b];
         setFullProg('Batch ' + (b + 1) + ' of ' + plan.length + ' \u2014 ' + pp.title);
         const body = { topic: effTopic, examStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: !!verifyFlag, documentId: sourceDocId };

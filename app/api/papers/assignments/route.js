@@ -49,3 +49,20 @@ export async function DELETE(req) {
   await query('DELETE FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
   return NextResponse.json({ ok: true });
 }
+
+// Pause/resume a shared test without deleting it (and its attempts). The /t/[token]
+// take route already returns "not available" when active=0, so this instantly
+// enables/disables the public link.
+export async function PATCH(req) {
+  if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const u = await getCurrentUser(req);
+  if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+  let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  const id = Number(body.id) || 0;
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const active = body.active ? 1 : 0;
+  const own = await query('SELECT id FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
+  if (!own[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  await query('UPDATE paper_assignments SET active = ? WHERE id = ? AND user_id = ?', [active, id, u.id]);
+  return NextResponse.json({ ok: true, active });
+}

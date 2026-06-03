@@ -60,10 +60,11 @@ export default function LibraryPage() {
           if (!list.length) return empty(q ? 'No matching tests.' : 'No shared tests yet.', q ? null : 'Go to question papers', '/question-paper-generator');
           return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{list.map((s) => (
             <div key={s.id} className="glass" style={{ padding: '12px 16px', borderRadius: 'var(--r-lg)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <span style={{ flex: 1, minWidth: 160, fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</span>
+              <span style={{ flex: 1, minWidth: 160, fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}{!s.active ? <span style={{ color: 'var(--text-4)', fontWeight: 400 }}> · paused</span> : null}</span>
               <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>{s.attempts} attempts{s.attempts ? ' · avg ' + s.avgPct + '%' : ''}</span>
               <a href={'/t/' + s.token} target="_blank" rel="noreferrer" className="btn btn-glass btn-sm">Open</a>
               <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + s.token); }} className="btn btn-glass btn-sm">Copy link</button>
+              <button onClick={async () => { const na = s.active ? 0 : 1; const rr = await fetch('/api/papers/assignments', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, active: na }) }); if (rr.ok) setShares((arr) => arr.map((x) => x.id === s.id ? { ...x, active: na } : x)); }} className="btn btn-glass btn-sm">{s.active ? 'Pause' : 'Resume'}</button>
             </div>))}</div>;
         })())}
       </main>
