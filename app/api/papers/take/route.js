@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { grade, isAuto, correctText, studentSafe, flatQs } from '@/app/question-paper-generator/grade';
+import { getClientIp } from '@/lib/validate';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,6 +25,12 @@ export async function POST(req) {
   const name = String(body.name || '').slice(0, 120);
   const answers = body.answers && typeof body.answers === 'object' ? body.answers : {};
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
+  // Public endpoint (no auth): rate-limit attempt submissions per IP so a script
+  // can't flood paper_attempts and skew the owner's score stats. A real student
+  // submits once; 20/10min leaves generous room for retries.
+  if (!(await rateLimit({ bucket: 'take', ip: getClientIp(req), max: 20, windowMin: 10 }))) {
+    return NextResponse.json({ error: 'Too many submissions — please wait a moment and try again.' }, { status: 429 });
+  }
   const rows = await query('SELECT id, payload, active FROM paper_assignments WHERE token = ?', [token]);
   if (!rows[0] || !rows[0].active) return NextResponse.json({ error: 'This test link is not available' }, { status: 404 });
   let paper; try { paper = JSON.parse(rows[0].payload); } catch { return NextResponse.json({ error: 'Corrupt test' }, { status: 500 }); }

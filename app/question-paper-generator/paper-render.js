@@ -15,7 +15,7 @@ export const clampInt = (v, min, max) => { const n = Math.round(Number(v)); if (
 export const clampHalf = (v, min, max) => { const n = Math.round(Number(v) * 2) / 2; if (!Number.isFinite(n)) return min; return Math.max(min, Math.min(max, n)); };
 
 export function renderBody(q) {
-  const opts = (list) => (<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 20px', marginTop: 8 }}>{list.map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap' }}>({LETTER(oi)}) {o}</div>)}</div>);
+  const opts = (list) => (<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 8 }}>{list.map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {o}</div>)}</div>);
   const qt = q.type === 'code' ? <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: '#f3f3f6', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: '2px 0 0' }}>{q.q}</pre> : <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{q.q}</span>;
   switch (q.type) {
     case 'mcq': case 'code': return <>{qt}{opts(q.options)}</>;
@@ -24,10 +24,10 @@ export function renderBody(q) {
     case 'fill': return qt;
     case 'numeric': return <>{qt}<div style={{ marginTop: 8, fontSize: 13, color: '#555' }}>Answer: ____________ {q.unit}</div></>;
     case 'assertion': return <><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {q.assertion}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {q.reason}</div>{opts(q.options)}</>;
-    case 'match': { const rs = rights(q.pairs); return <>{qt}<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px', marginTop: 8, fontSize: 13.5 }}><div>{q.pairs.map((p, pi) => <div key={pi}>{ROMAN[pi]}. {p.l}</div>)}</div><div>{rs.map((r, ri) => <div key={ri}>({LETTER(ri)}) {r}</div>)}</div></div></>; }
+    case 'match': { const rs = rights(q.pairs); return <>{qt}<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '2px 24px', marginTop: 8, fontSize: 13.5, overflowWrap: 'anywhere' }}><div>{q.pairs.map((p, pi) => <div key={pi}>{ROMAN[pi]}. {p.l}</div>)}</div><div>{rs.map((r, ri) => <div key={ri}>({LETTER(ri)}) {r}</div>)}</div></div></>; }
     case 'short': return <>{qt}<div style={{ marginTop: 8, height: 40, borderBottom: '1px solid #ccc' }}></div></>;
     case 'long': return <>{qt}<div style={{ marginTop: 8, height: 84, borderBottom: '1px solid #ccc' }}></div></>;
-    case 'case': return <>{qt}<div style={{ marginTop: 4 }}>{(q.sub || []).map((sq, si) => <div key={si} style={{ marginTop: si ? 10 : 6 }}><div style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>({ROMAN[si]}) {sq.q}</div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 20px', marginTop: 4 }}>{(sq.options || []).map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap' }}>({LETTER(oi)}) {o}</div>)}</div></div>)}</div></>;
+    case 'case': return <>{qt}<div style={{ marginTop: 4 }}>{(q.sub || []).map((sq, si) => <div key={si} style={{ marginTop: si ? 10 : 6 }}><div style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>({ROMAN[si]}) {sq.q}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 4 }}>{(sq.options || []).map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {o}</div>)}</div></div>)}</div></>;
     default: return qt;
   }
 }

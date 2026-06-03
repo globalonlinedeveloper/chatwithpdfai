@@ -14,10 +14,10 @@ export function toGIFT(paper) {
     if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') out.push(t + '{\n' + q.options.map((o, oi) => (oi === q.answer ? '=' : '~') + gift(o)).join('\n') + '\n}');
     else if (q.type === 'multi') { const pct = Math.max(1, Math.round(100 / q.answers.length)); out.push(t + '{\n' + q.options.map((o, oi) => (q.answers.includes(oi) ? `~%${pct}%` : '~%-100%') + gift(o)).join('\n') + '\n}'); }
     else if (q.type === 'tf') out.push(t + '{' + (q.answer ? 'TRUE' : 'FALSE') + '}');
-    else if (q.type === 'fill' || q.type === 'short') out.push(t + '{=' + gift(q.type === 'fill' ? q.answer : q.modelAnswer) + '}');
+    else if (q.type === 'fill') out.push(t + '{=' + gift(q.answer) + '}'); // exact-match blank (GIFT shortanswer is case-insensitive)
     else if (q.type === 'numeric') out.push(t + '{#' + gift(q.answer) + '}');
     else if (q.type === 'match') out.push(t + '{\n' + q.pairs.map((p) => '=' + gift(p.l) + ' -> ' + gift(p.r)).join('\n') + '\n}');
-    else out.push(t + '{}');
+    else out.push(t + '{}'); // short/long carry a model answer (a sentence), not an exact key -> manually-graded essay, so Moodle doesn't mark every student wrong
   });
   return out.join('\n\n') + '\n';
 }
@@ -30,7 +30,7 @@ export function toMoodleXML(paper) {
     if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') return `${head('multichoice', name, stem)}\n    <single>true</single>\n${q.options.map((o, oi) => `    <answer fraction="${oi === q.answer ? 100 : 0}">${cd(o)}</answer>`).join('\n')}\n  </question>`;
     if (q.type === 'multi') { const pct = Math.max(1, Math.round(100 / q.answers.length)); return `${head('multichoice', name, stem)}\n    <single>false</single>\n${q.options.map((o, oi) => `    <answer fraction="${q.answers.includes(oi) ? pct : 0}">${cd(o)}</answer>`).join('\n')}\n  </question>`; }
     if (q.type === 'tf') return `${head('truefalse', name, stem)}\n    <answer fraction="${q.answer ? 100 : 0}">${cd('true')}</answer>\n    <answer fraction="${q.answer ? 0 : 100}">${cd('false')}</answer>\n  </question>`;
-    if (q.type === 'fill' || q.type === 'short') return `${head('shortanswer', name, stem)}\n    <answer fraction="100">${cd(q.type === 'fill' ? q.answer : q.modelAnswer)}</answer>\n  </question>`;
+    if (q.type === 'fill') return `${head('shortanswer', name, stem)}\n    <answer fraction="100">${cd(q.answer)}</answer>\n  </question>`;
     if (q.type === 'numeric') return `${head('numerical', name, stem)}\n    <answer fraction="100">${cd(q.answer)}<tolerance>0</tolerance></answer>\n  </question>`;
     if (q.type === 'match') return `${head('matching', name, stem)}\n${q.pairs.map((p) => `    <subquestion format="html">${cd(p.l)}<answer>${cd(p.r)}</answer></subquestion>`).join('\n')}\n  </question>`;
     return `${head('essay', name, stem)}\n  </question>`;
