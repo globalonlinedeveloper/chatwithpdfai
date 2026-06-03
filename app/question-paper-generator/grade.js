@@ -33,6 +33,21 @@ export function correctText(q) {
   }
 }
 
+// Render a student's submitted answer as human-readable text (mirrors correctText's shape).
+export function studentAnswerText(q, ua) {
+  const U = (i) => String.fromCharCode(65 + i);
+  const none = '— (no answer)';
+  switch (q.type) {
+    case 'mcq': case 'code': case 'assertion': return Number.isInteger(ua) && q.options[ua] != null ? '(' + U(ua) + ') ' + q.options[ua] : none;
+    case 'tf': return ua === true ? 'True' : ua === false ? 'False' : none;
+    case 'multi': { const a = (Array.isArray(ua) ? ua : []).filter((i) => q.options[i] != null); return a.length ? a.map((i) => '(' + U(i) + ') ' + q.options[i]).join('; ') : none; }
+    case 'fill': case 'numeric': case 'short': case 'long': return ua != null && String(ua).trim() ? String(ua) : none;
+    case 'match': { if (!Array.isArray(ua)) return none; const rs = rights(q.pairs); return q.pairs.map((p, pi) => p.l + ' -> ' + (rs[ua[pi]] != null ? rs[ua[pi]] : '?')).join(', '); }
+    case 'case': { const ans = ua && typeof ua === 'object' && !Array.isArray(ua) ? ua : {}; return (q.sub || []).map((sq, si) => (si + 1) + '. ' + (Number.isInteger(ans[si]) && (sq.options || [])[ans[si]] != null ? '(' + U(ans[si]) + ') ' + sq.options[ans[si]] : '—')).join('   '); }
+    default: return ua != null ? String(ua) : none;
+  }
+}
+
 // Strip correct answers; for match send lefts + sorted choices (no alignment leak).
 export function studentSafe(paper) {
   const stripQ = (q) => {

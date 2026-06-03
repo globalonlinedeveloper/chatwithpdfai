@@ -13,8 +13,16 @@ export async function GET(req) {
   if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id')) || 0;
   if (id) {
-    const own = await query('SELECT id, title FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
+    const own = await query('SELECT id, title, payload FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
     if (!own[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const attemptId = Number(new URL(req.url).searchParams.get('attemptId')) || 0;
+    if (attemptId) {
+      const at = await query('SELECT id, student_name, score, total, answers, created_at FROM paper_attempts WHERE id = ? AND assignment_id = ?', [attemptId, id]);
+      if (!at[0]) return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
+      let paper = null; try { paper = JSON.parse(own[0].payload); } catch {}
+      let answers = {}; try { answers = JSON.parse(at[0].answers || '{}') || {}; } catch {}
+      return NextResponse.json({ ok: true, attempt: { id: at[0].id, name: at[0].student_name, score: at[0].score, total: at[0].total, createdAt: at[0].created_at }, paper, answers });
+    }
     const att = await query('SELECT id, student_name, score, total, created_at FROM paper_attempts WHERE assignment_id = ? ORDER BY created_at DESC LIMIT 500', [id]);
     return NextResponse.json({ ok: true, assignment: { id: own[0].id, title: own[0].title }, attempts: att.map((a) => ({ id: a.id, name: a.student_name, score: a.score, total: a.total, createdAt: a.created_at })) });
   }

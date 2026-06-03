@@ -70,3 +70,23 @@ describe('mathText (notation -> unicode)', () => {
     expect(mathText('a_{ij}')).toBe('a_{ij}'); // unmappable subscript kept intact
   });
 });
+
+import { studentAnswerText } from '../../app/question-paper-generator/grade.js';
+describe('studentAnswerText()', () => {
+  it('renders objective answers with letters', () => {
+    expect(studentAnswerText({ type: 'mcq', options: ['a', 'b', 'c'] }, 1)).toBe('(B) b');
+    expect(studentAnswerText({ type: 'tf' }, false)).toBe('False');
+    expect(studentAnswerText({ type: 'multi', options: ['a', 'b', 'c'] }, [2, 0])).toBe('(C) c; (A) a');
+  });
+  it('renders open-ended text and blanks', () => {
+    expect(studentAnswerText({ type: 'short' }, 'My essay')).toBe('My essay');
+    expect(studentAnswerText({ type: 'mcq', options: ['a'] }, undefined)).toMatch(/no answer/);
+    expect(studentAnswerText({ type: 'fill' }, '')).toMatch(/no answer/);
+  });
+  it('renders match mapping and case sub-answers', () => {
+    const m = studentAnswerText({ type: 'match', pairs: [{ l: 'Dog', r: 'Bark' }, { l: 'Cat', r: 'Meow' }] }, [0, 1]);
+    expect(m).toContain('Dog ->');
+    const c = studentAnswerText({ type: 'case', sub: [{ q: 'x', options: ['p', 'q'], answer: 0 }] }, { 0: 1 });
+    expect(c).toContain('(B) q');
+  });
+});
