@@ -9,18 +9,29 @@ jobs:
     steps:
       - name: Wait for Hostinger deploy to land
         run: sleep 150
-      - name: Check key routes
+      - name: Check key routes (with retries)
         run: |
-          set -e
           B=https://chatwithpdfai.com
-          check(){ code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$B$1"); echo "$1 -> $code (want $2)"; [ "$code" = "$2" ]; }
-          check / 200
-          check /pricing 200
-          check /tools 200
-          check /guides 200
-          check /api/health 200
-          check /robots.txt 200
-          check /sitemap.xml 200
-          check /og-image.png 200
-          check /dashboard 307
-          echo "smoke ok"
+          # Retry each route up to 6 times (10s apart, ~60s grace) so a cold
+          # start or worker respawn right after deploy doesn't false-fail the
+          # canary. A genuinely broken route still stays wrong past every retry.
+          check(){
+            path="$1"; want="$2"; code=""
+            for i in $(seq 1 6); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$B$path" || true)
+              if [ "$code" = "$want" ]; then echo "$path -> $code (ok, try $i)"; return 0; fi
+              echo "$path -> $code (want $want) retry $i/6"; sleep 10
+            done
+            echo "FAIL: $path stayed $code (want $want) after 6 tries"; return 1
+          }
+          rc=0
+          check / 200             || rc=1
+          check /pricing 200      || rc=1
+          check /tools 200        || rc=1
+          check /guides 200       || rc=1
+          check /api/health 200   || rc=1
+          check /robots.txt 200   || rc=1
+          check /sitemap.xml 200  || rc=1
+          check /og-image.png 200 || rc=1
+          check /dashboard 307    || rc=1
+          if [ "$rc" = "0" ]; then echo "smoke ok"; else echo "smoke FAILED"; exit 1; fi
