@@ -32,7 +32,7 @@ export function renderBody(q) {
   }
 }
 
-export function PaperView({ paper, layout, includeKey }) {
+export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegenSection }) {
   const compact = layout === 'compact';
   const official = layout === 'official';
   const qFont = compact ? 12.5 : 14;
@@ -65,12 +65,12 @@ export function PaperView({ paper, layout, includeKey }) {
   const body = paper.sections.map((sec, si) => (
     <div key={si} style={{ marginBottom: compact ? 4 : 8 }}>
       {(sec.title || paper.sections.length > 1 || official) ? (official ? (
-        <div className="section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', border: '1px solid #ccc', borderRadius: 4, padding: '4px 10px', margin: '12px 0 10px', background: '#f3f3f6', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}><span style={{ fontSize: 14, fontWeight: 700 }}>{secName(sec, si)}</span><span style={{ fontSize: 11.5, color: '#666' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>
+        <div className="section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', border: '1px solid #ccc', borderRadius: 4, padding: '4px 10px', margin: '12px 0 10px', background: '#f3f3f6', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}><span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{secName(sec, si)}</h2>{onRegenSection ? <button type="button" className="no-print" onClick={() => onRegenSection(si)} disabled={regenGi != null} title="Regenerate all questions in this section" data-testid={'sregen-' + si} style={{ fontSize: 10.5, padding: '1px 7px', cursor: 'pointer', border: '1px solid #ccc', borderRadius: 4, background: 'transparent', color: '#555' }}>{regenGi === ('s' + si) ? '…' : '↻'}</button> : null}</span><span style={{ fontSize: 11.5, color: '#666' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>
       ) : (
-        <div className="section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #ddd', margin: compact ? '10px 0 6px' : '14px 0 10px', paddingBottom: 4 }}><span style={{ fontSize: compact ? 13 : 14.5, fontWeight: 700 }}>{secName(sec, si)}</span><span style={{ fontSize: 11.5, color: '#777' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>
+        <div className="section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #ddd', margin: compact ? '10px 0 6px' : '14px 0 10px', paddingBottom: 4 }}><span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><h2 style={{ fontSize: compact ? 13 : 14.5, fontWeight: 700, margin: 0 }}>{secName(sec, si)}</h2>{onRegenSection ? <button type="button" className="no-print" onClick={() => onRegenSection(si)} disabled={regenGi != null} title="Regenerate all questions in this section" data-testid={'sregen-' + si} style={{ fontSize: 10.5, padding: '1px 7px', cursor: 'pointer', border: '1px solid #ccc', borderRadius: 4, background: 'transparent', color: '#555' }}>{regenGi === ('s' + si) ? '…' : '↻'}</button> : null}</span><span style={{ fontSize: 11.5, color: '#777' }}>{sec.questions.length} × {sec.marks} = {sec.questions.length * sec.marks} marks</span></div>
       )) : null}
-      {sec.questions.map((q) => { n += 1; return (
-        <div key={n} className="q-block" style={{ marginBottom: compact ? 9 : 16, fontSize: qFont, lineHeight: compact ? 1.4 : 1.55, display: 'flex', gap: 8 }}><span style={{ fontWeight: 600, flexShrink: 0 }}>{n}.</span><div style={{ flex: 1 }}>{renderBody(q)}</div>{official ? <span style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap', flexShrink: 0 }}>[{sec.marks}]</span> : null}</div>
+      {sec.questions.map((q) => { n += 1; const gi = n - 1; return (
+        <div key={n} className="q-block" style={{ marginBottom: compact ? 9 : 16, fontSize: qFont, lineHeight: compact ? 1.4 : 1.55, display: 'flex', gap: 8 }}><span style={{ fontWeight: 600, flexShrink: 0 }}>{n}.</span><div style={{ flex: 1 }}>{renderBody(q)}</div>{official ? <span style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap', flexShrink: 0 }}>[{sec.marks}]</span> : null}{onRegen ? <button type="button" className="no-print" onClick={() => onRegen(gi)} disabled={regenGi != null} title="Replace this question with a fresh AI one (uses a credit)" aria-label={'Regenerate question ' + (gi + 1)} data-testid={'pregen-' + gi} style={{ flexShrink: 0, fontSize: 11, padding: '1px 6px', cursor: 'pointer', border: '1px solid #ccc', borderRadius: 4, background: 'transparent', color: '#555', alignSelf: 'flex-start' }}>{regenGi === gi ? '…' : '↻'}</button> : null}</div>
       ); })}
     </div>
   ));

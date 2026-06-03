@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toGIFT, toMoodleXML, toCSV, slug } from '../../app/question-paper-generator/exporters.js';
+import { toGIFT, toMoodleXML, toCSV, toAiken, toQTIZip, slug } from '../../app/question-paper-generator/exporters.js';
 
 const paper = () => ({ title: 'My Paper', sections: [{ title: 'A', marks: 1, questions: [
   { type: 'mcq', q: '2+2?', options: ['3', '4'], answer: 1, explanation: 'math' },
@@ -53,5 +53,22 @@ describe('slug()', () => {
   it('sanitizes a title for filenames', () => {
     expect(slug('My Paper!')).toBe('My_Paper');
     expect(slug('')).toBe('paper');
+  });
+});
+
+describe('toAiken', () => {
+  it('emits only single-answer MCQ blocks each ending in ANSWER:', () => {
+    const out = toAiken(paper());
+    const blocks = out.trim().split(/\n\n/);
+    expect(blocks.length).toBeGreaterThanOrEqual(3); // mcq + tf + 2 case-subs
+    blocks.forEach((b) => expect(b).toMatch(/\nANSWER: [A-Z]\s*$/));
+  });
+});
+describe('toQTIZip', () => {
+  it('produces a PK zip with content', async () => {
+    const blob = await toQTIZip(paper());
+    expect(blob.size).toBeGreaterThan(100);
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    expect(buf[0]).toBe(0x50); expect(buf[1]).toBe(0x4B);
   });
 });
