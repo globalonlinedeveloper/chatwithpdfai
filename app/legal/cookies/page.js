@@ -23,5 +23,5 @@ const SECTIONS = [
     ];
 export const metadata = { title: "Cookie Policy \u2014 CHATWITHPDFAI" };
 export default function Page() {
-  return <LongFormPage eyebrow={""} title={""} lede={""} lastUpdated={""} sections={SECTIONS} />;
+  return <LongFormPage eyebrow={"Legal · Cookies"} title={"Cookie Policy"} lede={"How we use cookies — and how to control them."} lastUpdated={""} sections={SECTIONS} />;
 }
