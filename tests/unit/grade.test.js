@@ -57,3 +57,16 @@ describe('studentSafe()', () => {
     expect(q1.pairs).toBeUndefined();
   });
 });
+
+import { mathText } from '../../app/question-paper-generator/grade.js';
+describe('mathText (notation -> unicode)', () => {
+  it('converts exponents, subscripts, fractions and symbols', () => {
+    expect(mathText('x^2 + y^{10}')).toBe('x² + y¹⁰');
+    expect(mathText('H_2O and CO_2')).toBe('H₂O and CO₂');
+    expect(mathText('a \\times b \\leq c')).toBe('a × b ≤ c');
+    expect(mathText('\\frac{1}{2} and \\sqrt{9}')).toBe('(1)/(2) and √(9)');
+    expect(mathText('\\pi r^2')).toBe('π r²');
+    expect(mathText('plain text')).toBe('plain text');
+    expect(mathText('a_{ij}')).toBe('a_{ij}'); // unmappable subscript kept intact
+  });
+});

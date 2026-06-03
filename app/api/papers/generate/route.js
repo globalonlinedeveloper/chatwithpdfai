@@ -33,7 +33,7 @@ const TYPE_SCHEMA = {
 const ALL_TYPES = Object.keys(TYPE_SCHEMA);
 const DIFF = { easy: 'easy (recall)', medium: 'medium (application)', hard: 'hard (analysis)', mixed: 'a balanced mix of easy, medium and hard' };
 
-function buildSystem({ sections, difficulty, level, language, examStyle, grounded }) {
+function buildSystem({ sections, difficulty, level, language, examStyle, grounded, cognitive }) {
   const used = [...new Set(sections.flatMap((s) => s.types))];
   const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
   const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
@@ -51,6 +51,9 @@ Hard rules:
 - Every fact, date, name and code behaviour must be accurate. Never invent. If unsure, choose content you are certain about.
 - For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).\n- Option strings must contain ONLY the answer text — never prefix them with letters or numbers like "a)", "A.", "(b)", "1."; the layout adds the labels automatically.
 - Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
+- Write any math or science notation in simple inline form: exponents with ^ (x^2, x^{12}), subscripts with _ (H_2O, a_{ij}); use Unicode symbols directly (× ÷ ± ≤ ≥ √ π θ °). Do NOT use $ or display-math delimiters.
+- Tag EVERY question with a short "bloom" field — one of Remember, Understand, Apply or Analyse — for the cognitive level it tests.
+- Cognitive focus: ${cognitive === 'recall' ? 'emphasise Remember/Understand (foundational recall).' : cognitive === 'application' ? 'emphasise Apply/Analyse (higher-order application and HOTS).' : 'a balanced mix across Remember, Understand, Apply and Analyse.'}
 - Each question object MUST include a "type" field and follow that type's exact shape.
 - Return EVERY section listed in the blueprint above, in order, each populated with its full set of questions — never omit a section or leave one empty.\n- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
 - Output ONLY valid minified JSON, no markdown, no commentary:
@@ -82,6 +85,7 @@ function sanitize(q) {
   if (!q || typeof q !== 'object') return null;
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
   const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
+  const _bl = str(q.bloom, 24); if (_bl) base.bloom = _bl;
   const pg = Number(q.page); if (Number.isInteger(pg) && pg > 0 && pg < 100000) base.page = pg;
   if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
   if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
@@ -176,6 +180,7 @@ export async function POST(req) {
   const institution = str(body.institution, 100).trim();
   const instructions = str(body.instructions, 400).trim();
   const difficulty = ['easy', 'medium', 'hard', 'mixed'].includes(body.difficulty) ? body.difficulty : 'mixed';
+  const cognitive = ['recall', 'application'].includes(body.cognitive) ? body.cognitive : '';
   const language = isLang(body.language) ? body.language : 'en';
   const sections = normalizeSections(body);
   const nonce = str(body.nonce, 40);
@@ -210,7 +215,7 @@ export async function POST(req) {
     const seedNote = nonce ? `\nVariation seed: ${nonce}. Use it to pick different sub-topics, examples and phrasing than a typical paper.` : '';
     const sourceNote = grounded ? `\n\nSOURCE MATERIAL — base every question on this and cite the page numbers shown:\n${sourceContext}` : '';
     const userMsg = `Topic / syllabus: ${topic || sourceName}\nProduce the paper exactly per the section blueprint above.${seedNote}${excludeNote}${sourceNote}`;
-    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(8000, 500 * totalQ + 1500), temperature: 0.8, jsonMode: true });
+    const result = await routeChat({ system: buildSystem({ sections, difficulty, level, language, examStyle, grounded, cognitive }), messages: [{ role: 'user', content: userMsg }], maxTokens: Math.min(8000, 500 * totalQ + 1500), temperature: 0.8, jsonMode: true });
 
     let parsed;
     try { parsed = extractJson(result.text); } catch { return NextResponse.json({ error: 'The generator returned an unexpected format — please try again.' }, { status: 502 }); }
@@ -232,7 +237,7 @@ export async function POST(req) {
       let guard = 0;
       while (sec.questions.length < want && guard++ < 3) {
         const need = want - sec.questions.length;
-        const tSys = buildSystem({ sections: [{ title: sec.title, types: sec.types, count: need, marks: sec.marks }], difficulty, level, language, examStyle, grounded });
+        const tSys = buildSystem({ sections: [{ title: sec.title, types: sec.types, count: need, marks: sec.marks }], difficulty, level, language, examStyle, grounded, cognitive });
         const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} ${sec.types.join('/')} question(s) for the section "${sec.title}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${baseExclude.join('\n- ')}${sourceNote}`;
         let tr;
         try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(6000, 500 * need + 900), temperature: 0.85, jsonMode: true }); }

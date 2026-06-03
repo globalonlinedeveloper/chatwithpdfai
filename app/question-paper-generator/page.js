@@ -57,6 +57,7 @@ export default function PapersPage() {
   const [editAns, setEditAns] = useState(false);
   const [regenGi, setRegenGi] = useState(null);
   const [undoQ, setUndoQ] = useState(null);
+  const [cognitive, setCognitive] = useState('');
   const [elapsed, setElapsed] = useState(0); // seconds since generation started (progress feedback)
   const [shortWarn, setShortWarn] = useState(''); // set when fewer questions came back than requested
   const abortRef = useRef(null); // in-flight AbortController so Cancel can abort
@@ -112,6 +113,9 @@ export default function PapersPage() {
   async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/papers/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
   async function delShare(id) { try { await fetch('/api/papers/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
   async function viewAttempts(id) { if (attemptsFor === id) { setAttemptsFor(null); return; } try { const r = await fetch('/api/papers/assignments?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && Array.isArray(j.attempts)) { setAttemptList(j.attempts); setAttemptsFor(id); } } catch (e) {} }
+  function exportScores(title) { const rows = [['Student', 'Score', 'Total', 'Percent', 'Submitted']]; (attemptList || []).forEach((a) => rows.push([a.name || 'Anonymous', a.score, a.total, a.total ? Math.round(100 * a.score / a.total) + '%' : '', a.createdAt ? new Date(a.createdAt).toLocaleString() : ''])); const csv = rows.map((r) => r.map((c) => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\r\n'); downloadText(slug(title || 'scores') + '-scores.csv', csv, 'text/csv'); }
+  async function overrideScore(attemptId, score, assignmentId) { try { const r = await fetch('/api/papers/assignments', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: assignmentId, attemptId, score: Number(score) }) }); if (r.ok) { setAttemptList((arr) => (arr || []).map((a) => a.id === attemptId ? { ...a, score: Math.max(0, Math.min(Number(a.total) || 0, Math.round(Number(score)) || 0)) } : a)); loadShares(); } } catch (e) {} }
+  async function clonePaper(id) { await openPaper(id); setPaper((pp) => pp ? { ...pp, title: 'Copy of ' + (pp.title || 'paper') } : pp); setSavedMsg(''); }
   function patchQ(gi, patch) { setPaper((pp) => { if (!pp) return pp; let n = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((q) => { n += 1; return n === gi ? { ...q, ...patch } : q; }) })) }; }); }
   function replaceQ(gi, nq) { setPaper((pp) => { if (!pp) return pp; let n = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((qq) => { n += 1; return n === gi ? nq : qq; }) })) }; }); }
   async function regenQ(gi) {
@@ -181,7 +185,7 @@ export default function PapersPage() {
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper');
     try {
-      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle, level, difficulty, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
+      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle, level, difficulty, cognitive, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
@@ -296,7 +300,7 @@ export default function PapersPage() {
                   <div style={{ fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lp.title}</div>
                   <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{lp.numQuestions} Qs{lp.examStyle ? ' · ' + lp.examStyle : ''}</div>
                   <div style={{ display: 'flex', gap: 5 }}>
-                    <button onClick={() => openPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }} data-testid="lib-open">Open</button>
+                    <button onClick={() => openPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }} data-testid="lib-open">Open</button><button onClick={() => clonePaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }} data-testid="lib-clone" title="Open as a new copy">Duplicate</button>
                     <button onClick={() => delPaper(lp.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} aria-label="Delete saved paper">{'✕'}</button>
                   </div>
                 </div>
@@ -316,7 +320,7 @@ export default function PapersPage() {
                     {sh.attempts > 0 && <button onClick={() => viewAttempts(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} data-testid="view-attempts">{attemptsFor === sh.id ? 'Hide' : 'Scores'}</button>}
                     <button onClick={() => delShare(sh.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} aria-label="Delete shared test">{'✕'}</button>
                   </div>
-                  {attemptsFor === sh.id && (<div style={{ marginTop: 6, borderTop: '1px solid var(--stroke-1)', paddingTop: 6 }}>{attemptList.length === 0 ? <div style={{ fontSize: 11, color: 'var(--text-3)' }}>No attempts yet.</div> : attemptList.map((a) => <div key={a.id} style={{ display: 'flex', gap: 8, fontSize: 11, padding: '2px 0' }}><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'Anonymous'}</span><span style={{ fontWeight: 600 }}>{a.score}/{a.total}</span></div>)}</div>)}
+                  {attemptsFor === sh.id && (<div style={{ marginTop: 6, borderTop: '1px solid var(--stroke-1)', paddingTop: 6 }}>{attemptList.length > 0 ? <button onClick={() => exportScores(sh.title)} data-testid="export-scores" className="btn btn-glass btn-sm" style={{ fontSize: 10, padding: '2px 7px', marginBottom: 4 }}>Export CSV</button> : null}{attemptList.length === 0 ? <div style={{ fontSize: 11, color: 'var(--text-3)' }}>No attempts yet.</div> : attemptList.map((a) => <div key={a.id} style={{ display: 'flex', gap: 8, fontSize: 11, padding: '2px 0' }}><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name || 'Anonymous'}</span><span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}><input type="number" defaultValue={a.score} min={0} max={a.total} onBlur={(e) => overrideScore(a.id, e.target.value, sh.id)} aria-label="Adjust score" data-testid="score-input" style={{ width: 40, fontSize: 11, padding: '1px 4px', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 4, color: 'var(--text)' }} />/{a.total}</span></div>)}</div>)}
                 </div>
               ))}
             </div>
@@ -394,7 +398,7 @@ export default function PapersPage() {
               <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}
             </>)}
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 16 }}>
-              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} aria-label="Difficulty" style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
+              <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Difficulty<select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} aria-label="Difficulty" style={ctrl}><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label><label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }} data-testid="cognitive">Focus<select value={cognitive} onChange={(e) => setCognitive(e.target.value)} aria-label="Cognitive focus" style={ctrl}><option value="">Balanced</option><option value="recall">More recall</option><option value="application">More application/HOTS</option></select></label>
               <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>Level<select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Level" style={ctrl}><option value="">Any</option><option value="Beginner">Beginner</option><option value="School">School</option><option value="College">College</option><option value="Professional">Professional</option><option value="Expert">Expert</option></select></label>
             </div>
             {LANGUAGES.length > 1 ? (<>
@@ -461,7 +465,7 @@ export default function PapersPage() {
                     {(() => { let n = 0; return paper.sections.flatMap((sec) => sec.questions.map((q) => { const gi = n++; return (
                       <div key={gi} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8, fontSize: 13 }}>
                         <span style={{ fontWeight: 600, color: 'var(--violet-2)', minWidth: 24 }}>{gi + 1}.</span>
-                        <span style={{ flex: 1, minWidth: 0, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(q.q || q.assertion || '').replace(/\n/g, ' ').slice(0, 64)}</span>
+                        <input value={String(q.q || q.assertion || '')} onChange={(e) => patchQ(gi, q.type === 'assertion' ? { assertion: e.target.value } : { q: e.target.value })} aria-label="Question text" data-testid="edit-stem" className="input" style={{ flex: 1, minWidth: 0, fontSize: 12.5, padding: '5px 9px' }} />
                         <EditAnswerControl q={q} gi={gi} onPatch={patchQ} />
                         <button type="button" onClick={() => regenQ(gi)} disabled={regenGi != null} title="Replace this question with a fresh AI-generated one (uses a credit)" className="btn btn-glass btn-sm" style={{ padding: '2px 9px' }} data-testid={'regen-' + gi}>{regenGi === gi ? '…' : '↻'}</button>
                       </div>

@@ -48,3 +48,25 @@ export function studentSafe(paper) {
 }
 
 export function flatQs(paper) { return (paper.sections || []).flatMap((s) => s.questions); }
+
+// Lightweight, dependency-free math/science notation -> Unicode (CSP-safe, prints fine).
+// Covers the common school cases: exponents (x^2, x^{12}), subscripts (H_2O, a_{ij}),
+// fractions, roots, Greek letters and common operators. Not a full LaTeX engine.
+const _SUP = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','n':'ⁿ','i':'ⁱ' };
+const _SUB = { '0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎' };
+const _SYM = { '\\times':'×','\\div':'÷','\\pm':'±','\\mp':'∓','\\leq':'≤','\\le':'≤','\\geq':'≥','\\ge':'≥','\\neq':'≠','\\ne':'≠','\\approx':'≈','\\equiv':'≡','\\rightarrow':'→','\\to':'→','\\Rightarrow':'⇒','\\leftarrow':'←','\\infty':'∞','\\cdot':'·','\\circ':'°','\\degree':'°','\\alpha':'α','\\beta':'β','\\gamma':'γ','\\delta':'δ','\\epsilon':'ε','\\theta':'θ','\\lambda':'λ','\\mu':'μ','\\pi':'π','\\rho':'ρ','\\sigma':'σ','\\tau':'τ','\\phi':'φ','\\omega':'ω','\\Delta':'Δ','\\Sigma':'Σ','\\Omega':'Ω','\\Theta':'Θ','\\sum':'∑','\\prod':'∏','\\int':'∫','\\partial':'∂','\\nabla':'∇','\\sqrt':'√','\\propto':'∝','\\angle':'∠','\\perp':'⊥','\\parallel':'∥','\\therefore':'∴','\\implies':'⇒' };
+function _mapRun(str, map) { return String(str).split('').map((c) => map[c] || c).join(''); }
+export function mathText(s) {
+  if (s == null) return s;
+  let t = String(s);
+  if (!/[\^_\\$]/.test(t)) return t; // fast path
+  t = t.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1)/($2)');
+  t = t.replace(/\\sqrt\s*\{([^{}]*)\}/g, '√($1)');
+  t = t.replace(/\\[a-zA-Z]+/g, (m) => (_SYM[m] != null ? _SYM[m] : m));
+  t = t.replace(/\^\{([^{}]*)\}/g, (m, g) => ([...g].length && [...g].every((c) => _SUP[c] != null)) ? _mapRun(g, _SUP) : m);
+  t = t.replace(/_\{([^{}]*)\}/g, (m, g) => ([...g].length && [...g].every((c) => _SUB[c] != null)) ? _mapRun(g, _SUB) : m);
+  t = t.replace(/\^([0-9n+\-=()i])/g, (_, c) => _SUP[c] || ('^' + c));
+  t = t.replace(/_([0-9+\-=()])/g, (_, c) => _SUB[c] || ('_' + c));
+  t = t.replace(/\$([^$]*)\$/g, '$1'); // strip inline $...$ delimiters, keep content
+  return t;
+}

@@ -64,6 +64,15 @@ export async function PATCH(req) {
   const active = body.active ? 1 : 0;
   const own = await query('SELECT id FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
   if (!own[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const attemptId = Number(body.attemptId) || 0;
+  if (attemptId) {
+    const at = await query('SELECT id, total FROM paper_attempts WHERE id = ? AND assignment_id = ?', [attemptId, id]);
+    if (!at[0]) return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
+    const total = Number(at[0].total) || 0;
+    let score = Math.round(Number(body.score)); if (!Number.isFinite(score)) score = 0; score = Math.max(0, Math.min(total, score));
+    await query('UPDATE paper_attempts SET score = ? WHERE id = ? AND assignment_id = ?', [score, attemptId, id]);
+    return NextResponse.json({ ok: true, attemptId, score });
+  }
   await query('UPDATE paper_assignments SET active = ? WHERE id = ? AND user_id = ?', [active, id, u.id]);
   return NextResponse.json({ ok: true, active });
 }
