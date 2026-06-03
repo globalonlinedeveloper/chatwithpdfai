@@ -299,6 +299,7 @@ export default function PapersPage() {
         </aside>
 
         <div id="main" className="papers-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+          <h1 className="sr-only">Question paper generator</h1>
           <section className="no-print papers-build" style={{ width: asideOpen ? 472 : 660, flexShrink: 0, borderRight: '1px solid var(--stroke-1)', overflowY: 'auto', padding: '18px 20px', background: 'rgba(5,6,20,0.35)' }}>
             {!asideOpen && <button type="button" onClick={() => setAsideOpen(true)} aria-label="Show papers panel" title="Show library & papers" data-testid="aside-show" className="btn btn-glass btn-sm" style={{ marginBottom: 12, padding: '3px 10px' }}>» Library &amp; papers</button>}
             <div className="eyebrow" style={{ marginBottom: 8 }}>Structure &mdash; exam blueprint</div>
