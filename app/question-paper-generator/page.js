@@ -55,6 +55,7 @@ export default function PapersPage() {
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
   const [editAns, setEditAns] = useState(false);
+  const [regenGi, setRegenGi] = useState(null);
   const [elapsed, setElapsed] = useState(0); // seconds since generation started (progress feedback)
   const [shortWarn, setShortWarn] = useState(''); // set when fewer questions came back than requested
   const abortRef = useRef(null); // in-flight AbortController so Cancel can abort
@@ -108,6 +109,27 @@ export default function PapersPage() {
   async function delShare(id) { try { await fetch('/api/papers/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
   async function viewAttempts(id) { if (attemptsFor === id) { setAttemptsFor(null); return; } try { const r = await fetch('/api/papers/assignments?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && Array.isArray(j.attempts)) { setAttemptList(j.attempts); setAttemptsFor(id); } } catch (e) {} }
   function patchQ(gi, patch) { setPaper((pp) => { if (!pp) return pp; let n = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((q) => { n += 1; return n === gi ? { ...q, ...patch } : q; }) })) }; }); }
+  async function regenQ(gi) {
+    if (!paper || regenGi != null) return;
+    let si = -1, tgt = null, n = -1;
+    paper.sections.forEach((s, a) => s.questions.forEach((qq) => { n += 1; if (n === gi) { si = a; tgt = qq; } }));
+    if (!tgt) return;
+    const sec = paper.sections[si];
+    const exclude = paper.sections.flatMap((s) => s.questions.map((x) => String((x && (x.q || x.assertion)) || '').slice(0, 140))).filter(Boolean);
+    setRegenGi(gi); setNote('');
+    try {
+      const body = { topic: (topic.trim() || paper.title || ''), examStyle, level, difficulty, language, institution, instructions, sections: [{ title: sec.title || '', types: [tgt.type], count: 1, marks: Number(sec.marks || 1) }], nonce: Math.random().toString(36).slice(2), exclude: exclude.slice(-80), verify: false, documentId: sourceDocId };
+      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname); return; } setNote(j.error || 'Could not regenerate that question.'); return; }
+      const nq = (j.paper && Array.isArray(j.paper.sections) && j.paper.sections[0] && Array.isArray(j.paper.sections[0].questions)) ? j.paper.sections[0].questions[0] : null;
+      if (!nq) { setNote('No replacement came back — try again.'); return; }
+      setPaper((pp) => { if (!pp) return pp; let m = -1; return { ...pp, sections: pp.sections.map((s) => ({ ...s, questions: s.questions.map((qq) => { m += 1; return m === gi ? nq : qq; }) })) }; });
+      if (typeof j.credits === 'number') setUsed((u) => (Number(u) || 0) + j.credits);
+      if (typeof j.balance === 'number') setCredits(j.balance);
+    } catch (e) { setNote('Regenerate failed — try again.'); }
+    finally { setRegenGi(null); }
+  }
   const totalQ = sections.reduce((n, s) => n + Number(s.count || 0), 0);
   const totalMarks = sections.reduce((m, s) => m + Number(s.count || 0) * Number(s.marks || 1), 0);
   const flat = paper ? paper.sections.flatMap((s) => s.questions) : [];
@@ -414,6 +436,7 @@ export default function PapersPage() {
                         <span style={{ fontWeight: 600, color: 'var(--violet-2)', minWidth: 24 }}>{gi + 1}.</span>
                         <span style={{ flex: 1, minWidth: 0, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(q.q || q.assertion || '').replace(/\n/g, ' ').slice(0, 64)}</span>
                         <EditAnswerControl q={q} gi={gi} onPatch={patchQ} />
+                        <button type="button" onClick={() => regenQ(gi)} disabled={regenGi != null} title="Replace this question with a fresh AI-generated one (uses a credit)" className="btn btn-glass btn-sm" style={{ padding: '2px 9px' }} data-testid={'regen-' + gi}>{regenGi === gi ? '…' : '↻'}</button>
                       </div>
                     ); })); })()}
                   </div>
