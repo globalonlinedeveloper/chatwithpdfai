@@ -25,6 +25,18 @@ export default function LibraryPage() {
     try { const r = await fetch('/api/documents/' + id, { method: 'DELETE' }); if (!r.ok) throw new Error('failed'); }
     catch (e) { fetch('/api/documents').then((x) => x.ok ? x.json() : null).then((x) => setDocs(x && x.documents ? x.documents : [])).catch(() => {}); }
   }
+  async function delPaper(id, name) {
+    if (typeof window !== 'undefined' && !window.confirm('Delete "' + (name || 'this paper') + '"? This removes the saved question paper from your library.')) return;
+    setPapers((arr) => (arr || []).filter((p) => p.id !== id));
+    try { const r = await fetch('/api/papers/library?id=' + id, { method: 'DELETE' }); if (!r.ok) throw new Error('failed'); }
+    catch (e) { fetch('/api/papers/library').then((x) => x.ok ? x.json() : null).then((x) => setPapers(x && x.papers ? x.papers : [])).catch(() => {}); }
+  }
+  async function delShare(id, name) {
+    if (typeof window !== 'undefined' && !window.confirm('Delete shared test "' + (name || 'this test') + '"? The share link will stop working and all student attempts and results for it will be permanently removed.')) return;
+    setShares((arr) => (arr || []).filter((s) => s.id !== id));
+    try { const r = await fetch('/api/papers/assignments?id=' + id, { method: 'DELETE' }); if (!r.ok) throw new Error('failed'); }
+    catch (e) { fetch('/api/papers/assignments').then((x) => x.ok ? x.json() : null).then((x) => setShares(x && x.assignments ? x.assignments : [])).catch(() => {}); }
+  }
   const ql = q.toLowerCase();
   const TABS = [['docs', 'Documents', docs], ['papers', 'Question papers', papers], ['tests', 'Shared tests', shares]];
   const card = { background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r-lg)', display: 'block', color: 'inherit', textDecoration: 'none' };
@@ -55,11 +67,12 @@ export default function LibraryPage() {
           const list = papers.filter((p) => (p.title || '').toLowerCase().includes(ql));
           if (!list.length) return empty(q ? 'No matching papers.' : 'No saved papers yet.', q ? null : '+ Generate a paper', '/question-paper-generator');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((p) => (
-            <a key={p.id} href={`/question-paper-generator?paper=${p.id}`} className="glass hover-glow" style={{ ...card, padding: 16 }}>
+            <div key={p.id} style={{ position: 'relative' }}>
+            <a href={`/question-paper-generator?paper=${p.id}`} className="glass hover-glow" data-testid="paper-row" style={{ ...card, padding: 16, display: 'block' }}>
               <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', marginBottom: 12 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="17" rx="2" /><path d="M9 4V3h6v1" /></svg></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{p.numQuestions} Qs{p.examStyle ? ' · ' + p.examStyle : ''}{p.createdAt ? ' · ' + fmtDate(p.createdAt) : ''}</div>
-            </a>))}</div>;
+            </a><button onClick={() => delPaper(p.id, p.title)} data-testid="paper-delete" aria-label={'Delete ' + (p.title || 'paper')} title="Delete paper" className="btn btn-glass btn-sm" style={{ position: 'absolute', top: 10, right: 10, fontSize: 11, padding: '2px 7px', lineHeight: 1 }}>✕</button></div>))}</div>;
         })())}
 
         {tab === 'tests' && (shares === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
@@ -72,6 +85,7 @@ export default function LibraryPage() {
               <a href={'/t/' + s.token} target="_blank" rel="noreferrer" className="btn btn-glass btn-sm">Open</a>
               <button onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.origin + '/t/' + s.token); }} className="btn btn-glass btn-sm">Copy link</button>
               <button onClick={async () => { const na = s.active ? 0 : 1; const rr = await fetch('/api/papers/assignments', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, active: na }) }); if (rr.ok) setShares((arr) => arr.map((x) => x.id === s.id ? { ...x, active: na } : x)); }} className="btn btn-glass btn-sm">{s.active ? 'Pause' : 'Resume'}</button>
+              <button onClick={() => delShare(s.id, s.title)} data-testid="share-delete" aria-label={'Delete shared test ' + (s.title || '')} title="Delete shared test" className="btn btn-glass btn-sm" style={{ color: 'var(--red, #e5484d)' }}>Delete</button>
             </div>))}</div>;
         })())}
       </main>
