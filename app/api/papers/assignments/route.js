@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { grade, isAuto, flatQs } from '@/app/question-paper-generator/grade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,20 @@ export async function GET(req) {
       let paper = null; try { paper = JSON.parse(own[0].payload); } catch {}
       let answers = {}; try { answers = JSON.parse(at[0].answers || '{}') || {}; } catch {}
       return NextResponse.json({ ok: true, attempt: { id: at[0].id, name: at[0].student_name, score: at[0].score, total: at[0].total, createdAt: at[0].created_at }, paper, answers });
+    }
+    if (new URL(req.url).searchParams.get('stats')) {
+      const atts = await query('SELECT answers, score, total FROM paper_attempts WHERE assignment_id = ? LIMIT 2000', [id]);
+      let paper = null; try { paper = JSON.parse(own[0].payload); } catch {}
+      const flat = paper ? flatQs(paper) : [];
+      const agg = flat.map((q, gi) => ({ n: gi + 1, type: q.type, stem: String(q.q || q.assertion || (q.type === 'match' ? 'Match the following' : '')).slice(0, 90), auto: isAuto(q), correct: 0, graded: 0 }));
+      let sumPct = 0, scored = 0;
+      for (const at2 of atts) {
+        let ans = {}; try { ans = JSON.parse(at2.answers || '{}') || {}; } catch {}
+        flat.forEach((q, gi) => { if (isAuto(q)) { agg[gi].graded += 1; if (grade(q, ans[gi]) === true) agg[gi].correct += 1; } });
+        if (Number(at2.total) > 0) { sumPct += 100 * Number(at2.score) / Number(at2.total); scored += 1; }
+      }
+      const perQuestion = agg.map((p) => ({ n: p.n, type: p.type, stem: p.stem, auto: p.auto, attempts: p.graded, correctRate: p.graded ? Math.round(100 * p.correct / p.graded) : null }));
+      return NextResponse.json({ ok: true, stats: { count: atts.length, avgPct: scored ? Math.round(sumPct / scored) : 0, perQuestion } });
     }
     const att = await query('SELECT id, student_name, score, total, created_at FROM paper_attempts WHERE assignment_id = ? ORDER BY created_at DESC LIMIT 500', [id]);
     return NextResponse.json({ ok: true, assignment: { id: own[0].id, title: own[0].title }, attempts: att.map((a) => ({ id: a.id, name: a.student_name, score: a.score, total: a.total, createdAt: a.created_at })) });
