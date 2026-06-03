@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run test:unit
+      - run: npx --yes vitest@2.1.9 run
