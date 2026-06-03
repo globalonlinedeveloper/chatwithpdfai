@@ -7,6 +7,7 @@ import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
 import { rateLimit, recordHit } from '@/lib/ratelimit';
 import { langInstr as langInstrFor, isLang } from '@/lib/languages';
+import { stripOptionLabel } from '@/lib/qpaper';
 // Same-language default query for PDF retrieval when Scope is blank — improves
 // grounding precision for Indic-language source documents (embeddings are multilingual).
 const DEFAULT_RETRIEVAL_Q = { en: 'key concepts, definitions, facts and important points', ta: 'முக்கியக் கருத்துகள், வரையறைகள், உண்மைகள் மற்றும் முக்கியத் தகவல்கள்', hi: 'मुख्य अवधारणाएँ, परिभाषाएँ, तथ्य और महत्वपूर्ण बिंदु' };
@@ -48,7 +49,7 @@ ${schemas}
 
 Hard rules:
 - Every fact, date, name and code behaviour must be accurate. Never invent. If unsure, choose content you are certain about.
-- For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).
+- For mcq/code/assertion, exactly one correct option; distractors must be plausible (common misconceptions).\n- Option strings must contain ONLY the answer text — never prefix them with letters or numbers like "a)", "A.", "(b)", "1."; the layout adds the labels automatically.
 - Vary sub-topics; no duplicate or near-duplicate questions across the whole paper.
 - Each question object MUST include a "type" field and follow that type's exact shape.
 - Return EVERY section listed in the blueprint above, in order, each populated with its full set of questions — never omit a section or leave one empty.\n- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
@@ -82,14 +83,14 @@ function sanitize(q) {
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
   const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
   const pg = Number(q.page); if (Number.isInteger(pg) && pg > 0 && pg < 100000) base.page = pg;
-  if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
-  if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
+  if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
+  if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
   if (type === 'tf') return { ...base, answer: q.answer === true || String(q.answer).toLowerCase() === 'true' };
   if (type === 'fill') return { ...base, answer: str(q.answer, 300) };
   if (type === 'numeric') return { ...base, answer: str(q.answer, 80), unit: str(q.unit, 40) };
-  if (type === 'match') { const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(p && p.r, 200) })).filter((p) => p.l && p.r) : []; if (pairs.length < 2) return null; return { ...base, pairs }; }
-  if (type === 'assertion') { const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(o, 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true']; return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) }; }
-  if (type === 'case') { const sub = (Array.isArray(q.sub) ? q.sub : []).slice(0, 6).map((x) => { const options = Array.isArray(x && x.options) ? x.options.slice(0, 6).map((o) => str(o, 400)) : []; if (options.length < 2) return null; return { q: str(x && x.q, 700), options, answer: clampIdx(x && x.answer, options.length), explanation: str(x && x.explanation, 400) }; }).filter(Boolean); if (sub.length < 2) return null; return { ...base, sub }; }
+  if (type === 'match') { const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(stripOptionLabel(p && p.r), 200) })).filter((p) => p.l && p.r) : []; if (pairs.length < 2) return null; return { ...base, pairs }; }
+  if (type === 'assertion') { const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(stripOptionLabel(o), 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true']; return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) }; }
+  if (type === 'case') { const sub = (Array.isArray(q.sub) ? q.sub : []).slice(0, 6).map((x) => { const options = Array.isArray(x && x.options) ? x.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; return { q: str(x && x.q, 700), options, answer: clampIdx(x && x.answer, options.length), explanation: str(x && x.explanation, 400) }; }).filter(Boolean); if (sub.length < 2) return null; return { ...base, sub }; }
   if (type === 'short' || type === 'long') return { ...base, modelAnswer: str(q.modelAnswer || q.answer, 1500) };
   return base;
 }

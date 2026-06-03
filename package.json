@@ -1,13 +1,15 @@
 {
   "name": "chatwithpdfai",
   "version": "1.0.0",
-  "description": "CHATWITHPDFAI.COM — Static site served via Next.js on Hostinger",
+  "description": "CHATWITHPDFAI.COM \u2014 Static site served via Next.js on Hostinger",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test": "vitest run",
+    "test:unit": "vitest run"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -22,7 +24,8 @@
     "unpdf": "^1.6.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.1"
+    "@playwright/test": "^1.49.1",
+    "vitest": "^2.1.8"
   },
   "author": "Rajasekar Selvam",
   "license": "UNLICENSED",
