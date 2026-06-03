@@ -40,7 +40,7 @@ export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegen
   const header = official ? (
     <div style={{ border: '1.5px solid #111', borderRadius: 6, marginBottom: 14 }}>
       <div style={{ textAlign: 'center', padding: '10px 14px 8px' }}>
-        {paper.institution ? <div style={{ fontSize: 11.5, letterSpacing: '0.12em', color: '#444' }}>{paper.institution}</div> : null}
+        {paper.logo ? <img src={paper.logo} alt="" style={{ maxHeight: 54, maxWidth: 200, margin: '0 auto 6px', display: 'block', objectFit: 'contain' }} /> : null}{paper.institution ? <div style={{ fontSize: 11.5, letterSpacing: '0.12em', color: '#444' }}>{paper.institution}</div> : null}
         <div style={{ fontSize: 19, fontWeight: 700, marginTop: 2 }}>{paper.title}</div>
         {paper.examStyle ? <div style={{ fontSize: 11.5, color: '#666', marginTop: 2 }}>{paper.examStyle}</div> : null}
       </div>
@@ -51,7 +51,7 @@ export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegen
     </div>
   ) : (
     <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: compact ? 8 : 14, marginBottom: compact ? 12 : 18 }}>
-      {paper.institution ? <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div> : null}
+      {paper.logo ? <img src={paper.logo} alt="" style={{ maxHeight: 54, maxWidth: 200, margin: '0 auto 6px', display: 'block', objectFit: 'contain' }} /> : null}{paper.institution ? <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div> : null}
       <div style={{ fontSize: compact ? 17 : 21, fontWeight: 700, marginTop: paper.institution ? 4 : 0 }}>{paper.title}</div>
       <div style={{ fontSize: 12.5, color: '#555', marginTop: 6 }}>Max marks: {paper.totalMarks} · Time: {paper.durationMin} min{paper.examStyle ? ' · ' + paper.examStyle : ''}{paper.grounded && paper.sourceName ? ' · source: ' + paper.sourceName : ''}</div>
     </div>
@@ -166,7 +166,7 @@ export function OMRSheet({ paper }) {
   return (
     <div>
       <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: 10, marginBottom: 12 }}>
-        {paper.institution ? <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div> : null}
+        {paper.logo ? <img src={paper.logo} alt="" style={{ maxHeight: 54, maxWidth: 200, margin: '0 auto 6px', display: 'block', objectFit: 'contain' }} /> : null}{paper.institution ? <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div> : null}
         <div style={{ fontSize: 18, fontWeight: 700 }}>{paper.title} &mdash; OMR answer sheet</div>
         {paper.examStyle ? <div style={{ fontSize: 11.5, color: '#666', marginTop: 2 }}>{paper.examStyle}</div> : null}
       </div>
