@@ -62,7 +62,8 @@ const SECTIONS = [
         "**CHATWITHPDFAI, Inc.**, 548 Market St #84219, San Francisco, CA 94104, USA · `legal@chatwithpdfai.com`",
       ]},
     ];
-export const metadata = { title: "Terms of Service \u2014 CHATWITHPDFAI" };
+export const metadata = {
+  alternates: { canonical: '/legal/terms' }, title: "Terms of Service \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={"Legal \u00b7 Terms"} title={"Terms of Service"} lede={"Plain-English terms. Pay per document. We don't train on your files. You own your content."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
 }

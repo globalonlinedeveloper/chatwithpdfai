@@ -1,5 +1,6 @@
 import SiteShell, { PageHeader } from '../_components/Chrome';
-export const metadata = { title: 'Help center — CHATWITHPDFAI' };
+export const metadata = {
+  alternates: { canonical: '/help' }, title: 'Help center — CHATWITHPDFAI' };
 const ARTICLES = [
   ['Getting started', 'Sign up, upload your first PDF, ask your first question.', '/help/getting-started'],
   ['Credits & billing', 'How credits work and where to buy more.', '/help/credits'],

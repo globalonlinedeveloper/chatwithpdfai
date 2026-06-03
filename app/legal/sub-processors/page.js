@@ -26,7 +26,8 @@ const SECTIONS = [
         "Email `subprocessors@chatwithpdfai.com` to subscribe to change notifications. If you object to a new sub-processor for legitimate data-protection reasons, you may terminate the agreement and receive a pro-rata refund of unused credits.",
       ]},
     ];
-export const metadata = { title: "Sub-processor list \u2014 CHATWITHPDFAI" };
+export const metadata = {
+  alternates: { canonical: '/legal/sub-processors' }, title: "Sub-processor list \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={"Legal \u00b7 Sub-processors"} title={"Sub-processor list"} lede={"Every vendor that touches your data, named. Updated within 7 days of any change."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
 }

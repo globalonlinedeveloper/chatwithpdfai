@@ -65,7 +65,8 @@ const SECTIONS = [
         "If you need a counter-signed copy, email `dpo@chatwithpdfai.com` from your billing email. We will return a signed PDF within 2 business days. Enterprise customers can request our pre-signed DPA from sales.",
       ]},
     ];
-export const metadata = { title: "Data Processing Agreement \u2014 CHATWITHPDFAI" };
+export const metadata = {
+  alternates: { canonical: '/legal/dpa' }, title: "Data Processing Agreement \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={"Legal \u00b7 DPA"} title={"Data Processing Agreement"} lede={"GDPR Article 28 DPA with standard contractual clauses. Sign-ready for Enterprise customers."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
 }

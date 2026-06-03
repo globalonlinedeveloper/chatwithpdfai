@@ -79,7 +79,8 @@ const SECTIONS = [
         "Email: `privacy@chatwithpdfai.com` (privacy requests), `dpo@chatwithpdfai.com` (DPO / GDPR), `support@chatwithpdfai.com` (general).",
       ]},
     ];
-export const metadata = { title: "Privacy Policy \u2014 CHATWITHPDFAI" };
+export const metadata = {
+  alternates: { canonical: '/legal/privacy' }, title: "Privacy Policy \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={"Legal \u00b7 Privacy"} title={"Privacy Policy"} lede={"We collect what we need to run the service. We do not sell your data. We do not train AI models on your files."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
 }

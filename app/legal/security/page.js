@@ -52,7 +52,8 @@ const SECTIONS = [
         "PGP key (Fingerprint: `B3D4 1F9E 0A12 …`): fetch from `chatwithpdfai.com/pgp.asc`.",
       ]},
     ];
-export const metadata = { title: "Security policy \u2014 CHATWITHPDFAI" };
+export const metadata = {
+  alternates: { canonical: '/legal/security' }, title: "Security policy \u2014 CHATWITHPDFAI" };
 export default function Page() {
   return <LongFormPage eyebrow={"Legal \u00b7 Security"} title={"Security policy"} lede={"The bar is the bar. Lawyers, doctors, and analysts brought us here."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
 }

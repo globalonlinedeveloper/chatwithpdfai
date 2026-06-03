@@ -4,6 +4,7 @@ import ToolCardClient from '../_components/ToolCardClient';
 import { TOOLS, CATEGORIES } from '@/lib/tools';
 
 export const metadata = {
+  alternates: { canonical: '/tools' },
   title: 'PDF tools — CHATWITHPDFAI',
   description: 'Every tool to read, understand and create from your PDFs — chat with cited answers and generate exam papers with answer keys. Pay per use, no subscription.',
 };
