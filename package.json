@@ -7,9 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:e2e": "playwright test",
-    "test": "vitest run",
-    "test:unit": "vitest run"
+    "test:e2e": "playwright test"
   },
   "engines": {
     "node": ">=18.0.0"
