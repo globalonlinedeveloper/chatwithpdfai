@@ -54,3 +54,21 @@ export async function DELETE(req) {
   if (!r || !r.affectedRows) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
+
+
+export async function PATCH(req) {
+  if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const u = await getCurrentUser(req);
+  if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+  let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  const id = Number(body.id) || 0;
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const stem = str(body.stem, 300).trim();
+  if (!stem) return NextResponse.json({ error: 'Question text required' }, { status: 400 });
+  const rows = await query('SELECT payload FROM paper_question_bank WHERE id = ? AND user_id = ?', [id, u.id]);
+  if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  let payload = rows[0].payload;
+  try { const q = JSON.parse(payload); if (q && q.type === 'assertion') q.assertion = stem; else if (q) q.q = stem; payload = JSON.stringify(q); } catch {}
+  await query('UPDATE paper_question_bank SET stem = ?, payload = ? WHERE id = ? AND user_id = ?', [stem, payload, id, u.id]);
+  return NextResponse.json({ ok: true, stem });
+}

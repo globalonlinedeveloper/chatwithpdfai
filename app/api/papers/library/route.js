@@ -49,3 +49,21 @@ export async function DELETE(req) {
   if (!r || !r.affectedRows) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
+
+
+export async function PATCH(req) {
+  if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const u = await getCurrentUser(req);
+  if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+  let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  const id = Number(body.id) || 0;
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const title = String(body.title == null ? '' : body.title).trim().slice(0, 160);
+  if (!title) return NextResponse.json({ error: 'Title required' }, { status: 400 });
+  const rows = await query('SELECT payload FROM papers WHERE id = ? AND user_id = ?', [id, u.id]);
+  if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  let payload = rows[0].payload;
+  try { const p = JSON.parse(payload); p.title = title; payload = JSON.stringify(p); } catch {}
+  await query('UPDATE papers SET title = ?, payload = ? WHERE id = ? AND user_id = ?', [title, payload, id, u.id]);
+  return NextResponse.json({ ok: true, title });
+}
