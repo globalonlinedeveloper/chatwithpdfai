@@ -46,7 +46,8 @@ export async function DELETE(req) {
   if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id')) || 0;
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  await query('DELETE FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
+  const r = await query('DELETE FROM paper_assignments WHERE id = ? AND user_id = ?', [id, u.id]);
+  if (!r || !r.affectedRows) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
 
