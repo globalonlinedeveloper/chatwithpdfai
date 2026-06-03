@@ -59,6 +59,8 @@ export default function PapersPage() {
   const [hist, setHist] = useState([]);
   const [future, setFuture] = useState([]);
   const [pristine, setPristine] = useState(null);
+  const [bank, setBank] = useState([]);
+  const [bankQ, setBankQ] = useState('');
   const editSnapRef = useRef(0);
   const [cognitive, setCognitive] = useState('');
   const [logo, setLogo] = useState('');
@@ -73,6 +75,7 @@ export default function PapersPage() {
   useEffect(() => { try { const d = Number(new URLSearchParams(window.location.search).get('doc')) || 0; if (d) { setSourceDocId(d); fetch('/api/documents/' + d).then((r) => r.ok ? r.json() : null).then((j) => { if (j && j.document) setSelectedDoc({ id: j.document.id, filename: j.document.filename, pageCount: j.document.pageCount, sizeBytes: j.document.sizeBytes }); }).catch(() => {}); } } catch (e) {} }, []);
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
+  useEffect(() => { const t = setTimeout(loadBank, 250); return () => clearTimeout(t); }, [bankQ]);
   useEffect(() => { try { const u = new URLSearchParams(window.location.search); if (u.get('paper') || u.get('doc')) return; const d = JSON.parse(localStorage.getItem('cwpai_qpg_draft') || 'null'); if (d && Array.isArray(d.sections) && d.sections.length) { if (typeof d.topic === 'string') setTopic(d.topic); setSections(d.sections); if (d.institution) setInstitution(d.institution); if (d.instructions) setInstructions(d.instructions); if (d.difficulty) setDifficulty(d.difficulty); if (d.sets) setSets(d.sets); if (d.examStyle) setExamStyle(d.examStyle); if (typeof d.logo === 'string') setLogo(d.logo); } } catch (e) {} }, []);
   useEffect(() => { try { localStorage.setItem('cwpai_qpg_draft', JSON.stringify({ topic, sections, institution, instructions, difficulty, sets, examStyle, logo })); } catch (e) {} }, [topic, sections, institution, instructions, difficulty, sets, examStyle, logo]);
   useEffect(() => { setPaper((pp) => pp ? { ...pp, logo } : pp); }, [logo]);
@@ -115,6 +118,10 @@ export default function PapersPage() {
   async function openPaper(id) { try { const r = await fetch('/api/papers/library?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && j.paper) { setPaper(j.paper); setLogo(j.paper.logo || ''); freshHistory(j.paper); setCurSet(0); setLayout(j.paper.layout || 'official'); setView('paper'); setChecked(false); setAnswers({}); setUsed(null); setTimeout(() => { const el = document.getElementById('result-top'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); } } catch (e) {} }
   async function delPaper(id) { try { await fetch('/api/papers/library?id=' + id, { method: 'DELETE' }); loadLibrary(); } catch (e) {} }
   function loadShares() { fetch('/api/papers/assignments').then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.assignments)) setShares(j.assignments); }).catch(() => {}); }
+  function loadBank() { fetch('/api/papers/bank' + (bankQ ? '?q=' + encodeURIComponent(bankQ) : '')).then((r) => r.ok ? r.json() : null).then((j) => { if (j && Array.isArray(j.items)) setBank(j.items); }).catch(() => {}); }
+  function saveToBank(gi) { if (!paper) return; let n = -1, q = null; paper.sections.forEach((s) => s.questions.forEach((qq) => { n += 1; if (n === gi) q = qq; })); if (!q) return; fetch('/api/papers/bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q, topic: (topic.trim() || paper.examStyle || paper.title || '') }) }).then((r) => r.json().catch(() => ({}))).then((j) => { if (j && j.ok) { setSavedMsg('Saved to bank'); loadBank(); setTimeout(() => setSavedMsg(''), 1800); } else setSavedMsg((j && j.error) || 'Could not save to bank'); }).catch(() => {}); }
+  async function insertFromBank(id) { if (!paper) { setNote('Generate or open a paper first, then insert from the bank.'); return; } try { const r = await fetch('/api/papers/bank?id=' + id); const j = await r.json().catch(() => ({})); if (!r.ok || !j.question) { setNote('Could not load that question.'); return; } pushHist(); setPaper((pp) => { if (!pp || !pp.sections.length) return pp; const sections = pp.sections.map((sec, i) => i === pp.sections.length - 1 ? { ...sec, questions: [...sec.questions, j.question] } : sec); const totalMarks = sections.reduce((t, sec) => t + sec.questions.length * (Number(sec.marks) || 1), 0); return { ...pp, sections, totalMarks }; }); } catch (e) { setNote('Insert failed.'); } }
+  async function delBankQ(id) { setBank((arr) => (arr || []).filter((x) => x.id !== id)); try { await fetch('/api/papers/bank?id=' + id, { method: 'DELETE' }); } catch (e) {} }
   async function shareTest() { if (!paper) return; setShareMsg('Creating link\u2026'); try { const r = await fetch('/api/papers/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paper }) }); const j = await r.json().catch(() => ({})); if (r.ok && j.token) { const url = window.location.origin + '/t/' + j.token; try { await navigator.clipboard.writeText(url); setShareMsg('Link copied \u2014 ' + url); } catch (e2) { setShareMsg('Share link: ' + url); } loadShares(); } else setShareMsg(j.error || 'Could not create link'); } catch (e) { setShareMsg(e.message); } }
   async function delShare(id) { try { await fetch('/api/papers/assignments?id=' + id, { method: 'DELETE' }); loadShares(); } catch (e) {} }
   async function viewAttempts(id) { if (attemptsFor === id) { setAttemptsFor(null); return; } try { const r = await fetch('/api/papers/assignments?id=' + id); const j = await r.json().catch(() => ({})); if (r.ok && Array.isArray(j.attempts)) { setAttemptList(j.attempts); setAttemptsFor(id); } } catch (e) {} }
@@ -336,6 +343,22 @@ export default function PapersPage() {
               ))}
             </div>
           )}
+          <div className="eyebrow" style={{ marginBottom: 8, marginTop: 14 }} data-testid="bank-eyebrow">Question bank{bank.length ? ' (' + bank.length + ')' : ''}</div>
+          <input className="input" value={bankQ} onChange={(e) => setBankQ(e.target.value)} placeholder="Search saved questions…" aria-label="Search question bank" data-testid="bank-search" style={{ width: '100%', boxSizing: 'border-box', fontSize: 11.5, padding: '6px 9px', marginBottom: 6 }} />
+          {bank.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Save questions from a paper (★) to reuse them here.</div> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {bank.map((b) => (
+                <div key={b.id} className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)' }} data-testid="bank-row">
+                  <div style={{ fontSize: 11.5, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.stem}</div>
+                  <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{b.type}{b.topic ? ' \u00b7 ' + b.topic : ''}</div>
+                  <div style={{ display: 'flex', gap: 5 }}>
+                    <button onClick={() => insertFromBank(b.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 9px' }} data-testid="bank-insert">Insert</button>
+                    <button onClick={() => delBankQ(b.id)} className="btn btn-glass btn-sm" style={{ fontSize: 10.5, padding: '3px 8px' }} aria-label="Delete from bank" data-testid="bank-del">{'\u2715'}</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </aside>
 
         <div id="main" className="papers-main" style={{ display: 'flex', flex: 1, minWidth: 0 }}>
@@ -485,7 +508,7 @@ export default function PapersPage() {
                 )}
                 {view === 'paper' ? (
                   <div id="paper-print" style={{ background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)' }}>
-                    {omr ? <OMRSheet paper={activePaper} /> : (printAll && setsArr.length > 1 ? setsArr.map((sp, i) => (<div key={i} className={i > 0 ? 'pagebreak' : ''}><div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#555', margin: '0 0 10px' }}>SET {sp.setLabel || String.fromCharCode(65 + i)}</div><PaperView paper={sp} layout={paper.layout || layout} includeKey={includeKey} /></div>)) : <PaperView paper={activePaper} layout={paper.layout || layout} includeKey={includeKey} onRegen={setsArr.length > 1 ? null : regenQ} regenGi={regenGi} onRegenSection={setsArr.length > 1 ? null : regenSection} />)}
+                    {omr ? <OMRSheet paper={activePaper} /> : (printAll && setsArr.length > 1 ? setsArr.map((sp, i) => (<div key={i} className={i > 0 ? 'pagebreak' : ''}><div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#555', margin: '0 0 10px' }}>SET {sp.setLabel || String.fromCharCode(65 + i)}</div><PaperView paper={sp} layout={paper.layout || layout} includeKey={includeKey} /></div>)) : <PaperView paper={activePaper} layout={paper.layout || layout} includeKey={includeKey} onRegen={setsArr.length > 1 ? null : regenQ} regenGi={regenGi} onRegenSection={setsArr.length > 1 ? null : regenSection} onBankQ={setsArr.length > 1 ? null : saveToBank} />)}
                   </div>
                 ) : (
                   <div className="glass" style={{ padding: '24px 26px', borderRadius: 'var(--r-lg)', maxWidth: 760, margin: '0 auto' }}>
