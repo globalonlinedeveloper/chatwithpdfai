@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { documents } from '@/lib/store/documents';
 import { getCurrentUser } from '@/lib/auth';
+import { promises as fsp } from 'node:fs';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,5 +38,23 @@ export async function GET(req, { params }) {
   } catch (e) {
     console.error('[documents/:id] failed', e);
     return NextResponse.json({ error: 'Could not load document' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req, { params }) {
+  if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const id = Number(params?.id);
+  if (!(id > 0)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
+  try {
+    const u = await getCurrentUser(req);
+    if (!u) return NextResponse.json({ error: 'Please sign in' }, { status: 401 });
+    const doc = await documents.getDocument(id);
+    if (!doc || Number(doc.user_id) !== Number(u.id)) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    await documents.deleteDocument(id);
+    if (doc.disk_path) { try { await fsp.unlink(doc.disk_path); } catch (e) { /* file already gone */ } }
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error('[documents/:id DELETE] failed', e);
+    return NextResponse.json({ error: 'Could not delete document' }, { status: 500 });
   }
 }

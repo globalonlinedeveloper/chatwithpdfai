@@ -19,6 +19,12 @@ export default function LibraryPage() {
     fetch('/api/papers/library').then((r) => (r.ok ? r.json() : null)).then((j) => setPapers(j && j.papers ? j.papers : [])).catch(() => setPapers([]));
     fetch('/api/papers/assignments').then((r) => (r.ok ? r.json() : null)).then((j) => setShares(j && j.assignments ? j.assignments : [])).catch(() => setShares([]));
   }, []);
+  async function delDoc(id, name) {
+    if (typeof window !== 'undefined' && !window.confirm('Delete "' + (name || 'this document') + '"? This permanently removes the PDF and its extracted data.')) return;
+    setDocs((arr) => (arr || []).filter((d) => d.id !== id));
+    try { const r = await fetch('/api/documents/' + id, { method: 'DELETE' }); if (!r.ok) throw new Error('failed'); }
+    catch (e) { fetch('/api/documents').then((x) => x.ok ? x.json() : null).then((x) => setDocs(x && x.documents ? x.documents : [])).catch(() => {}); }
+  }
   const ql = q.toLowerCase();
   const TABS = [['docs', 'Documents', docs], ['papers', 'Question papers', papers], ['tests', 'Shared tests', shares]];
   const card = { background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r-lg)', display: 'block', color: 'inherit', textDecoration: 'none' };
@@ -37,11 +43,12 @@ export default function LibraryPage() {
           const list = docs.filter((d) => (d.filename || '').toLowerCase().includes(ql));
           if (!list.length) return empty(q ? 'No matching documents.' : 'No documents yet.', q ? null : '+ Upload your first PDF', '/chat-with-pdf');
           return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{list.map((d) => (
-            <a key={d.id} href={`/chat-with-pdf?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16 }}>
+            <div key={d.id} style={{ position: 'relative' }}>
+            <a href={`/chat-with-pdf?doc=${d.id}`} className="glass hover-glow" data-testid="doc-row" style={{ ...card, padding: 16, display: 'block' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}><div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--glass-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet-2)', flexShrink: 0 }}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3v5h5" /><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /></svg></div><span className="pill" style={{ fontSize: 10, padding: '3px 8px', color: d.status === 'ready' ? 'var(--green)' : 'var(--text-3)' }}>{d.status}</span></div>
               <div style={{ fontSize: 14, fontWeight: 600, margin: '12px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}</div>
               <div className="mono" style={{ fontSize: 10, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.pageCount ? d.pageCount + ' pp · ' : ''}{fmtSize(d.sizeBytes)}{d.createdAt ? ' · ' + fmtDate(d.createdAt) : ''}</div>
-            </a>))}</div>;
+            </a><button onClick={() => delDoc(d.id, d.filename)} data-testid="doc-delete" aria-label={'Delete ' + (d.filename || 'document')} title="Delete document" className="btn btn-glass btn-sm" style={{ position: 'absolute', bottom: 10, right: 10, fontSize: 11, padding: '2px 7px', lineHeight: 1 }}>✕</button></div>))}</div>;
         })())}
 
         {tab === 'papers' && (papers === null ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>{[0, 1, 2, 3].map((i) => <div key={i} className="skel" style={{ height: 92 }} />)}</div> : (() => {
