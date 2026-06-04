@@ -33,6 +33,13 @@ describe('cleanTitle (rejects junk LLM titles, composes a sensible fallback)', (
     expect(cleanTitle('CBSE Class 10 Science Examination', 'CBSE Class 10', 'science', '')).toBe('CBSE Class 10 Science Examination');
     expect(cleanTitle('Python Programming Basics Exam', '', 'python', '')).toBe('Python Programming Basics Exam');
   });
+  it('replaces a title that just echoes a section name (the Application/Hard bug)', () => {
+    expect(cleanTitle('Application', '', 'Indian freedom struggle', '', ['Easy', 'Application'])).toBe('Indian freedom struggle');
+    expect(cleanTitle('hard', '', 'World geography', '', ['Easy', 'Hard'])).toBe('World geography');
+  });
+  it('does not falsely reject a real title that is not a section name', () => {
+    expect(cleanTitle('Photosynthesis Basics Exam', '', 'biology', '', ['Section A', 'Recall'])).toBe('Photosynthesis Basics Exam');
+  });
   it('replaces a bare section/part label (the observed bug)', () => {
     expect(cleanTitle('Section B', 'English', 'English grammar — tenses and articles', '')).toBe('English grammar');
     expect(cleanTitle('Part A', '', 'The water cycle', '')).toBe('The water cycle');

@@ -265,7 +265,7 @@ export async function POST(req) {
     const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
     await recordHit({ bucket: 'paper', ip: 'u' + userId });
-    return NextResponse.json({ ok: true, paper: { title: cleanTitle(parsed.title, examStyle, topic, sourceName), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance });
+    return NextResponse.json({ ok: true, paper: { title: cleanTitle(parsed.title, examStyle, topic, sourceName, outSections.map((s) => s.title)), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance });
   } catch (e) {
     const status = e.statusCode || 500;
     if (status >= 500) console.error('[papers/paper] failed', e);
