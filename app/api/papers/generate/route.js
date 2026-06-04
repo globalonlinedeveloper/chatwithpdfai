@@ -36,7 +36,7 @@ const DIFF = { easy: 'easy (recall)', medium: 'medium (application)', hard: 'har
 function buildSystem({ sections, difficulty, level, language, examStyle, grounded, cognitive }) {
   const used = [...new Set(sections.flatMap((s) => s.types))];
   const schemas = used.map((t) => '- ' + TYPE_SCHEMA[t]).join('\n');
-  const blueprint = sections.map((s, i) => `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.`).join('\n');
+  const blueprint = sections.map((s, i) => { const ov = []; if (s.difficulty && s.difficulty !== difficulty) ov.push('difficulty: ' + s.difficulty); if (s.cognitive && s.cognitive !== cognitive) ov.push(s.cognitive === 'recall' ? 'recall-focused (Remember/Understand)' : 'application-focused (Apply/Analyse)'); const ex = ov.length ? ' [' + ov.join('; ') + ']' : ''; return `  Section ${i + 1} "${s.title || ('Section ' + (i + 1))}": ${s.count} questions using type(s) ${s.types.join(', ')}.${ex}`; }).join('\n');
   const langInstr = langInstrFor(language);
   return `You are an expert exam question-paper setter${examStyle ? ' preparing a ' + examStyle + '-style paper' : ''}.
 ${langInstr}
@@ -54,7 +54,7 @@ Hard rules:
 - Write any math or science notation in simple inline form: exponents with ^ (x^2, x^{12}), subscripts with _ (H_2O, a_{ij}); use Unicode symbols directly (× ÷ ± ≤ ≥ √ π θ °). Do NOT use $ or display-math delimiters.
 - For mathematical notation, use LaTeX wrapped in $...$ \u2014 e.g. $\\frac{3}{4}$, $x^2$, $\\sqrt{2}$, $\\int_0^1 x\\,dx$, $\\sum_{i=1}^n i$, Greek like $\\alpha$. Use it for fractions, powers, roots, integrals, summations, matrices and symbols.\n- Tag EVERY question with a short "bloom" field — one of Remember, Understand, Apply or Analyse — for the cognitive level it tests.
 - Cognitive focus: ${cognitive === 'recall' ? 'emphasise Remember/Understand (foundational recall).' : cognitive === 'application' ? 'emphasise Apply/Analyse (higher-order application and HOTS).' : 'a balanced mix across Remember, Understand, Apply and Analyse.'}
-- Each question object MUST include a "type" field and follow that type's exact shape.
+- When a section above is annotated in brackets with its own difficulty or cognitive focus, apply THAT to that section's questions; otherwise use the paper-wide difficulty and cognitive focus.\n- Each question object MUST include a "type" field and follow that type's exact shape.
 - Return EVERY section listed in the blueprint above, in order, each populated with its full set of questions — never omit a section or leave one empty.\n- Produce EXACTLY the number of questions specified for each section — count them before finishing. The exact count is MANDATORY and takes priority, even while avoiding any "already used" questions listed by the user.${grounded ? '\n- Base EVERY question STRICTLY on the SOURCE MATERIAL in the user message. Do NOT use outside knowledge. Add a numeric "page" field to each question citing the source page it came from.' : ''}
 - Output ONLY valid minified JSON, no markdown, no commentary:
 {"title":"<short paper title>","sections":[{"title":"<section title>","questions":[ <question objects> ]}, ...]}`;
@@ -101,7 +101,7 @@ function sanitize(q) {
 
 function normalizeSections(body) {
   let sections = Array.isArray(body.sections) ? body.sections : [];
-  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)), note: str(s && s.note, 200), choose: Math.max(0, Math.min(30, Number(s && s.choose) || 0)) })).filter((s) => s.types.length);
+  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)), note: str(s && s.note, 200), choose: Math.max(0, Math.min(30, Number(s && s.choose) || 0)), difficulty: ['easy', 'medium', 'hard', 'mixed'].includes(s && s.difficulty) ? s.difficulty : '', cognitive: ['recall', 'application'].includes(s && s.cognitive) ? s.cognitive : '' })).filter((s) => s.types.length);
   if (!sections.length) { let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)); if (!types.length) types = ['mcq']; sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }]; }
   let total = 0; sections = sections.filter((s) => { if (total >= 40) return false; total += s.count; return true; });
   return sections;
@@ -221,7 +221,7 @@ export async function POST(req) {
       const types = req.types && req.types.length ? req.types : ['mcq'];
       const picked = [];
       for (let j = 0; j < pool.length && picked.length < req.count; j++) { if (pool[j] && types.includes(pool[j].type)) { picked.push(pool[j]); pool[j] = null; } }
-      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, note: req.note || '', choose: req.choose || 0, types, questions: picked };
+      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, note: req.note || '', choose: req.choose || 0, difficulty: req.difficulty || '', cognitive: req.cognitive || '', types, questions: picked };
     });
 
     // Enforce the requested blueprint: each requested section must appear with its exact count.
@@ -234,7 +234,7 @@ export async function POST(req) {
       let guard = 0;
       while (sec.questions.length < want && guard++ < 3) {
         const need = want - sec.questions.length;
-        const tSys = buildSystem({ sections: [{ title: sec.title, types: sec.types, count: need, marks: sec.marks }], difficulty, level, language, examStyle, grounded, cognitive });
+        const tSys = buildSystem({ sections: [{ title: sec.title, types: sec.types, count: need, marks: sec.marks, difficulty: sec.difficulty, cognitive: sec.cognitive }], difficulty: sec.difficulty || difficulty, level, language, examStyle, grounded, cognitive: sec.cognitive || cognitive });
         const tMsg = `Topic / syllabus: ${topic || sourceName}\nGenerate EXACTLY ${need} ${sec.types.join('/')} question(s) for the section "${sec.title}", in the same JSON shape. Do NOT repeat or paraphrase any of these:\n- ${baseExclude.join('\n- ')}${sourceNote}`;
         let tr;
         try { tr = await routeChat({ system: tSys, messages: [{ role: 'user', content: tMsg }], maxTokens: Math.min(6000, 500 * need + 900), temperature: 0.85, jsonMode: true }); }
