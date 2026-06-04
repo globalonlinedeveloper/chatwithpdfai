@@ -90,3 +90,21 @@ describe('studentAnswerText()', () => {
     expect(c).toContain('(B) q');
   });
 });
+
+import { grade as gradeH, correctText as ctH, isAuto as isAutoH } from '../../app/question-paper-generator/grade.js';
+describe('hotspot grading', () => {
+  const q = { type: 'hotspot', hot: { x: 0.5, y: 0.5, r: 0.12 } };
+  it('correct when click is within tolerance', () => {
+    expect(gradeH(q, [0.5, 0.5])).toBe(true);
+    expect(gradeH(q, [0.55, 0.52])).toBe(true);
+  });
+  it('wrong when click is outside tolerance or missing', () => {
+    expect(gradeH(q, [0.8, 0.8])).toBe(false);
+    expect(gradeH(q, null)).toBe(false);
+    expect(gradeH({ type: 'hotspot' }, [0.5, 0.5])).toBe(false);
+  });
+  it('is auto-graded and has correctText', () => {
+    expect(isAutoH({ type: 'hotspot' })).toBe(true);
+    expect(ctH(q)).toMatch(/location/);
+  });
+});

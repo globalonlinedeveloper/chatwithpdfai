@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 function str(s, n) { return String(s == null ? '' : s).slice(0, n); }
-const ALL_TYPES = ['mcq', 'multi', 'tf', 'fill', 'match', 'assertion', 'numeric', 'short', 'long', 'case', 'code'];
+const ALL_TYPES = ['mcq', 'multi', 'tf', 'fill', 'match', 'assertion', 'numeric', 'short', 'long', 'case', 'code', 'hotspot'];
 
 export async function GET(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });

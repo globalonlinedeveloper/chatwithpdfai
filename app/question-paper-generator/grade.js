@@ -1,5 +1,5 @@
 // Shared grading + student-safe stripping (used by take API server-side).
-export const AUTO = ['mcq', 'code', 'assertion', 'tf', 'multi', 'fill', 'numeric', 'match'];
+export const AUTO = ['mcq', 'code', 'assertion', 'tf', 'multi', 'fill', 'numeric', 'match', 'hotspot'];
 export const isAuto = (q) => AUTO.includes(q.type);
 export const rights = (pairs) => [...pairs.map((p) => p.r)].sort((a, b) => String(a).localeCompare(String(b)));
 const norm = (x) => String(x == null ? '' : x).trim().toLowerCase().replace(/\s+/g, ' ');
@@ -14,6 +14,7 @@ export function grade(q, ua) {
     case 'fill': { const u = normFill(ua); return !!u && String(q.answer).split('|').some((a) => normFill(a) === u); }
     case 'numeric': { const x = parseFloat(ua), y = parseFloat(q.answer); if (!isNaN(x) && !isNaN(y)) { const tol = Math.max(0.001, Math.abs(y) * 0.005); return Math.abs(x - y) <= tol; } return !!norm(ua) && norm(ua) === norm(q.answer); }
     case 'match': { if (!Array.isArray(ua)) return false; const rs = rights(q.pairs); return q.pairs.every((p, pi) => rs[ua[pi]] === p.r); }
+    case 'hotspot': { if (!q.hot || !Array.isArray(ua) || ua.length < 2) return false; const dx = Number(ua[0]) - Number(q.hot.x), dy = Number(ua[1]) - Number(q.hot.y); const tol = Number(q.hot.r) || 0.12; return Math.sqrt(dx * dx + dy * dy) <= tol; }
     case 'case': return null;
     default: return null;
   }
@@ -28,6 +29,7 @@ export function correctText(q) {
     case 'numeric': return String(q.answer) + (q.unit ? ' ' + q.unit : '');
     case 'match': return q.pairs.map((p) => p.l + ' -> ' + p.r).join(', ');
     case 'case': return (q.sub || []).map((sq, si) => (si + 1) + '. (' + L(sq.answer) + ') ' + (sq.options || [])[sq.answer]).join('   ');
+    case 'hotspot': return 'the marked location on the image';
     case 'short': case 'long': return q.modelAnswer || '';
     default: return '';
   }
