@@ -52,6 +52,7 @@ export function studentAnswerText(q, ua) {
 export function studentSafe(paper) {
   const stripQ = (q) => {
     const b = { type: q.type, q: q.q };
+    if (q.image) b.image = q.image;
     if (q.type === 'mcq' || q.type === 'code' || q.type === 'multi') b.options = q.options;
     if (q.type === 'assertion') { b.assertion = q.assertion; b.reason = q.reason; b.options = q.options; }
     if (q.type === 'numeric') b.unit = q.unit;
