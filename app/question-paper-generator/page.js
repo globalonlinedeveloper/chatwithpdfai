@@ -16,6 +16,7 @@ export default function PapersPage() {
   const [fullSize, setFullSize] = useState(false); // "Full real-size exam" toggle (batched generation)
   const [fullConfirm, setFullConfirm] = useState(false); // showing the full-size confirm panel
   const [fullProg, setFullProg] = useState(''); // batch progress text during full generation
+  const [genStage, setGenStage] = useState(0); // staged progress index while generating
   const [uploading, setUploading] = useState(false); // direct PDF upload in progress
   const [uploadMsg, setUploadMsg] = useState(''); // upload status message
   const [srcOpen, setSrcOpen] = useState(false); // content-source picker open
@@ -94,6 +95,7 @@ export default function PapersPage() {
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
   useEffect(() => { const t = setTimeout(loadBank, 250); return () => clearTimeout(t); }, [bankQ]);
   useEffect(() => { if (paper) setMobileTab('preview'); }, [paper]);
+  useEffect(() => { if (!busy) { setGenStage(0); return; } setGenStage(0); const id = setInterval(() => setGenStage((x) => x + 1), 4000); return () => clearInterval(id); }, [busy]);
   useEffect(() => { try { const u = new URLSearchParams(window.location.search); if (u.get('paper') || u.get('doc')) return; const d = JSON.parse(localStorage.getItem('cwpai_qpg_draft') || 'null'); if (d && Array.isArray(d.sections) && d.sections.length) { if (typeof d.topic === 'string') setTopic(d.topic); setSections(d.sections); if (d.institution) setInstitution(d.institution); if (d.instructions) setInstructions(d.instructions); if (d.difficulty) setDifficulty(d.difficulty); if (d.sets) setSets(d.sets); if (d.examStyle) setExamStyle(d.examStyle); if (typeof d.bpKey === 'string') setBpKey(d.bpKey); if (typeof d.logo === 'string') setLogo(d.logo); } } catch (e) {} }, []);
   useEffect(() => { try { localStorage.setItem('cwpai_qpg_draft', JSON.stringify({ topic, sections, institution, instructions, difficulty, sets, examStyle, logo, bpKey })); } catch (e) {} }, [topic, sections, institution, instructions, difficulty, sets, examStyle, logo]);
   useEffect(() => { setPaper((pp) => pp ? { ...pp, logo } : pp); }, [logo]);
@@ -289,6 +291,7 @@ export default function PapersPage() {
   const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
   const activePaper = setsArr[curSet] || paper;
   const dupWarn = activePaper ? dupPairs(activePaper) : [];
+  const genStages = ['Planning the sections', 'Writing the questions'].concat(verify ? ['Checking the answer key'] : []).concat(['Formatting your paper']);
   async function runBatched(sectionList, label, verifyFlag, effTopic) {
     const MAXCHUNK = 30;
     const plan = [];
@@ -512,7 +515,8 @@ export default function PapersPage() {
                   <div style={{ maxWidth: 380 }} data-testid="gen-progress" role="status" aria-live="polite">
                     <div className="qpg-spinner" style={{ width: 40, height: 40, margin: '0 auto 16px', borderRadius: '50%', border: '3px solid var(--stroke-2)', borderTopColor: 'var(--violet-2)' }} />
                     <div style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 4 }}>Generating your paper… <span className="mono" style={{ color: 'var(--text-3)' }}>{elapsed}s</span></div>
-                    <div style={{ fontSize: 12.5, marginBottom: 14 }}>{fullProg || (verify ? 'Writing questions, then verifying the answer key — this usually takes 10–30s.' : 'Writing your questions — this usually takes 10–30s.')}</div>
+                    <div style={{ fontSize: 12.5, marginBottom: 10 }} data-testid="gen-stage">{fullProg || (genStages[Math.min(genStage, genStages.length - 1)] + '…')}</div>
+                    {!fullProg ? <div data-testid="gen-steps" style={{ display: 'flex', gap: 5, justifyContent: 'center', marginBottom: 14 }}>{genStages.map((_, i) => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: i <= Math.min(genStage, genStages.length - 1) ? 'var(--violet-2)' : 'var(--stroke-2)' }} />)}</div> : null}
                     <button type="button" onClick={cancelGenerate} className="btn btn-glass btn-sm" data-testid="cancel-gen">Cancel</button>
                   </div>
                 ) : (
