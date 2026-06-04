@@ -76,12 +76,13 @@ export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegen
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#444' }}>Roll no.<span style={{ display: 'inline-flex', gap: 3 }}>{[0, 1, 2, 3, 4, 5].map((i) => <span key={i} style={{ width: 15, height: 19, border: '1px solid #999', borderRadius: 2, display: 'inline-block' }} />)}</span></div>
         <div style={{ fontSize: 12, color: '#444', textAlign: 'right' }}>Time: {paper.durationMin} min&nbsp;&nbsp;·&nbsp;&nbsp;Max marks: {paper.totalMarks}{paper.grounded && paper.sourceName ? ' · source: ' + paper.sourceName : ''}</div>
       </div>
+      <div style={{ display: 'flex', gap: 18, borderTop: '1px solid #ccc', padding: '7px 14px', fontSize: 12, color: '#444', flexWrap: 'wrap' }} data-testid="student-info"><span style={{ flex: '1 1 200px' }}>Name: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 150 }} /></span><span>Class/Sec: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 70 }} /></span><span>Date: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 80 }} /></span></div>
     </div>
   ) : (
     <div style={{ textAlign: 'center', borderBottom: '2px solid #111', paddingBottom: compact ? 8 : 14, marginBottom: compact ? 12 : 18 }}>
       {paper.logo ? <img src={paper.logo} alt="" style={{ maxHeight: 54, maxWidth: 200, margin: '0 auto 6px', display: 'block', objectFit: 'contain' }} /> : null}{paper.institution ? <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#333' }}>{paper.institution}</div> : null}
       <div style={{ fontFamily: SERIF, fontSize: compact ? 18 : 22, fontWeight: 700, letterSpacing: '0.01em', marginTop: paper.institution ? 4 : 0 }}>{paper.title}</div>
-      <div style={{ fontSize: 12.5, color: '#555', marginTop: 6 }}>Max marks: {paper.totalMarks} · Time: {paper.durationMin} min{paper.examStyle ? ' · ' + paper.examStyle : ''}{paper.grounded && paper.sourceName ? ' · source: ' + paper.sourceName : ''}</div>
+      <div style={{ fontSize: 12.5, color: '#555', marginTop: 6 }}>Max marks: {paper.totalMarks} · Time: {paper.durationMin} min{paper.examStyle ? ' · ' + paper.examStyle : ''}{paper.grounded && paper.sourceName ? ' · source: ' + paper.sourceName : ''}</div>{!compact ? <div style={{ display: 'flex', gap: 18, justifyContent: 'center', flexWrap: 'wrap', fontSize: 12, color: '#555', marginTop: 8 }} data-testid="student-info"><span>Name: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 140 }} /></span><span>Roll no.: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 80 }} /></span><span>Date: <span style={{ display: 'inline-block', borderBottom: '1px solid #999', minWidth: 80 }} /></span></div> : null}
     </div>
   );
   const instr = official ? (
