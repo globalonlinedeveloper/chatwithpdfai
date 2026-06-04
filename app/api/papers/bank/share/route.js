@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { sendMail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,12 @@ export async function POST(req) {
   if (email === String(u.email || '').toLowerCase()) return NextResponse.json({ error: 'That is your own email' }, { status: 400 });
   const cnt = await query('SELECT COUNT(*) AS c FROM bank_grants WHERE owner_user_id = ?', [u.id]);
   if (cnt[0] && Number(cnt[0].c) >= 50) return NextResponse.json({ error: 'You can share with at most 50 colleagues.' }, { status: 409 });
-  await query('INSERT IGNORE INTO bank_grants (owner_user_id, grantee_email) VALUES (?, ?)', [u.id, email]);
+  const ins = await query('INSERT IGNORE INTO bank_grants (owner_user_id, grantee_email) VALUES (?, ?)', [u.id, email]);
+  if (ins && ins.affectedRows) {
+    const ownerName = String(u.name || u.email || 'A teacher');
+    const link = 'https://chatwithpdfai.com/question-paper-generator';
+    try { await sendMail({ to: email, subject: ownerName + ' shared their question bank with you on chatwithpdfai', text: ownerName + ' (' + u.email + ') shared their question bank with you on chatwithpdfai.com.\n\nSign in (or sign up) with this email to use their saved questions in your own papers:\n' + link + '\n\nIf you were not expecting this, you can ignore this email.', html: '<p><b>' + ownerName + '</b> (' + u.email + ') shared their question bank with you on <b>chatwithpdfai.com</b>.</p><p>Sign in (or sign up) with <b>' + email + '</b> to use their saved questions in your own papers:</p><p><a href="' + link + '">Open the question paper generator</a></p><p style="color:#888;font-size:12px">If you were not expecting this, you can ignore this email.</p>' }); } catch (e) {}
+  }
   return NextResponse.json({ ok: true, email });
 }
 
