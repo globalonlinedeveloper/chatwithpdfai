@@ -1,7 +1,7 @@
 {
   "name": "chatwithpdfai",
   "version": "1.0.0",
-  "description": "CHATWITHPDFAI.COM \u2014 Static site served via Next.js on Hostinger",
+  "description": "CHATWITHPDFAI.COM — Static site served via Next.js on Hostinger",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "katex": "^0.17.0",
     "mysql2": "^3.11.0",
     "next": "14.2.5",
     "nodemailer": "^6.9.16",

@@ -1,5 +1,31 @@
 'use client';
 import { grade, correctText, mathText } from './grade.js';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+// splitMath: tokenize text into plain + LaTeX-math segments ($...$ or \(...\)).
+export function splitMath(text) {
+  const str = String(text == null ? '' : text);
+  const re = /\$([^$\n]+)\$|\\\(([\s\S]+?)\\\)/g;
+  const out = []; let m, last = 0;
+  while ((m = re.exec(str))) {
+    if (m.index > last) out.push({ math: false, s: str.slice(last, m.index) });
+    out.push({ math: true, s: (m[1] != null ? m[1] : m[2]) });
+    last = re.lastIndex;
+  }
+  if (last < str.length) out.push({ math: false, s: str.slice(last) });
+  return out.length ? out : [{ math: false, s: str }];
+}
+// mathRender: LaTeX segments via KaTeX, everything else via the Unicode mathText fallback.
+export function mathRender(text) {
+  const segs = splitMath(text);
+  if (segs.length === 1 && !segs[0].math) return mathText(segs[0].s);
+  return segs.map((seg, i) => {
+    if (!seg.math) return <span key={i}>{mathText(seg.s)}</span>;
+    let html = ''; try { html = katex.renderToString(seg.s, { throwOnError: false, output: 'html' }); } catch (e) { html = ''; }
+    return html ? <span key={i} dangerouslySetInnerHTML={{ __html: html }} /> : <span key={i}>{mathText(seg.s)}</span>;
+  });
+}
 
 export const TYPE_LABELS = { mcq: 'Multiple choice', multi: 'Multi-select', tf: 'True / false', fill: 'Fill the blank', match: 'Match', assertion: 'Assertion–reason', numeric: 'Numeric', short: 'Short answer', long: 'Long answer', case: 'Case study', code: 'Code output', hotspot: 'Image hotspot' };
 export const ALL_TYPES = Object.keys(TYPE_LABELS);
@@ -15,8 +41,8 @@ export const clampInt = (v, min, max) => { const n = Math.round(Number(v)); if (
 export const clampHalf = (v, min, max) => { const n = Math.round(Number(v) * 2) / 2; if (!Number.isFinite(n)) return min; return Math.max(min, Math.min(max, n)); };
 
 export function renderBody(q) {
-  const opts = (list) => (<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 8 }}>{list.map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {mathText(o)}</div>)}</div>);
-  const qt = q.type === 'code' ? <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: '#f3f3f6', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: '2px 0 0' }}>{q.q}</pre> : <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathText(q.q)}</span>;
+  const opts = (list) => (<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 8 }}>{list.map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {mathRender(o)}</div>)}</div>);
+  const qt = q.type === 'code' ? <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: '#f3f3f6', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: '2px 0 0' }}>{q.q}</pre> : <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathRender(q.q)}</span>;
   switch (q.type) {
     case 'mcq': case 'code': return <>{qt}{opts(q.options)}</>;
     case 'multi': return <>{qt}<div style={{ fontSize: 11.5, color: '#777', marginTop: 3 }}>(select all that apply)</div>{opts(q.options)}</>;
@@ -24,11 +50,11 @@ export function renderBody(q) {
     case 'fill': return qt;
     case 'hotspot': return <>{qt}<div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>Mark the correct location on the image with an ✗.</div></>;
     case 'numeric': return <>{qt}<div style={{ marginTop: 8, fontSize: 13, color: '#555' }}>Answer: ____________ {q.unit}</div></>;
-    case 'assertion': return <><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {mathText(q.assertion)}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {mathText(q.reason)}</div>{opts(q.options)}</>;
-    case 'match': { const rs = rights(q.pairs); return <>{qt}<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '2px 24px', marginTop: 8, fontSize: 13.5, overflowWrap: 'anywhere' }}><div>{q.pairs.map((p, pi) => <div key={pi}>{ROMAN[pi]}. {mathText(p.l)}</div>)}</div><div>{rs.map((r, ri) => <div key={ri}>({LETTER(ri)}) {mathText(r)}</div>)}</div></div></>; }
+    case 'assertion': return <><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {mathRender(q.assertion)}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {mathRender(q.reason)}</div>{opts(q.options)}</>;
+    case 'match': { const rs = rights(q.pairs); return <>{qt}<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '2px 24px', marginTop: 8, fontSize: 13.5, overflowWrap: 'anywhere' }}><div>{q.pairs.map((p, pi) => <div key={pi}>{ROMAN[pi]}. {mathRender(p.l)}</div>)}</div><div>{rs.map((r, ri) => <div key={ri}>({LETTER(ri)}) {mathRender(r)}</div>)}</div></div></>; }
     case 'short': return <>{qt}<div style={{ marginTop: 8, height: 40, borderBottom: '1px solid #ccc' }}></div></>;
     case 'long': return <>{qt}<div style={{ marginTop: 8, height: 84, borderBottom: '1px solid #ccc' }}></div></>;
-    case 'case': return <>{qt}<div style={{ marginTop: 4 }}>{(q.sub || []).map((sq, si) => <div key={si} style={{ marginTop: si ? 10 : 6 }}><div style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>({ROMAN[si]}) {mathText(sq.q)}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 4 }}>{(sq.options || []).map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {mathText(o)}</div>)}</div></div>)}</div></>;
+    case 'case': return <>{qt}<div style={{ marginTop: 4 }}>{(q.sub || []).map((sq, si) => <div key={si} style={{ marginTop: si ? 10 : 6 }}><div style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>({ROMAN[si]}) {mathRender(sq.q)}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 20px', marginTop: 4 }}>{(sq.options || []).map((o, oi) => <div key={oi} style={{ fontSize: 13.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', minWidth: 0 }}>({LETTER(oi)}) {mathRender(o)}</div>)}</div></div>)}</div></>;
     default: return qt;
   }
 }
@@ -87,7 +113,7 @@ export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegen
       {includeKey ? (
         <div className="pagebreak" style={{ marginTop: 26, borderTop: '2px solid #111', paddingTop: 16 }}>
           <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 700, letterSpacing: '0.01em', marginBottom: 12 }}>Answer key</div>
-          {paper.sections.flatMap((sec) => sec.questions.map((q) => { k += 1; return <div key={k} className="key-item" style={{ fontSize: compact ? 12 : 13, lineHeight: 1.5, marginBottom: compact ? 5 : 7 }}><b style={{ fontWeight: 600 }}>{k}.</b> {mathText(correctText(q))}{q.explanation ? <span style={{ color: '#666' }}> — {mathText(q.explanation)}</span> : null}{q.page ? <span style={{ color: '#888' }}> [source p.{q.page}]</span> : null}</div>; }))}
+          {paper.sections.flatMap((sec) => sec.questions.map((q) => { k += 1; return <div key={k} className="key-item" style={{ fontSize: compact ? 12 : 13, lineHeight: 1.5, marginBottom: compact ? 5 : 7 }}><b style={{ fontWeight: 600 }}>{k}.</b> {mathRender(correctText(q))}{q.explanation ? <span style={{ color: '#666' }}> — {mathRender(q.explanation)}</span> : null}{q.page ? <span style={{ color: '#888' }}> [source p.{q.page}]</span> : null}</div>; }))}
         </div>
       ) : null}
     </>
@@ -96,10 +122,10 @@ export function PaperView({ paper, layout, includeKey, onRegen, regenGi, onRegen
 
 export function PromptStem({ q }) {
   if (q.type === 'code') return <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: 'var(--glass-1)', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: '2px 0 0', color: 'var(--text)' }}>{q.q}</pre>;
-  if (q.type === 'assertion') return <div><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {mathText(q.assertion)}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {mathText(q.reason)}</div></div>;
+  if (q.type === 'assertion') return <div><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {mathRender(q.assertion)}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {mathRender(q.reason)}</div></div>;
   if (q.type === 'match') return <span style={{ fontWeight: 600 }}>Match the following</span>;
-  if (q.type === 'case') return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathText(q.q)}</span>;
-  return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathText(q.q)}</span>;
+  if (q.type === 'case') return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathRender(q.q)}</span>;
+  return <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{mathRender(q.q)}</span>;
 }
 export function PracticeInput({ q, ua, checked, onAns }) {
   const optBtn = (label, active, state, onClick) => {
@@ -110,14 +136,14 @@ export function PracticeInput({ q, ua, checked, onAns }) {
     return <button type="button" disabled={checked} onClick={onClick} style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--r)', background: bg, border: '1px solid ' + bd, color: 'var(--text)', fontSize: 13.5, cursor: checked ? 'default' : 'pointer', width: '100%' }}>{label}</button>;
   };
   if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') {
-    return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{q.options.map((o, oi) => { const st = checked ? (oi === q.answer ? 'correct' : (ua === oi ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>({LETTER(oi)}) {mathText(o)}</span>, ua === oi, st, () => onAns(oi))}</div>; })}</div>;
+    return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{q.options.map((o, oi) => { const st = checked ? (oi === q.answer ? 'correct' : (ua === oi ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>({LETTER(oi)}) {mathRender(o)}</span>, ua === oi, st, () => onAns(oi))}</div>; })}</div>;
   }
   if (q.type === 'tf') {
     return <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>{[true, false].map((v) => { const st = checked ? (q.answer === v ? 'correct' : (ua === v ? 'wrong' : '')) : ''; return <div key={String(v)} style={{ flex: 1 }}>{optBtn(v ? 'True' : 'False', ua === v, st, () => onAns(v))}</div>; })}</div>;
   }
   if (q.type === 'multi') {
     const arr = Array.isArray(ua) ? ua : [];
-    return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{q.options.map((o, oi) => { const sel = arr.includes(oi); const st = checked ? (q.answers.includes(oi) ? 'correct' : (sel ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>{sel ? '☑' : '☐'} ({LETTER(oi)}) {mathText(o)}</span>, sel, st, () => onAns(sel ? arr.filter((x) => x !== oi) : [...arr, oi]))}</div>; })}</div>;
+    return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{q.options.map((o, oi) => { const sel = arr.includes(oi); const st = checked ? (q.answers.includes(oi) ? 'correct' : (sel ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>{sel ? '☑' : '☐'} ({LETTER(oi)}) {mathRender(o)}</span>, sel, st, () => onAns(sel ? arr.filter((x) => x !== oi) : [...arr, oi]))}</div>; })}</div>;
   }
   if (q.type === 'fill' || q.type === 'numeric') {
     return <input value={ua || ''} disabled={checked} onChange={(e) => onAns(e.target.value)} placeholder="Your answer" aria-label="Your answer" className="input" style={{ marginTop: 8, maxWidth: 320, fontSize: 13.5, padding: '8px 12px' }} />;
@@ -126,13 +152,13 @@ export function PracticeInput({ q, ua, checked, onAns }) {
     const rs = rights(q.pairs); const arr = Array.isArray(ua) ? ua : [];
     return <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>{q.pairs.map((p, pi) => (
       <div key={pi} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5 }}>
-        <span style={{ minWidth: 150 }}>{ROMAN[pi]}. {mathText(p.l)}</span>
+        <span style={{ minWidth: 150 }}>{ROMAN[pi]}. {mathRender(p.l)}</span>
         <select disabled={checked} value={arr[pi] == null ? '' : arr[pi]} onChange={(e) => { const next = [...arr]; next[pi] = Number(e.target.value); onAns(next); }} style={{ padding: '6px 9px', borderRadius: 'var(--r)', background: 'var(--glass-1)', border: '1px solid ' + (checked ? (arr[pi] === rs.indexOf(p.r) ? 'var(--green)' : '#e24b4a') : 'var(--stroke-2)'), color: 'var(--text)', fontSize: 12.5 }}>
           <option value="">—</option>{rs.map((r, ri) => <option key={ri} value={ri}>{LETTER(ri)}) {r}</option>)}
         </select>
       </div>))}</div>;
   }
-  if (q.type === 'case') { const ans = (ua && typeof ua === 'object' && !Array.isArray(ua)) ? ua : {}; return <div style={{ marginTop: 8, display: 'grid', gap: 12 }}>{(q.sub || []).map((sq, si) => <div key={si}><div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 4 }}>({ROMAN[si]}) {mathText(sq.q)}</div><div style={{ display: 'grid', gap: 6 }}>{(sq.options || []).map((o, oi) => { const st = checked ? (oi === sq.answer ? 'correct' : (ans[si] === oi ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>({LETTER(oi)}) {mathText(o)}</span>, ans[si] === oi, st, () => onAns({ ...ans, [si]: oi }))}</div>; })}</div>{checked && sq.explanation ? <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-3)' }}>{sq.explanation}</div> : null}</div>)}</div>; }
+  if (q.type === 'case') { const ans = (ua && typeof ua === 'object' && !Array.isArray(ua)) ? ua : {}; return <div style={{ marginTop: 8, display: 'grid', gap: 12 }}>{(q.sub || []).map((sq, si) => <div key={si}><div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 4 }}>({ROMAN[si]}) {mathRender(sq.q)}</div><div style={{ display: 'grid', gap: 6 }}>{(sq.options || []).map((o, oi) => { const st = checked ? (oi === sq.answer ? 'correct' : (ans[si] === oi ? 'wrong' : '')) : ''; return <div key={oi}>{optBtn(<span>({LETTER(oi)}) {mathRender(o)}</span>, ans[si] === oi, st, () => onAns({ ...ans, [si]: oi }))}</div>; })}</div>{checked && sq.explanation ? <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-3)' }}>{sq.explanation}</div> : null}</div>)}</div>; }
   return <textarea value={ua || ''} disabled={checked} onChange={(e) => onAns(e.target.value)} placeholder="Write your answer (self-assessed)" aria-label="Your answer" className="input" style={{ marginTop: 8, width: '100%', minHeight: 60, resize: 'vertical', fontFamily: 'inherit', fontSize: 13.5, padding: '9px 12px' }} />;
 }
 export function Feedback({ q, ua }) {
