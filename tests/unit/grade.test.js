@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { grade, correctText, studentSafe } from '../../app/question-paper-generator/grade.js';
+import { grade, correctText, studentSafe, scoreAttempt } from '../../app/question-paper-generator/grade.js';
 
 describe('grade()', () => {
   it('mcq/code/assertion/tf compare by index/boolean', () => {
@@ -125,5 +125,30 @@ describe('dupPairs', () => {
   it('returns empty for a clean paper', () => {
     const paper = { sections: [{ questions: [ { q: 'Newton first law of motion explained' }, { q: 'Define osmosis across a membrane' } ] }] };
     expect(dupPairs(paper).length).toBe(0);
+  });
+});
+
+describe('scoreAttempt (answer-any-N + negative marking)', () => {
+  const mcq = (ans) => ({ type: 'mcq', q: 'q', options: ['a','b','c','d'], answer: ans });
+  it('normal section: +1 per correct, total = auto count', () => {
+    const paper = { sections: [{ marks: 1, questions: [mcq(0), mcq(1), mcq(2)] }] };
+    const r = scoreAttempt(paper, { 0: 0, 1: 0, 2: 2 }); // q0 right, q1 wrong, q2 right
+    expect(r.score).toBe(2); expect(r.total).toBe(3);
+  });
+  it('answer any N of M: scored out of N (best N), total = N', () => {
+    const paper = { sections: [{ marks: 1, choose: 2, questions: [mcq(0), mcq(1), mcq(2), mcq(3)] }] };
+    const r = scoreAttempt(paper, { 0: 0, 1: 1, 2: 2, 3: 0 }); // 3 correct, cap to 2
+    expect(r.score).toBe(2); expect(r.total).toBe(2);
+  });
+  it('negative marking: penalise wrong ATTEMPTED only; blanks safe; floor 0', () => {
+    const paper = { negMark: 0.25, sections: [{ marks: 1, questions: [mcq(0), mcq(0), mcq(0), mcq(0)] }] };
+    // q0 right; q1 wrong(attempted); q2 wrong(attempted); q3 blank
+    const r = scoreAttempt(paper, { 0: 0, 1: 1, 2: 2 });
+    expect(r.score).toBe(0.5); expect(r.total).toBe(4); // correct=1, wrong-attempted=2 -> 1 - 0.25*2 = 0.5
+  });
+  it('negative marking never goes below 0', () => {
+    const paper = { negMark: 1, sections: [{ marks: 1, questions: [mcq(0), mcq(0), mcq(0)] }] };
+    const r = scoreAttempt(paper, { 0: 1, 1: 2, 2: 3 }); // all wrong-attempted: 0 - 3 -> floored 0
+    expect(r.score).toBe(0);
   });
 });

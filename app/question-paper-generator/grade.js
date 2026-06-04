@@ -20,6 +20,41 @@ export function grade(q, ua) {
   }
 }
 
+// scoreAttempt: section-aware scoring used by the take API (server-side).
+// - "answer any N of M" (section.choose): the section is scored out of N (best N
+//   correct); total counts N, not M.
+// - negative marking (paper.negMark, marks per wrong ATTEMPTED auto answer): only
+//   applied to non-optional sections; blanks are never penalised. Scores can be
+//   fractional, so this is dormant until the attempts.score column is DECIMAL.
+// Results[] preserves the flatQs global index so the take page can map them back.
+export function scoreAttempt(paper, answers) {
+  answers = answers || {};
+  const neg = Math.max(0, Number(paper && paper.negMark) || 0);
+  const results = [];
+  let score = 0, total = 0, gi = -1;
+  for (const sec of (paper && paper.sections) || []) {
+    const auto = [];
+    for (const q of (sec.questions || [])) {
+      gi += 1;
+      if (isAuto(q)) {
+        const v = answers[gi];
+        const attempted = v != null && !(typeof v === 'string' && v.trim() === '') && !(Array.isArray(v) && v.length === 0);
+        const ok = grade(q, v) === true;
+        auto.push({ ok, attempted });
+        results.push({ gi, correct: ok, answer: correctText(q), explanation: q.explanation || '' });
+      } else {
+        results.push({ gi, correct: null, answer: correctText(q), explanation: q.explanation || '' });
+      }
+    }
+    const m = auto.length; if (!m) continue;
+    const correct = auto.filter((a) => a.ok).length;
+    const N = Number(sec.choose) || 0;
+    if (N > 0 && N < m) { score += Math.min(correct, N); total += N; }           // answer any N of M
+    else { const wrong = auto.filter((a) => !a.ok && a.attempted).length; score += correct - neg * wrong; total += m; }
+  }
+  return { score: Math.max(0, Math.round(score * 100) / 100), total, results };
+}
+
 export function correctText(q) {
   switch (q.type) {
     case 'mcq': case 'code': case 'assertion': return '(' + L(q.answer) + ') ' + q.options[q.answer];

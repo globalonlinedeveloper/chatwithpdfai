@@ -101,7 +101,7 @@ function sanitize(q) {
 
 function normalizeSections(body) {
   let sections = Array.isArray(body.sections) ? body.sections : [];
-  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)), note: str(s && s.note, 200) })).filter((s) => s.types.length);
+  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)), note: str(s && s.note, 200), choose: Math.max(0, Math.min(30, Number(s && s.choose) || 0)) })).filter((s) => s.types.length);
   if (!sections.length) { let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)); if (!types.length) types = ['mcq']; sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }]; }
   let total = 0; sections = sections.filter((s) => { if (total >= 40) return false; total += s.count; return true; });
   return sections;
@@ -221,7 +221,7 @@ export async function POST(req) {
       const types = req.types && req.types.length ? req.types : ['mcq'];
       const picked = [];
       for (let j = 0; j < pool.length && picked.length < req.count; j++) { if (pool[j] && types.includes(pool[j].type)) { picked.push(pool[j]); pool[j] = null; } }
-      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, note: req.note || '', types, questions: picked };
+      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, note: req.note || '', choose: req.choose || 0, types, questions: picked };
     });
 
     // Enforce the requested blueprint: each requested section must appear with its exact count.
@@ -255,7 +255,7 @@ export async function POST(req) {
     if (verify) { const vr = await verifyPass(outSections); totalCredits += vr.credits; verifyInfo = { verified: vr.verified, fixes: vr.fixes }; }
     try { const newStems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 200))).filter(Boolean); if (newStems.length) { const ph = newStems.map(() => '(?,?,?)').join(','); const params = []; newStems.forEach((st2) => params.push(userId, topicKey, st2)); await query(`INSERT INTO paper_seen_questions (user_id, topic_key, stem) VALUES ${ph}`, params); } } catch (e) {}
 
-    const totalMarks = outSections.reduce((m, s) => m + s.marks * s.questions.length, 0);
+    const totalMarks = outSections.reduce((m, s) => m + s.marks * ((s.choose > 0 && s.choose < s.questions.length) ? s.choose : s.questions.length), 0);
     const nQ = outSections.reduce((n, s) => n + s.questions.length, 0);
     const durationMin = Math.max(15, Math.round(nQ * 1.5));
 
