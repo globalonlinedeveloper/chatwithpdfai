@@ -97,7 +97,7 @@ export function studentSafe(paper) {
     if (q.type === 'case') b.sub = (q.sub || []).map((sq) => ({ q: sq.q, options: sq.options }));
     return b;
   };
-  return { title: paper.title, examStyle: paper.examStyle, institution: paper.institution, durationMin: paper.durationMin, totalMarks: paper.totalMarks, sections: (paper.sections || []).map((s) => ({ title: s.title, marks: s.marks, questions: (s.questions || []).map(stripQ) })) };
+  return { title: paper.title, examStyle: paper.examStyle, institution: paper.institution, durationMin: paper.durationMin, totalMarks: paper.totalMarks, negMark: Number(paper.negMark) || 0, sections: (paper.sections || []).map((s) => ({ title: s.title, marks: s.marks, choose: s.choose || 0, questions: (s.questions || []).map(stripQ) })) };
 }
 
 export function flatQs(paper) { return (paper.sections || []).flatMap((s) => s.questions); }

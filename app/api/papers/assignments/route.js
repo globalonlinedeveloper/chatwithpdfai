@@ -22,7 +22,7 @@ export async function GET(req) {
       if (!at[0]) return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
       let paper = null; try { paper = JSON.parse(own[0].payload); } catch {}
       let answers = {}; try { answers = JSON.parse(at[0].answers || '{}') || {}; } catch {}
-      return NextResponse.json({ ok: true, attempt: { id: at[0].id, name: at[0].student_name, score: at[0].score, total: at[0].total, createdAt: at[0].created_at }, paper, answers });
+      return NextResponse.json({ ok: true, attempt: { id: at[0].id, name: at[0].student_name, score: Number(at[0].score), total: Number(at[0].total), createdAt: at[0].created_at }, paper, answers });
     }
     if (new URL(req.url).searchParams.get('stats')) {
       const atts = await query('SELECT answers, score, total FROM paper_attempts WHERE assignment_id = ? LIMIT 2000', [id]);
@@ -44,7 +44,7 @@ export async function GET(req) {
       return NextResponse.json({ ok: true, stats: { count: atts.length, avgPct: scored ? Math.round(sumPct / scored) : 0, perQuestion, byBloom, bySection, hardest } });
     }
     const att = await query('SELECT id, student_name, score, total, away_count, created_at FROM paper_attempts WHERE assignment_id = ? ORDER BY created_at DESC LIMIT 500', [id]);
-    return NextResponse.json({ ok: true, assignment: { id: own[0].id, title: own[0].title }, attempts: att.map((a) => ({ id: a.id, name: a.student_name, score: a.score, total: a.total, awayCount: a.away_count, createdAt: a.created_at })) });
+    return NextResponse.json({ ok: true, assignment: { id: own[0].id, title: own[0].title }, attempts: att.map((a) => ({ id: a.id, name: a.student_name, score: Number(a.score), total: Number(a.total), awayCount: a.away_count, createdAt: a.created_at })) });
   }
   const rows = await query('SELECT a.id, a.token, a.title, a.num_questions, a.active, a.created_at, COUNT(t.id) AS attempts, COALESCE(ROUND(AVG(CASE WHEN t.total > 0 THEN 100 * t.score / t.total END)), 0) AS avg_pct FROM paper_assignments a LEFT JOIN paper_attempts t ON t.assignment_id = a.id WHERE a.user_id = ? GROUP BY a.id ORDER BY a.created_at DESC LIMIT 100', [u.id]);
   return NextResponse.json({ ok: true, assignments: rows.map((r) => ({ id: r.id, token: r.token, title: r.title, numQuestions: r.num_questions, active: r.active, attempts: Number(r.attempts), avgPct: Number(r.avg_pct), createdAt: r.created_at })) });

@@ -107,7 +107,7 @@ export default function TakeTest({ params }) {
               <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>Submitted{name ? ', ' + name : ''}. Review your answers below.</div>
             </div>
           ) : (
-            <><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" aria-label="Your name" className="input" style={{ marginBottom: 8, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} /><div data-testid="integrity-note" style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 16 }}>Please stay on this tab — switching away during the test is recorded.</div></>
+            <><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" aria-label="Your name" className="input" style={{ marginBottom: 8, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} /><div data-testid="integrity-note" style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 16 }}>Please stay on this tab — switching away during the test is recorded.</div>{test.negMark > 0 ? <div data-testid="neg-note" style={{ fontSize: 12, color: '#ffb4b4', marginBottom: 16, fontWeight: 600 }}>{'\u26a0'} Negative marking: {test.negMark} mark{test.negMark === 1 ? '' : 's'} deducted for each wrong answer (blanks are not penalised).</div> : null}</>
           )}
           {qOrder.map((gi, di) => { const q = flat[gi]; const r = resById[gi]; return (
             <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }}>
