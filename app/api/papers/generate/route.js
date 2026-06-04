@@ -7,7 +7,7 @@ import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
 import { rateLimit, recordHit } from '@/lib/ratelimit';
 import { langInstr as langInstrFor, isLang } from '@/lib/languages';
-import { stripOptionLabel } from '@/lib/qpaper';
+import { stripOptionLabel, cleanTitle } from '@/lib/qpaper';
 // Same-language default query for PDF retrieval when Scope is blank — improves
 // grounding precision for Indic-language source documents (embeddings are multilingual).
 const DEFAULT_RETRIEVAL_Q = { en: 'key concepts, definitions, facts and important points', ta: 'முக்கியக் கருத்துகள், வரையறைகள், உண்மைகள் மற்றும் முக்கியத் தகவல்கள்', hi: 'मुख्य अवधारणाएँ, परिभाषाएँ, तथ्य और महत्वपूर्ण बिंदु' };
@@ -268,7 +268,7 @@ export async function POST(req) {
     const stems = outSections.flatMap((s) => s.questions.map((q) => str(q.q, 140)));
 
     await recordHit({ bucket: 'paper', ip: 'u' + userId });
-    return NextResponse.json({ ok: true, paper: { title: str(parsed.title || topic || sourceName, 140), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance, provider: result.provider, model: result.model });
+    return NextResponse.json({ ok: true, paper: { title: cleanTitle(parsed.title, examStyle, topic, sourceName), examStyle, language, difficulty, institution, instructions, totalMarks, durationMin, sections: outSections, verified: verifyInfo.verified, fixes: verifyInfo.fixes, grounded, sourceName }, stems, credits, balance });
   } catch (e) {
     const status = e.statusCode || 500;
     if (status >= 500) console.error('[papers/paper] failed', e);
