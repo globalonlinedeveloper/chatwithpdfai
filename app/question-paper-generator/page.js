@@ -2,7 +2,7 @@
 import AppNav from '../_components/AppNav';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { toGIFT, toMoodleXML, toCSV, toAiken, toQTIZip, downloadBlob, downloadText, slug } from './exporters';
-import { grade, correctText, flatQs, studentAnswerText } from './grade.js';
+import { grade, correctText, flatQs, studentAnswerText, dupPairs } from './grade.js';
 import { deriveSets } from './sets.js';
 import { CATEGORIES } from '@/lib/blueprints';
 import { LANGUAGES } from '@/lib/languages';
@@ -36,6 +36,7 @@ export default function PapersPage() {
   const [language, setLanguage] = useState('en');
   const [includeKey, setIncludeKey] = useState(true);
   const [verify, setVerify] = useState(true);
+  const [watermark, setWatermark] = useState(false);
   const [prevStems, setPrevStems] = useState([]);
   const [docs, setDocs] = useState([]);
   const [sourceDocId, setSourceDocId] = useState(0);
@@ -286,6 +287,7 @@ export default function PapersPage() {
   // The set shown in the preview/print + driving the exporters. Falls back to the master.
   const setsArr = useMemo(() => (paper ? (sets > 1 ? deriveSets(paper, sets) : [paper]) : []), [paper, sets]);
   const activePaper = setsArr[curSet] || paper;
+  const dupWarn = activePaper ? dupPairs(activePaper) : [];
   async function runBatched(sectionList, label, verifyFlag, effTopic) {
     const MAXCHUNK = 30;
     const plan = [];
@@ -484,7 +486,7 @@ export default function PapersPage() {
             </>) : null}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 12 }}>
               <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}><input type="checkbox" checked={includeKey} onChange={(e) => setIncludeKey(e.target.checked)} /> Include answer key</label>
-              <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label>
+              <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="A second AI pass re-checks the answer key"><input type="checkbox" checked={verify} onChange={(e) => setVerify(e.target.checked)} /> Verify answers</label><label style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} title="Faint diagonal watermark (institution or title) on the printed paper"><input type="checkbox" checked={watermark} onChange={(e) => setWatermark(e.target.checked)} data-testid="watermark-toggle" /> Watermark</label>
               <span style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }} title="Produce A/B/C… versions with questions and options shuffled (same answer key per set)"><span style={{ color: 'var(--text-3)' }}>Shuffled sets</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: 2 }}><button type="button" onClick={() => { setSets((v) => clampInt(v - 1, 1, 4)); setCurSet(0); }} disabled={sets <= 1} aria-label="Fewer sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-dec">−</button><span data-testid="sets-value" style={{ minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{sets}</span><button type="button" onClick={() => { setSets((v) => clampInt(v + 1, 1, 4)); setCurSet(0); }} disabled={sets >= 4} aria-label="More sets" className="btn btn-glass btn-sm" style={{ padding: '2px 8px', minWidth: 26 }} data-testid="sets-inc">+</button></span></span>
             </div>
             </>)}
@@ -525,6 +527,7 @@ export default function PapersPage() {
               <div id="result-top">
                 <h2 ref={headingRef} tabIndex={-1} className="no-print" style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>Generated paper: {paper.title}</h2>
                 {shortWarn && <div className="no-print" data-testid="short-warn" style={{ marginBottom: 12, fontSize: 12.5, color: '#ffd27a', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: '8px 12px' }}>{shortWarn}</div>}
+                {dupWarn.length ? <div className="no-print" data-testid="dup-warn" style={{ marginBottom: 12, fontSize: 12.5, color: '#ffd27a', background: 'var(--glass-1)', border: '1px solid var(--stroke-2)', borderRadius: 'var(--r)', padding: '8px 12px' }}>{'\u26a0'} {dupWarn.length === 1 ? 'Two questions look similar' : dupWarn.length + ' question pairs look similar'}: {dupWarn.slice(0, 4).map((d) => 'Q' + d.a + '\u2248Q' + d.b).join(', ')}{dupWarn.length > 4 ? '\u2026' : ''}. Consider regenerating one of each pair.</div> : null}
                 <div className="no-print result-toolbar" style={{ display: 'flex', alignItems: 'center', gap: 10, rowGap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', gap: 4, background: 'var(--glass-1)', borderRadius: 'var(--r)', padding: 3 }}>
                     <button onClick={() => setView('paper')} className={view === 'paper' ? 'btn btn-iris btn-sm' : 'btn btn-glass btn-sm'} data-testid="view-paper">Paper</button>
@@ -554,7 +557,7 @@ export default function PapersPage() {
                   </div>
                 )}
                 {view === 'paper' ? (
-                  <div id="paper-print" style={{ position: 'relative', background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)', boxShadow: '0 10px 40px rgba(0,0,0,0.30)' }}><span className="no-print" data-testid="copy-badge" style={{ position: 'absolute', top: 8, right: 12, fontSize: 9.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#999', border: '1px solid #e5e5e5', borderRadius: 999, padding: '1px 8px' }}>{includeKey ? 'Teacher copy' : 'Student copy'}</span>
+                  <div id="paper-print" style={{ position: 'relative', background: '#fff', color: '#111', borderRadius: 'var(--r-lg)', padding: '40px 44px', maxWidth: 820, margin: '0 auto', border: '1px solid var(--stroke-2)', boxShadow: '0 10px 40px rgba(0,0,0,0.30)' }}><span className="no-print" data-testid="copy-badge" style={{ position: 'absolute', top: 8, right: 12, fontSize: 9.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#999', border: '1px solid #e5e5e5', borderRadius: 999, padding: '1px 8px' }}>{includeKey ? 'Teacher copy' : 'Student copy'}</span>{watermark && (paper.institution || paper.title) ? <div aria-hidden="true" data-testid="watermark" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}><span style={{ transform: 'rotate(-30deg)', fontSize: 66, fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(0,0,0,0.05)', whiteSpace: 'nowrap', textTransform: 'uppercase', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>{(paper.institution || paper.title || '').slice(0, 28)}</span></div> : null}
                     {omr ? <OMRSheet paper={activePaper} /> : (printAll && setsArr.length > 1 ? setsArr.map((sp, i) => (<div key={i} className={i > 0 ? 'pagebreak' : ''}><div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#555', margin: '0 0 10px' }}>SET {sp.setLabel || String.fromCharCode(65 + i)}</div><PaperView paper={sp} layout={paper.layout || layout} includeKey={includeKey} /></div>)) : <PaperView paper={activePaper} layout={paper.layout || layout} includeKey={includeKey} onRegen={setsArr.length > 1 ? null : regenQ} regenGi={regenGi} onRegenSection={setsArr.length > 1 ? null : regenSection} onBankQ={setsArr.length > 1 ? null : saveToBank} onDelete={setsArr.length > 1 ? null : delQuestion} />)}
                   </div>
                 ) : (

@@ -67,6 +67,28 @@ export function studentSafe(paper) {
 
 export function flatQs(paper) { return (paper.sections || []).flatMap((s) => s.questions); }
 
+export function dupPairs(paper, thresh) {
+  thresh = thresh == null ? 0.82 : thresh;
+  const qs = flatQs(paper || {});
+  const toks = qs.map((q) => {
+    const parts = [(q && (q.q || q.assertion || q.stem)) || ''];
+    if (q && Array.isArray(q.options)) parts.push(q.options.map((o) => typeof o === 'string' ? o : (o && o.text) || '').join(' '));
+    return new Set(String(parts.join(' ')).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 2));
+  });
+  const out = [];
+  for (let i = 0; i < toks.length; i++) {
+    for (let j = i + 1; j < toks.length; j++) {
+      const a = toks[i], b = toks[j];
+      if (a.size < 3 || b.size < 3) continue;
+      let inter = 0; a.forEach((w) => { if (b.has(w)) inter += 1; });
+      const uni = a.size + b.size - inter;
+      const sim = uni ? inter / uni : 0;
+      if (sim >= thresh) out.push({ a: i + 1, b: j + 1, sim: Math.round(sim * 100) });
+    }
+  }
+  return out;
+}
+
 // Lightweight, dependency-free math/science notation -> Unicode (CSP-safe, prints fine).
 // Covers the common school cases: exponents (x^2, x^{12}), subscripts (H_2O, a_{ij}),
 // fractions, roots, Greek letters and common operators. Not a full LaTeX engine.

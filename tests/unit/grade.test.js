@@ -108,3 +108,22 @@ describe('hotspot grading', () => {
     expect(ctH(q)).toMatch(/location/);
   });
 });
+
+
+import { dupPairs } from '../../app/question-paper-generator/grade.js';
+describe('dupPairs', () => {
+  it('flags near-duplicate questions and ignores distinct ones', () => {
+    const paper = { sections: [{ questions: [
+      { q: 'What is the capital city of France today' },
+      { q: 'What is the capital city of France today indeed' },
+      { q: 'Define photosynthesis in plants clearly' },
+    ] }] };
+    const pairs = dupPairs(paper);
+    expect(pairs.some((p) => p.a === 1 && p.b === 2)).toBe(true);
+    expect(pairs.some((p) => p.b === 3 || p.a === 3)).toBe(false);
+  });
+  it('returns empty for a clean paper', () => {
+    const paper = { sections: [{ questions: [ { q: 'Newton first law of motion explained' }, { q: 'Define osmosis across a membrane' } ] }] };
+    expect(dupPairs(paper).length).toBe(0);
+  });
+});
