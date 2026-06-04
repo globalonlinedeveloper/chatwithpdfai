@@ -24,6 +24,7 @@ export async function POST(req) {
   const token = String(body.token || '').replace(/\.html?$/i, '').slice(0, 24);
   const name = String(body.name || '').slice(0, 120);
   const answers = body.answers && typeof body.answers === 'object' ? body.answers : {};
+  const away = Math.min(100000, Math.max(0, Math.round(Number(body.away)) || 0));
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
   // Public endpoint (no auth): rate-limit attempt submissions per IP so a script
   // can't flood paper_attempts and skew the owner's score stats. A real student
@@ -40,6 +41,6 @@ export async function POST(req) {
     if (isAuto(q)) { total++; const ok = grade(q, answers[gi]) === true; if (ok) score++; results.push({ gi, correct: ok, answer: correctText(q), explanation: q.explanation || '' }); }
     else results.push({ gi, correct: null, answer: correctText(q), explanation: q.explanation || '' });
   });
-  try { await query('INSERT INTO paper_attempts (assignment_id, student_name, score, total, answers) VALUES (?,?,?,?,?)', [rows[0].id, name || null, score, total, JSON.stringify(answers).slice(0, 500000)]); } catch (e) {}
+  try { await query('INSERT INTO paper_attempts (assignment_id, student_name, score, total, answers, away_count) VALUES (?,?,?,?,?,?)', [rows[0].id, name || null, score, total, JSON.stringify(answers).slice(0, 500000), away]); } catch (e) {}
   return NextResponse.json({ ok: true, score, total, results });
 }

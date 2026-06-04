@@ -31,6 +31,7 @@ export default function TakeTest({ params }) {
   const dataRef = useRef({ answers: {}, name: '' });
   dataRef.current = { answers, name };
   const submittedRef = useRef(false);
+  const awayRef = useRef(0);
 
   useEffect(() => {
     try { const raw = localStorage.getItem('cwpai_take_' + token); if (raw) setPrior(JSON.parse(raw)); } catch (e) {}
@@ -46,7 +47,7 @@ export default function TakeTest({ params }) {
     if (submittedRef.current) return;
     submittedRef.current = true; setBusy(true);
     try {
-      const r = await fetch('/api/papers/take', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, name: dataRef.current.name, answers: dataRef.current.answers }) });
+      const r = await fetch('/api/papers/take', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, name: dataRef.current.name, answers: dataRef.current.answers, away: awayRef.current }) });
       const j = await r.json().catch(() => ({}));
       if (r.ok) { setResult(j); try { localStorage.setItem('cwpai_take_' + token, JSON.stringify({ score: j.score, total: j.total, at: Date.now() })); } catch (e) {} window.scrollTo({ top: 0, behavior: 'smooth' }); }
       else { setErr(j.error || 'Submit failed'); submittedRef.current = false; }
@@ -61,6 +62,14 @@ export default function TakeTest({ params }) {
     setSecsLeft(mins * 60);
     const id = setInterval(() => { setSecsLeft((s) => { if (s == null) return s; if (s <= 1) { clearInterval(id); submit(); return 0; } return s - 1; }); }, 1000);
     return () => clearInterval(id);
+  }, [test, result, prior]);
+
+  // Light integrity: count how many times the student leaves the test tab/window.
+  useEffect(() => {
+    if (!test || result || prior) return;
+    const onVis = () => { if (document.visibilityState === 'hidden') awayRef.current += 1; };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, [test, result, prior]);
 
   const resById = result ? Object.fromEntries(result.results.map((r) => [r.gi, r])) : {};
@@ -93,7 +102,7 @@ export default function TakeTest({ params }) {
               <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>Submitted{name ? ', ' + name : ''}. Review your answers below.</div>
             </div>
           ) : (
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" aria-label="Your name" className="input" style={{ marginBottom: 18, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} />
+            <><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" aria-label="Your name" className="input" style={{ marginBottom: 8, maxWidth: 300, fontSize: 13.5, padding: '8px 12px' }} /><div data-testid="integrity-note" style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 16 }}>Please stay on this tab — switching away during the test is recorded.</div></>
           )}
           {qOrder.map((gi, di) => { const q = flat[gi]; const r = resById[gi]; return (
             <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }}>
