@@ -5,9 +5,11 @@ const LETTER = (i) => String.fromCharCode(97 + i);
 const OPT_TYPES = ['mcq', 'code', 'assertion', 'multi'];
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function shuffle(arr, rnd) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function speak(text) { try { const s = window.speechSynthesis; if (!s) return; s.cancel(); const u = new SpeechSynthesisUtterance(String(text || '')); u.rate = 0.95; s.speak(u); } catch (e) {} }
+function qText(q) { if (q.type === 'assertion') return 'Assertion: ' + (q.assertion || '') + '. Reason: ' + (q.reason || ''); if (q.type === 'match') return 'Match the following'; const base = q.q || ''; const opts = Array.isArray(q.options) ? q.options.map((o, i) => LETTER(i).toUpperCase() + '. ' + o).join('. ') : ''; return base + (opts ? '. Options: ' + opts : ''); }
 
 function TakeInput({ q, ua, locked, onA, optPerm }) {
-  const btn = (label, active, onClick) => <button type="button" onClick={onClick} disabled={locked} style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--r)', background: active ? 'var(--glass-2)' : 'var(--glass-1)', border: '1px solid ' + (active ? 'var(--violet)' : 'var(--stroke-2)'), color: 'var(--text)', fontSize: 13.5, cursor: locked ? 'default' : 'pointer', width: '100%' }}>{label}</button>;
+  const btn = (label, active, onClick) => <button type="button" onClick={onClick} disabled={locked} aria-pressed={!!active} style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--r)', background: active ? 'var(--glass-2)' : 'var(--glass-1)', border: '1px solid ' + (active ? 'var(--violet)' : 'var(--stroke-2)'), color: 'var(--text)', fontSize: 13.5, cursor: locked ? 'default' : 'pointer', width: '100%' }}>{label}</button>;
   if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') { const order = optPerm || q.options.map((_, i) => i); return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{order.map((oi, di) => <div key={oi}>{btn(<span>({LETTER(di)}) {q.options[oi]}</span>, ua === oi, () => onA(oi))}</div>)}</div>; }
   if (q.type === 'tf') return <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>{[true, false].map((v) => <div key={String(v)} style={{ flex: 1 }}>{btn(v ? 'True' : 'False', ua === v, () => onA(v))}</div>)}</div>;
   if (q.type === 'multi') { const order = optPerm || q.options.map((_, i) => i); const arr = Array.isArray(ua) ? ua : []; return <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>{order.map((oi, di) => { const sel = arr.includes(oi); return <div key={oi}>{btn(<span>{sel ? '☑' : '☐'} ({LETTER(di)}) {q.options[oi]}</span>, sel, () => onA(sel ? arr.filter((x) => x !== oi) : [...arr, oi]))}</div>; })}</div>; }
@@ -26,6 +28,7 @@ export default function TakeTest({ params }) {
   const [busy, setBusy] = useState(false);
   const [prior, setPrior] = useState(null);
   const [secsLeft, setSecsLeft] = useState(null);
+  const [bigText, setBigText] = useState(false);
 
   // Refs so the timer's auto-submit always reads the latest answers (avoids stale closure).
   const dataRef = useRef({ answers: {}, name: '' });
@@ -88,14 +91,15 @@ export default function TakeTest({ params }) {
         </div>
       )}
       {test && !prior && (
-        <div className="glass" style={{ padding: '26px 28px', borderRadius: 'var(--r-xl)', marginTop: 14 }}>
+        <div className="glass" data-testid="take-card" style={{ padding: '26px 28px', borderRadius: 'var(--r-xl)', marginTop: 14, zoom: bigText ? 1.2 : 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 600, margin: '0 0 4px' }}>{test.title}</h1>
               <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginBottom: 18 }}>{test.institution ? test.institution + ' · ' : ''}{flat.length} questions{test.totalMarks ? ' · ' + test.totalMarks + ' marks' : ''}{test.durationMin ? ' · ' + test.durationMin + ' min' : ''}</div>
             </div>
-            {secsLeft != null && !result && <div className="mono" data-testid="take-timer" style={{ fontSize: 15, fontWeight: 600, color: secsLeft < 60 ? '#ffb4b4' : 'var(--text-2)', whiteSpace: 'nowrap' }}>{'⏱ '}{mmss(secsLeft)}</div>}
+            {secsLeft != null && !result && <div className="mono" data-testid="take-timer" role="timer" aria-live="polite" style={{ fontSize: 15, fontWeight: 600, color: secsLeft < 60 ? '#ffb4b4' : 'var(--text-2)', whiteSpace: 'nowrap' }}>{'⏱ '}{mmss(secsLeft)}</div>}
           </div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}><button type="button" onClick={() => setBigText((v) => !v)} aria-pressed={bigText} data-testid="bigtext-toggle" className="btn btn-glass btn-sm" style={{ fontSize: 12 }}>{bigText ? 'A Reset text size' : 'A+ Larger text'}</button></div>
           {result ? (
             <div style={{ marginBottom: 18, padding: '14px 16px', borderRadius: 'var(--r)', background: 'var(--glass-2)' }} data-testid="take-score">
               <div style={{ fontSize: 24, fontWeight: 600, color: result.total && result.score / result.total >= 0.5 ? 'var(--green)' : '#ffb4b4' }}>{result.score} / {result.total}{result.total ? ' (' + Math.round(100 * result.score / result.total) + '%)' : ''}</div>
@@ -106,7 +110,7 @@ export default function TakeTest({ params }) {
           )}
           {qOrder.map((gi, di) => { const q = flat[gi]; const r = resById[gi]; return (
             <div key={gi} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid var(--stroke-1)' }}>
-              <div style={{ display: 'flex', gap: 8, fontSize: 14, lineHeight: 1.5 }}><span style={{ fontWeight: 600, color: 'var(--violet-2)' }}>{di + 1}.</span><div style={{ flex: 1 }}>{q.type === 'assertion' ? <div><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {q.assertion}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {q.reason}</div></div> : q.type === 'code' ? <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: 'var(--glass-1)', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: 0, color: 'var(--text)' }}>{q.q}</pre> : q.type === 'match' ? <span style={{ fontWeight: 600 }}>Match the following</span> : <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{q.q}</span>}</div></div>
+              <div style={{ display: 'flex', gap: 8, fontSize: 14, lineHeight: 1.5 }}><span style={{ fontWeight: 600, color: 'var(--violet-2)' }}>{di + 1}.</span><button type="button" onClick={() => speak(qText(q))} aria-label="Read this question aloud" data-testid="speak-q" style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, color: 'var(--text-3)', padding: '0 2px', alignSelf: 'flex-start' }}>{'🔊'}</button><div style={{ flex: 1 }}>{q.type === 'assertion' ? <div><div style={{ whiteSpace: 'pre-wrap' }}><b style={{ fontWeight: 600 }}>Assertion (A):</b> {q.assertion}</div><div style={{ whiteSpace: 'pre-wrap', marginTop: 3 }}><b style={{ fontWeight: 600 }}>Reason (R):</b> {q.reason}</div></div> : q.type === 'code' ? <pre style={{ fontFamily: 'monospace', fontSize: 12.5, background: 'var(--glass-1)', padding: '8px 10px', borderRadius: 6, whiteSpace: 'pre-wrap', margin: 0, color: 'var(--text)' }}>{q.q}</pre> : q.type === 'match' ? <span style={{ fontWeight: 600 }}>Match the following</span> : <span style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>{q.q}</span>}</div></div>
               <div style={{ marginLeft: 22 }}>
                 <TakeInput q={q} ua={answers[gi]} locked={!!result} onA={(v) => setAnswers((a) => ({ ...a, [gi]: v }))} optPerm={optPerms[gi]} />
                 {r && r.correct != null && <div style={{ marginTop: 8, fontSize: 12.5, color: r.correct ? 'var(--green)' : '#ffb4b4' }}><b style={{ fontWeight: 600 }}>{r.correct ? '✓ Correct' : '✗ Correct answer:'}</b> {r.correct ? '' : r.answer}{r.explanation ? <span style={{ color: 'var(--text-3)' }}> {'—'} {r.explanation}</span> : null}</div>}
