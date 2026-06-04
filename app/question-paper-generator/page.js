@@ -25,6 +25,7 @@ export default function PapersPage() {
   const [printAll, setPrintAll] = useState(false); // render all shuffled sets for one print job
   const [omr, setOmr] = useState(false); // show/print a bubble OMR answer sheet
   const [examStyle, setExamStyle] = useState('');
+  const effExamStyle = (bpKey && bpKey !== 'custom') ? examStyle : ''; // custom paper carries no exam-style (avoids stale draft examStyle leaking into the title)
   const [topic, setTopic] = useState('');
   const [institution, setInstitution] = useState('');
   const [instructions, setInstructions] = useState('');
@@ -85,8 +86,8 @@ export default function PapersPage() {
   useEffect(() => { fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     loadLibrary(); loadShares(); try { const pid = Number(new URLSearchParams(window.location.search).get('paper')) || 0; if (pid) openPaper(pid); } catch (e) {} }, []);
   useEffect(() => { const t = setTimeout(loadBank, 250); return () => clearTimeout(t); }, [bankQ]);
-  useEffect(() => { try { const u = new URLSearchParams(window.location.search); if (u.get('paper') || u.get('doc')) return; const d = JSON.parse(localStorage.getItem('cwpai_qpg_draft') || 'null'); if (d && Array.isArray(d.sections) && d.sections.length) { if (typeof d.topic === 'string') setTopic(d.topic); setSections(d.sections); if (d.institution) setInstitution(d.institution); if (d.instructions) setInstructions(d.instructions); if (d.difficulty) setDifficulty(d.difficulty); if (d.sets) setSets(d.sets); if (d.examStyle) setExamStyle(d.examStyle); if (typeof d.logo === 'string') setLogo(d.logo); } } catch (e) {} }, []);
-  useEffect(() => { try { localStorage.setItem('cwpai_qpg_draft', JSON.stringify({ topic, sections, institution, instructions, difficulty, sets, examStyle, logo })); } catch (e) {} }, [topic, sections, institution, instructions, difficulty, sets, examStyle, logo]);
+  useEffect(() => { try { const u = new URLSearchParams(window.location.search); if (u.get('paper') || u.get('doc')) return; const d = JSON.parse(localStorage.getItem('cwpai_qpg_draft') || 'null'); if (d && Array.isArray(d.sections) && d.sections.length) { if (typeof d.topic === 'string') setTopic(d.topic); setSections(d.sections); if (d.institution) setInstitution(d.institution); if (d.instructions) setInstructions(d.instructions); if (d.difficulty) setDifficulty(d.difficulty); if (d.sets) setSets(d.sets); if (d.examStyle) setExamStyle(d.examStyle); if (typeof d.bpKey === 'string') setBpKey(d.bpKey); if (typeof d.logo === 'string') setLogo(d.logo); } } catch (e) {} }, []);
+  useEffect(() => { try { localStorage.setItem('cwpai_qpg_draft', JSON.stringify({ topic, sections, institution, instructions, difficulty, sets, examStyle, logo, bpKey })); } catch (e) {} }, [topic, sections, institution, instructions, difficulty, sets, examStyle, logo]);
   useEffect(() => { setPaper((pp) => pp ? { ...pp, logo } : pp); }, [logo]);
   useEffect(() => {
     if (!srcOpen) return; let live = true; setSrcLoading(true);
@@ -166,7 +167,7 @@ export default function PapersPage() {
     const exclude = paper.sections.flatMap((s) => s.questions.map((x) => String((x && (x.q || x.assertion)) || '').slice(0, 140))).filter(Boolean);
     pushHist(); setRegenGi(gi); setNote('');
     try {
-      const body = { topic: (topic.trim() || paper.title || ''), examStyle, level, difficulty, language, institution, instructions, sections: [{ title: sec.title || '', types: [tgt.type], count: 1, marks: Number(sec.marks || 1) }], nonce: Math.random().toString(36).slice(2), exclude: exclude.slice(-80), verify: false, documentId: sourceDocId };
+      const body = { topic: (topic.trim() || paper.title || ''), examStyle: effExamStyle, level, difficulty, language, institution, instructions, sections: [{ title: sec.title || '', types: [tgt.type], count: 1, marks: Number(sec.marks || 1) }], nonce: Math.random().toString(36).slice(2), exclude: exclude.slice(-80), verify: false, documentId: sourceDocId };
       const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname); return; } setNote(j.error || 'Could not regenerate that question.'); return; }
@@ -185,7 +186,7 @@ export default function PapersPage() {
     const exclude = paper.sections.flatMap((s) => s.questions.map((x) => String((x && (x.q || x.assertion)) || '').slice(0, 140))).filter(Boolean);
     pushHist(); setRegenGi('s' + si); setNote('');
     try {
-      const body = { topic: (topic.trim() || paper.title || ''), examStyle, level, difficulty, language, institution, instructions, sections: [{ title: sec.title || '', types: (sec.types && sec.types.length ? sec.types : ['mcq']), count: sec.questions.length || 5, marks: Number(sec.marks || 1) }], nonce: Math.random().toString(36).slice(2), exclude: exclude.slice(-80), verify: false, documentId: sourceDocId };
+      const body = { topic: (topic.trim() || paper.title || ''), examStyle: effExamStyle, level, difficulty, language, institution, instructions, sections: [{ title: sec.title || '', types: (sec.types && sec.types.length ? sec.types : ['mcq']), count: sec.questions.length || 5, marks: Number(sec.marks || 1) }], nonce: Math.random().toString(36).slice(2), exclude: exclude.slice(-80), verify: false, documentId: sourceDocId };
       const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname); return; } setNote(j.error || 'Could not regenerate that section.'); return; }
@@ -214,7 +215,7 @@ export default function PapersPage() {
     if (typeof credits === 'number' && credits < 1) { setNote("You're out of credits — buy a pack to generate."); return; }
     const requested = sections.reduce((nn, s) => nn + Number(s.count || 0), 0);
     // A single AI call is capped at ~40 questions server-side; bigger papers (custom or blueprint) go through the batched generator.
-    if (requested > 40) { setFullConfirm(false); return runBatched(sections.map((s) => ({ title: s.title, type: s.type, count: Number(s.count), marks: Number(s.marks) })), examStyle || 'Custom paper', verify, eff); }
+    if (requested > 40) { setFullConfirm(false); return runBatched(sections.map((s) => ({ title: s.title, type: s.type, count: Number(s.count), marks: Number(s.marks) })), effExamStyle || 'Custom paper', verify, eff); }
     cancelGenerate();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -222,7 +223,7 @@ export default function PapersPage() {
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper');
     try {
-      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle, level, difficulty, cognitive, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
+      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle: effExamStyle, level, difficulty, cognitive, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
@@ -293,7 +294,7 @@ export default function PapersPage() {
         if (Date.now() > deadline) { stopped = true; setNote('Stopped after 8 minutes to avoid a runaway generation — Regenerate to fill the rest.'); break; }
         const pp = plan[b];
         setFullProg('Batch ' + (b + 1) + ' of ' + plan.length + ' \u2014 ' + pp.title);
-        const body = { topic: effTopic, examStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: !!verifyFlag, documentId: sourceDocId };
+        const body = { topic: effTopic, examStyle: effExamStyle, level, difficulty, language, institution, instructions, sections: [{ title: pp.title, types: [pp.type], count: pp.count, marks: pp.marks }], nonce: Math.random().toString(36).slice(2), exclude: seen.slice(-80), verify: !!verifyFlag, documentId: sourceDocId };
         let r, j;
         try { r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(body) }); }
         catch (e) { if (e && e.name === 'AbortError') { stopped = true; break; } failed++; continue; }
@@ -310,7 +311,7 @@ export default function PapersPage() {
       const got = finalSections.reduce((a, s) => a + s.questions.length, 0);
       if (got === 0) { setNote(stopped ? 'Generation cancelled.' : 'Could not generate the paper — please try again.'); setBusy(false); stopTimer(); setFullProg(''); if (abortRef.current === controller) abortRef.current = null; return; }
       const tMarks = finalSections.reduce((m, s) => m + s.questions.length * Number(s.marks || 1), 0);
-      const paperObj = { title: ((label || 'Full') + ' \u2014 full paper'), examStyle, language, difficulty, institution, instructions, totalMarks: tMarks, durationMin: Math.max(15, Math.round(got * 1.5)), sections: finalSections, verified: (verifyFlag && allVerified), grounded: Number(sourceDocId) > 0, sourceName: (selectedDoc && selectedDoc.filename) || '', layout, logo };
+      const paperObj = { title: ((label || 'Full') + ' \u2014 full paper'), examStyle: effExamStyle, language, difficulty, institution, instructions, totalMarks: tMarks, durationMin: Math.max(15, Math.round(got * 1.5)), sections: finalSections, verified: (verifyFlag && allVerified), grounded: Number(sourceDocId) > 0, sourceName: (selectedDoc && selectedDoc.filename) || '', layout, logo };
       setPaper(paperObj); setUsed(used); if (bal != null) setCredits(bal); freshHistory(paperObj);
       setPrevStems(seen.slice(-80));
       if (got < wantTotal) setShortWarn('Built ' + got + ' of ' + wantTotal + ' questions' + (failed ? ' (' + failed + ' batch(es) failed)' : (stopped ? ' (stopped)' : '')) + '. Regenerate to fill the gaps.');
