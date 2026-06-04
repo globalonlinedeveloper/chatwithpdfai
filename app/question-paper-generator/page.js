@@ -40,8 +40,10 @@ export default function PapersPage() {
   const [docs, setDocs] = useState([]);
   const [sourceDocId, setSourceDocId] = useState(0);
   const [library, setLibrary] = useState([]);
+  const [libQ, setLibQ] = useState('');
   const [savedMsg, setSavedMsg] = useState('');
   const [shares, setShares] = useState([]);
+  const [shareQ, setShareQ] = useState('');
   const [shareMsg, setShareMsg] = useState('');
   const [attemptsFor, setAttemptsFor] = useState(null);
   const [attemptList, setAttemptList] = useState([]);
@@ -268,6 +270,8 @@ export default function PapersPage() {
   const hasScope = topic.trim().length > 0;
   const fromPDF = Number(sourceDocId) > 0;
   const canGen = Boolean(isBP || fromPDF || hasScope);
+  const libShown = libQ.trim() ? library.filter((lp) => (lp.title || '').toLowerCase().includes(libQ.trim().toLowerCase())) : library;
+  const shareShown = shareQ.trim() ? shares.filter((sh) => (sh.title || '').toLowerCase().includes(shareQ.trim().toLowerCase())) : shares;
   const _sc = topic.trim();
   const _scShort = _sc.length > 44 ? _sc.slice(0, 44) + '…' : _sc;
   const genExplain = !canGen
@@ -334,9 +338,11 @@ export default function PapersPage() {
           <button type="button" onClick={() => setAsideOpen(false)} aria-label="Hide papers panel" title="Hide panel" data-testid="aside-hide" className="btn btn-glass btn-sm" style={{ alignSelf: 'flex-end', padding: '2px 9px', marginBottom: 8 }}>«</button>
           <button type="button" onClick={() => { setPaper(null); setUsed(null); setNote(''); setView('paper'); setEditAns(false); setCurSet(0); }} className="btn btn-iris btn-sm" data-testid="new-paper" style={{ width: '100%', marginBottom: 16 }}>+ New paper</button>
           <div onClick={() => setSecOpen((x) => ({ ...x, lib: !x.lib }))} role="button" tabIndex={0} data-testid="sec-lib" className="eyebrow" style={{ marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 9, width: 8, display: 'inline-block' }}>{secOpen.lib ? '▾' : '▸'}</span>My library{library.length ? ' (' + library.length + ')' : ''}</div>{secOpen.lib && (<>
-          {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (
+          {library.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)', marginBottom: 18 }}>Saved papers appear here.</div> : (<>
+            <input className="input" value={libQ} onChange={(e) => setLibQ(e.target.value)} placeholder="Search saved papers…" aria-label="Search my library" data-testid="lib-search" style={{ width: '100%', boxSizing: 'border-box', fontSize: 11.5, padding: '6px 9px', marginBottom: 6 }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
-              {library.map((lp) => (
+              {libShown.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>No papers match.</div> : null}
+              {libShown.map((lp) => (
                 <div key={lp.id} className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)' }} data-testid="lib-row">
                   {renaming === ('lib:' + lp.id) ? <input autoFocus value={renameVal} onChange={(e) => setRenameVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') saveRename(); if (e.key === 'Escape') setRenaming(null); }} onBlur={saveRename} aria-label="New name" data-testid="rename-input" className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 12, padding: '3px 6px' }} /> : <div title={lp.title} style={{ fontSize: 12, fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{lp.title}</div>}
                   <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{lp.numQuestions} Qs{lp.examStyle ? ' · ' + lp.examStyle : ''}</div>
@@ -347,11 +353,13 @@ export default function PapersPage() {
                 </div>
               ))}
             </div>
-          )}
+          </>)}
           </>)}<div onClick={() => setSecOpen((x) => ({ ...x, shares: !x.shares }))} role="button" tabIndex={0} data-testid="sec-shares" className="eyebrow" style={{ marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 9, width: 8, display: 'inline-block' }}>{secOpen.shares ? '▾' : '▸'}</span>Shared tests{shares.length ? ' (' + shares.length + ')' : ''}</div>{secOpen.shares && (<>
-          {shares.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Share a paper as a test to see it here.</div> : (
+          {shares.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>Share a paper as a test to see it here.</div> : (<>
+            <input className="input" value={shareQ} onChange={(e) => setShareQ(e.target.value)} placeholder="Search shared tests…" aria-label="Search shared tests" data-testid="share-search" style={{ width: '100%', boxSizing: 'border-box', fontSize: 11.5, padding: '6px 9px', marginBottom: 6 }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 18 }}>
-              {shares.map((sh) => (
+              {shareShown.length === 0 ? <div style={{ fontSize: 11.5, color: 'var(--text-4)' }}>No tests match.</div> : null}
+              {shareShown.map((sh) => (
                 <div key={sh.id} className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)' }} data-testid="share-row">
                   {renaming === ('share:' + sh.id) ? <input autoFocus value={renameVal} onChange={(e) => setRenameVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') saveRename(); if (e.key === 'Escape') setRenaming(null); }} onBlur={saveRename} aria-label="New name" data-testid="rename-input" className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 12, padding: '3px 6px' }} /> : <div title={sh.title} style={{ fontSize: 12, fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{sh.title}</div>}
                   <div className="mono" style={{ fontSize: 9.5, color: 'var(--text-4)', margin: '2px 0 5px' }}>{sh.attempts} attempts{sh.attempts ? ' · avg ' + sh.avgPct + '%' : ''}</div>
@@ -365,7 +373,7 @@ export default function PapersPage() {
                 </div>
               ))}
             </div>
-          )}
+          </>)}
           </>)}<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 0, marginBottom: 8 }}><div onClick={() => setSecOpen((x) => ({ ...x, bank: !x.bank }))} role="button" tabIndex={0} data-testid="sec-bank" className="eyebrow" style={{ margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 9, width: 8, display: 'inline-block' }}>{secOpen.bank ? '▾' : '▸'}</span>Question bank{bank.length ? ' (' + bank.length + ')' : ''}</div><button type="button" onClick={() => { setBankShareOpen((v) => { const nx = !v; if (nx) loadGrants(); return nx; }); }} data-testid="bank-share-toggle" className="btn btn-glass btn-sm" style={{ fontSize: 10, padding: '2px 7px' }}>{bankShareOpen ? 'Close' : 'Share'}</button></div>{secOpen.bank && (<>
           {bankShareOpen ? <div data-testid="bank-share-panel" className="glass" style={{ padding: '8px 10px', borderRadius: 'var(--r)', marginBottom: 8 }}><div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 5 }}>Share your bank with a colleague by email. They can insert your questions; only you can edit or delete them.</div><div style={{ display: 'flex', gap: 5 }}><input className="input" value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') grantBank(); }} placeholder="colleague@email.com" aria-label="Colleague email" data-testid="grant-email" style={{ flex: 1, minWidth: 0, fontSize: 11, padding: '5px 7px' }} /><button type="button" onClick={grantBank} data-testid="grant-add" className="btn btn-iris btn-sm" style={{ fontSize: 10.5, padding: '4px 9px' }}>Share</button></div>{grantees.length ? <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>{grantees.map((g) => <div key={g.email} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }} data-testid="grantee-row"><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-2)' }}>{g.email}</span><button type="button" onClick={() => revokeBank(g.email)} data-testid="grant-revoke" aria-label={'Revoke ' + g.email} className="btn btn-glass btn-sm" style={{ fontSize: 10, padding: '1px 6px' }}>Revoke</button></div>)}</div> : null}</div> : null}
           <input className="input" value={bankQ} onChange={(e) => setBankQ(e.target.value)} placeholder="Search saved questions…" aria-label="Search question bank" data-testid="bank-search" style={{ width: '100%', boxSizing: 'border-box', fontSize: 11.5, padding: '6px 9px', marginBottom: 6 }} />
