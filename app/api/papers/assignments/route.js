@@ -28,6 +28,7 @@ export async function GET(req) {
       const atts = await query('SELECT answers, score, total FROM paper_attempts WHERE assignment_id = ? LIMIT 2000', [id]);
       let paper = null; try { paper = JSON.parse(own[0].payload); } catch {}
       const flat = paper ? flatQs(paper) : [];
+      const meta = []; (paper && paper.sections ? paper.sections : []).forEach((sec, si) => (sec.questions || []).forEach((q) => meta.push({ bloom: q.bloom || null, section: sec.name || sec.title || ('Section ' + (si + 1)) })));
       const agg = flat.map((q, gi) => ({ n: gi + 1, type: q.type, stem: String(q.q || q.assertion || (q.type === 'match' ? 'Match the following' : '')).slice(0, 90), auto: isAuto(q), correct: 0, graded: 0 }));
       let sumPct = 0, scored = 0;
       for (const at2 of atts) {
@@ -36,7 +37,11 @@ export async function GET(req) {
         if (Number(at2.total) > 0) { sumPct += 100 * Number(at2.score) / Number(at2.total); scored += 1; }
       }
       const perQuestion = agg.map((p) => ({ n: p.n, type: p.type, stem: p.stem, auto: p.auto, attempts: p.graded, correctRate: p.graded ? Math.round(100 * p.correct / p.graded) : null }));
-      return NextResponse.json({ ok: true, stats: { count: atts.length, avgPct: scored ? Math.round(sumPct / scored) : 0, perQuestion } });
+      const groupBy = (keyFn) => { const m = new Map(); agg.forEach((p, gi) => { if (!p.auto) return; const k = keyFn(gi); if (k == null) return; const e = m.get(k) || { correct: 0, graded: 0 }; e.correct += p.correct; e.graded += p.graded; m.set(k, e); }); return [...m.entries()].map(([k, e]) => ({ key: String(k), attempts: e.graded, correctRate: e.graded ? Math.round(100 * e.correct / e.graded) : null })); };
+      const byBloom = groupBy((gi) => meta[gi] && meta[gi].bloom);
+      const bySection = groupBy((gi) => meta[gi] && meta[gi].section);
+      const hardest = perQuestion.filter((p) => p.correctRate != null).sort((x, y) => x.correctRate - y.correctRate).slice(0, 3).map((p) => ({ n: p.n, stem: p.stem, correctRate: p.correctRate }));
+      return NextResponse.json({ ok: true, stats: { count: atts.length, avgPct: scored ? Math.round(sumPct / scored) : 0, perQuestion, byBloom, bySection, hardest } });
     }
     const att = await query('SELECT id, student_name, score, total, created_at FROM paper_attempts WHERE assignment_id = ? ORDER BY created_at DESC LIMIT 500', [id]);
     return NextResponse.json({ ok: true, assignment: { id: own[0].id, title: own[0].title }, attempts: att.map((a) => ({ id: a.id, name: a.student_name, score: a.score, total: a.total, createdAt: a.created_at })) });
