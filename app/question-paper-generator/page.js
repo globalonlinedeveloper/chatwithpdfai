@@ -239,7 +239,7 @@ export default function PapersPage() {
     stopTimer(); setElapsed(0); timerRef.current = setInterval(() => setElapsed((n) => n + 1), 1000);
     setBusy(true); setNote(''); setShortWarn(''); setPaper(null); setUsed(null); setAnswers({}); setChecked(false); setView('paper');
     try {
-      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle: effExamStyle, level, difficulty, cognitive, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks) })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
+      const r = await fetch('/api/papers/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ topic: eff, examStyle: effExamStyle, level, difficulty, cognitive, language, institution, instructions, sections: sections.map((s) => ({ title: s.title, types: [s.type], count: Number(s.count), marks: Number(s.marks), note: s.note || '' })), nonce: Math.random().toString(36).slice(2), exclude: prevStems, verify, documentId: sourceDocId }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
@@ -513,6 +513,7 @@ export default function PapersPage() {
                     <label style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Marks <input type="number" min={1} max={20} step={0.5} value={s.marks} onChange={(e) => setSec(i, { marks: clampHalf(e.target.value, 1, 20) })} aria-label="Marks per question" className="qpg-num" style={{ ...ctrl, width: 58 }} /></label><span data-testid="sec-marks" title="Section total = questions \u00d7 marks" style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', minWidth: 34, textAlign: 'right' }}>= {(Number(s.count) || 0) * (Number(s.marks) || 0)}</span>
                     <button type="button" onClick={() => delSec(i)} className="btn btn-glass btn-sm" style={{ padding: '5px 9px' }} aria-label="Remove section">{'✕'}</button>
                   </div>
+                  <input value={s.note || ''} onChange={(e) => setSec(i, { note: e.target.value })} placeholder="Section instructions (optional) — e.g. Answer all questions" aria-label="Section instructions" data-testid="sec-note" className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: 11.5, padding: '6px 9px' }} />
                 </div>
               ))}
               <button type="button" onClick={addSec} disabled={sections.length >= 8} className="btn btn-glass btn-sm" data-testid="add-section" style={{ marginTop: 2 }}>+ Add section</button>{sections.length >= 8 && <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 8 }}>Up to 8 sections</span>}

@@ -25,8 +25,8 @@ const TYPE_SCHEMA = {
   match: 'match: {"type":"match","q":"Match the following","pairs":[{"l":"left","r":"correct match"}, (3-5 pairs)],"explanation":"..."}',
   assertion: 'assertion: {"type":"assertion","assertion":"...","reason":"...","options":["Both A and R are true and R explains A","Both A and R are true but R does not explain A","A is true but R is false","A is false but R is true"],"answer":<0-3>,"explanation":"..."}',
   numeric: 'numeric: {"type":"numeric","q":"...","answer":<number>,"unit":"<optional>","explanation":"..."}',
-  short: 'short: {"type":"short","q":"...","modelAnswer":"<concise model answer>"}',
-  long: 'long: {"type":"long","q":"...","modelAnswer":"<key points>"}',
+  short: 'short: {"type":"short","q":"...","modelAnswer":"<concise model answer>","rubric":"<1-2 line marking scheme: what earns the marks>"}',
+  long: 'long: {"type":"long","q":"...","modelAnswer":"<key points>","rubric":"<2-3 line marking scheme: how marks are awarded>"}',
   case: 'case (reading comprehension / case study): {"type":"case","q":"<a 3-6 sentence passage or real-world scenario>","sub":[{"q":"<sub-question answerable only from the passage>","options":["o1","o2","o3","o4"],"answer":<index 0-3>,"explanation":"..."} (exactly 4 sub-questions)]}',
   code: 'code: {"type":"code","q":"What is the output?\\n<code>","options":["o1","o2","o3","o4"],"answer":<0-3>,"explanation":"..."}',
 };
@@ -95,13 +95,13 @@ function sanitize(q) {
   if (type === 'match') { const pairs = Array.isArray(q.pairs) ? q.pairs.slice(0, 6).map((p) => ({ l: str(p && p.l, 200), r: str(stripOptionLabel(p && p.r), 200) })).filter((p) => p.l && p.r) : []; if (pairs.length < 2) return null; return { ...base, pairs }; }
   if (type === 'assertion') { const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options.slice(0, 4).map((o) => str(stripOptionLabel(o), 300)) : ['Both A and R are true and R explains A', 'Both A and R are true but R does not explain A', 'A is true but R is false', 'A is false but R is true']; return { ...base, assertion: str(q.assertion, 500), reason: str(q.reason, 500), options, answer: clampIdx(q.answer, options.length) }; }
   if (type === 'case') { const sub = (Array.isArray(q.sub) ? q.sub : []).slice(0, 6).map((x) => { const options = Array.isArray(x && x.options) ? x.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; return { q: str(x && x.q, 700), options, answer: clampIdx(x && x.answer, options.length), explanation: str(x && x.explanation, 400) }; }).filter(Boolean); if (sub.length < 2) return null; return { ...base, sub }; }
-  if (type === 'short' || type === 'long') return { ...base, modelAnswer: str(q.modelAnswer || q.answer, 1500) };
+  if (type === 'short' || type === 'long') return { ...base, modelAnswer: str(q.modelAnswer || q.answer, 1500), rubric: str(q.rubric, 800) };
   return base;
 }
 
 function normalizeSections(body) {
   let sections = Array.isArray(body.sections) ? body.sections : [];
-  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)) })).filter((s) => s.types.length);
+  sections = sections.map((s) => ({ title: str(s && s.title, 80), types: (Array.isArray(s && s.types) ? s.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)), count: Math.max(1, Math.min(30, Number(s && s.count) || 5)), marks: Math.max(1, Math.min(20, Number(s && s.marks) || 1)), note: str(s && s.note, 200) })).filter((s) => s.types.length);
   if (!sections.length) { let types = (Array.isArray(body.types) ? body.types : ['mcq']).filter((t) => ALL_TYPES.includes(t)); if (!types.length) types = ['mcq']; sections = [{ title: '', types, count: Math.max(3, Math.min(30, Number(body.count) || 10)), marks: 1 }]; }
   let total = 0; sections = sections.filter((s) => { if (total >= 40) return false; total += s.count; return true; });
   return sections;
@@ -221,7 +221,7 @@ export async function POST(req) {
       const types = req.types && req.types.length ? req.types : ['mcq'];
       const picked = [];
       for (let j = 0; j < pool.length && picked.length < req.count; j++) { if (pool[j] && types.includes(pool[j].type)) { picked.push(pool[j]); pool[j] = null; } }
-      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, types, questions: picked };
+      return { title: req.title || ('Section ' + String.fromCharCode(65 + i)), marks: req.marks, note: req.note || '', types, questions: picked };
     });
 
     // Enforce the requested blueprint: each requested section must appear with its exact count.
