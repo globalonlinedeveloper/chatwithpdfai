@@ -15,16 +15,17 @@ export async function GET(req) {
   const url = new URL(req.url);
   const id = Number(url.searchParams.get('id')) || 0;
   if (id) {
-    const rows = await query('SELECT payload FROM paper_question_bank WHERE id = ? AND user_id = ?', [id, u.id]);
+    const rows = await query('SELECT payload FROM paper_question_bank WHERE id = ? AND (user_id = ? OR user_id IN (SELECT owner_user_id FROM bank_grants WHERE grantee_email = ?))', [id, u.id, String(u.email || '').toLowerCase()]);
     if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     let question = null; try { question = JSON.parse(rows[0].payload); } catch {}
     return NextResponse.json({ ok: true, question });
   }
   const q = str(url.searchParams.get('q'), 80).trim();
+  const em = String(u.email || '').toLowerCase();
   const rows = q
-    ? await query('SELECT id, type, stem, topic, created_at FROM paper_question_bank WHERE user_id = ? AND (stem LIKE ? OR topic LIKE ?) ORDER BY created_at DESC LIMIT 200', [u.id, '%' + q + '%', '%' + q + '%'])
-    : await query('SELECT id, type, stem, topic, created_at FROM paper_question_bank WHERE user_id = ? ORDER BY created_at DESC LIMIT 200', [u.id]);
-  return NextResponse.json({ ok: true, items: rows.map((r) => ({ id: r.id, type: r.type, stem: r.stem, topic: r.topic, createdAt: r.created_at })) });
+    ? await query('SELECT b.id, b.type, b.stem, b.topic, b.created_at, (b.user_id = ?) AS mine, ow.name AS owner_name, ow.email AS owner_email FROM paper_question_bank b LEFT JOIN users ow ON ow.id = b.user_id WHERE (b.user_id = ? OR b.user_id IN (SELECT owner_user_id FROM bank_grants WHERE grantee_email = ?)) AND (b.stem LIKE ? OR b.topic LIKE ?) ORDER BY mine DESC, b.created_at DESC LIMIT 300', [u.id, u.id, em, '%' + q + '%', '%' + q + '%'])
+    : await query('SELECT b.id, b.type, b.stem, b.topic, b.created_at, (b.user_id = ?) AS mine, ow.name AS owner_name, ow.email AS owner_email FROM paper_question_bank b LEFT JOIN users ow ON ow.id = b.user_id WHERE b.user_id = ? OR b.user_id IN (SELECT owner_user_id FROM bank_grants WHERE grantee_email = ?) ORDER BY mine DESC, b.created_at DESC LIMIT 300', [u.id, u.id, em]);
+  return NextResponse.json({ ok: true, items: rows.map((r) => ({ id: r.id, type: r.type, stem: r.stem, topic: r.topic, createdAt: r.created_at, shared: !Number(r.mine), ownerName: Number(r.mine) ? null : (r.owner_name || r.owner_email || 'A colleague') })) });
 }
 
 export async function POST(req) {
