@@ -7,7 +7,7 @@ import { query } from '@/lib/db';
 import { getClientIp } from '@/lib/validate';
 import { rateLimit, recordHit } from '@/lib/ratelimit';
 import { langInstr as langInstrFor, isLang } from '@/lib/languages';
-import { stripOptionLabel, cleanTitle } from '@/lib/qpaper';
+import { stripOptionLabel, cleanTitle, defaultBloom, vApplyOption, vApplyTf, vApplyValue, vApplyMulti, vApplyMatch } from '@/lib/qpaper';
 // Same-language default query for PDF retrieval when Scope is blank — improves
 // grounding precision for Indic-language source documents (embeddings are multilingual).
 const DEFAULT_RETRIEVAL_Q = { en: 'key concepts, definitions, facts and important points', ta: 'முக்கியக் கருத்துகள், வரையறைகள், உண்மைகள் மற்றும் முக்கியத் தகவல்கள்', hi: 'मुख्य अवधारणाएँ, परिभाषाएँ, तथ्य और महत्वपूर्ण बिंदु' };
@@ -85,7 +85,7 @@ function sanitize(q) {
   if (!q || typeof q !== 'object') return null;
   const type = ALL_TYPES.includes(q.type) ? q.type : 'mcq';
   const base = { type, q: str(q.q, 1400), explanation: str(q.explanation, 500) };
-  const _bl = str(q.bloom, 24); if (_bl) base.bloom = _bl;
+  const _bl = str(q.bloom, 24); base.bloom = _bl || defaultBloom(type);
   const pg = Number(q.page); if (Number.isInteger(pg) && pg > 0 && pg < 100000) base.page = pg;
   if (type === 'mcq' || type === 'code') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; return { ...base, options, answer: clampIdx(q.answer, options.length) }; }
   if (type === 'multi') { const options = Array.isArray(q.options) ? q.options.slice(0, 6).map((o) => str(stripOptionLabel(o), 400)) : []; if (options.length < 2) return null; let answers = Array.isArray(q.answers) ? q.answers.map(Number).filter((n) => n >= 0 && n < options.length) : []; if (!answers.length) answers = [0]; return { ...base, options, answers: [...new Set(answers)] }; }
@@ -112,56 +112,53 @@ function normalizeSections(body) {
 // returns the correct answer as TEXT for option questions; we map text->index
 // ourselves, so an index/value mix-up in the marked key (e.g. "10 % 3" marked
 // as option "2" when the answer is 1) gets caught and corrected.
-function normAns(s) { return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' ').replace(/[\s.;:]+$/, ''); }
 
 async function verifyPass(sections) {
   const refs = []; for (const s of sections) for (const q of s.questions) refs.push(q);
-  const items = [];
-  refs.forEach((q, i) => {
+  // Build a flat list of independently-checkable units. Each unit's apply()
+  // writes a correction back onto its question (or a case sub-question).
+  const units = [];
+  const add = (line, apply) => units.push({ u: units.length, line, apply });
+  for (const q of refs) {
     if (q.type === 'mcq' || q.type === 'code' || q.type === 'assertion') {
       const stem = q.type === 'assertion' ? ('Assertion: ' + q.assertion + ' | Reason: ' + q.reason) : q.q;
       const opts = (q.options || []).map((o, k) => '  (' + k + ') ' + o).join('\n');
-      const marked = (q.options || [])[q.answer];
-      items.push({ i, kind: 'option', line: '[' + i + '] ' + stem + '\nOptions:\n' + opts + '\nMarked correct: (' + q.answer + ') ' + marked });
+      add('Single-correct MCQ.\n' + stem + '\nOptions:\n' + opts + '\nMarked correct: ' + (q.options || [])[q.answer] + '\n-> Return "answer" as the EXACT TEXT of the one correct option.', (a) => vApplyOption(q, a));
     } else if (q.type === 'tf') {
-      items.push({ i, kind: 'tf', line: '[' + i + '] ' + q.q + '\nMarked correct (true/false): ' + q.answer });
+      add('True/False.\n' + q.q + '\nMarked correct (true/false): ' + q.answer + '\n-> Return "answer" as true or false.', (a) => vApplyTf(q, a));
     } else if (q.type === 'fill' || q.type === 'numeric') {
-      items.push({ i, kind: 'value', line: '[' + i + '] ' + q.q + '\nMarked correct: ' + q.answer });
+      add((q.type === 'numeric' ? 'Numeric.' : 'Fill-in-the-blank.') + '\n' + q.q + '\nMarked correct: ' + q.answer + '\n-> Return "answer" as the correct value.', (a) => vApplyValue(q, a));
+    } else if (q.type === 'multi') {
+      const opts = (q.options || []).map((o, k) => '  (' + k + ') ' + o).join('\n');
+      const marked = (q.answers || []).map((k) => (q.options || [])[k]).join(' ; ');
+      add('Multiple-correct (one OR MORE correct).\n' + q.q + '\nOptions:\n' + opts + '\nMarked correct: ' + marked + '\n-> Return "answer" as a JSON ARRAY of the EXACT TEXTS of ALL correct options.', (a) => vApplyMulti(q, a));
+    } else if (q.type === 'match') {
+      const lines = (q.pairs || []).map((p, k) => '  ' + (k + 1) + '. ' + p.l + '  =>  ' + p.r).join('\n');
+      add('Matching. Each left item pairs with its correct right item.\nCurrent pairing:\n' + lines + '\n-> Return "answer" as a JSON ARRAY giving the correct right-item TEXT for each left item, in order.', (a) => vApplyMatch(q, a));
+    } else if (q.type === 'case') {
+      (Array.isArray(q.sub) ? q.sub : []).forEach((sq) => {
+        const opts = (sq.options || []).map((o, k) => '  (' + k + ') ' + o).join('\n');
+        add('Case-study sub-question (single-correct MCQ).\nContext: ' + str(q.q, 300) + '\nQ: ' + sq.q + '\nOptions:\n' + opts + '\nMarked correct: ' + (sq.options || [])[sq.answer] + '\n-> Return "answer" as the EXACT TEXT of the one correct option.', (a) => vApplyOption(sq, a));
+      });
     }
-  });
-  if (!items.length) return { verified: false, credits: 0, fixes: 0 };
+  }
+  if (!units.length) return { verified: false, credits: 0, fixes: 0 };
   const sys = 'You are a meticulous exam answer-checker. Work through EACH numbered item INDEPENDENTLY and from scratch BEFORE trusting the marked answer:\n'
-    + '- code-output items: mentally execute the code line by line and state the exact output.\n'
-    + '- numeric/fill items: compute or recall the exact value step by step.\n'
-    + '- option items (MCQ/assertion): work out the correct answer, THEN find which option text matches it.\n'
-    + '- true/false items: decide whether the statement is true or false.\n'
-    + 'Then compare with the "Marked correct" value. A common error to catch: the marked OPTION TEXT does not match the genuinely correct value (the answer index points at the wrong option). If your independently-derived answer differs from the marked answer, you MUST output a correction.\n'
-    + 'For option items, return "answer" as the EXACT TEXT of the correct option, copied verbatim. For true/false items return true or false. For numeric/fill items return the correct value.\n'
-    + 'Output ONLY JSON: {"fixes":[{"i":<index>,"answer":<text|true|false>}]}. Include every item you are correcting; if all marked answers are correct, return {"fixes":[]}.';
+    + '- code-output: mentally execute the code line by line and state the exact output.\n'
+    + '- numeric/fill: compute or recall the exact value step by step.\n'
+    + '- single/multiple-choice and case sub-questions: work out the correct answer(s), THEN find which option text(s) match.\n'
+    + '- matching: independently decide the correct right item for each left item.\n'
+    + '- true/false: decide whether the statement is true or false.\n'
+    + 'Then compare with the "Marked correct" value and follow each item\'s "-> Return" instruction for the answer format. A common error to catch: the marked option text does not match the genuinely correct value.\n'
+    + 'Output ONLY JSON: {"fixes":[{"i":<item index>,"answer":<text|true|false|array>}]}. Include every item you are correcting; if all marked answers are correct, return {"fixes":[]}.';
   let result;
-  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: items.map((x) => x.line).join('\n\n') }], maxTokens: Math.min(2600, 500 + 90 * items.length), temperature: 0.1, jsonMode: true, prefer: 'google' }); }
+  try { result = await routeChat({ system: sys, messages: [{ role: 'user', content: units.map((x) => '[' + x.u + '] ' + x.line).join('\n\n') }], maxTokens: Math.min(3200, 500 + 90 * units.length), temperature: 0.1, jsonMode: true, prefer: 'google' }); }
   catch { return { verified: false, credits: 0, fixes: 0 }; }
   let parsed; try { parsed = extractJson(result.text); } catch { return { verified: false, credits: result.credits || 0, fixes: 0 }; }
   const fixes = Array.isArray(parsed.fixes) ? parsed.fixes : [];
-  const kindByIdx = new Map(items.map((x) => [x.i, x.kind]));
+  const byU = new Map(units.map((x) => [x.u, x]));
   let n = 0;
-  for (const f of fixes) {
-    const idx = Number(f.i); const q = refs[idx]; const kind = kindByIdx.get(idx);
-    if (!q || !kind) continue;
-    if (kind === 'option') {
-      let target = -1;
-      const a = f.answer;
-      if (typeof a === 'string' && a.trim()) target = (q.options || []).findIndex((o) => normAns(o) === normAns(a));
-      if (target < 0) { const c = Number.isInteger(a) ? a : Number(f.index); if (Number.isInteger(c) && c >= 0 && c < (q.options || []).length) target = c; }
-      if (target >= 0 && target !== q.answer) { q.answer = target; n++; }
-    } else if (kind === 'tf') {
-      const c = f.answer === true || normAns(f.answer) === 'true';
-      if (c !== q.answer) { q.answer = c; n++; }
-    } else if (kind === 'value') {
-      const c = str(f.answer, 80);
-      if (c && c !== String(q.answer)) { q.answer = c; n++; }
-    }
-  }
+  for (const f of fixes) { const unit = byU.get(Number(f.i)); if (unit && unit.apply(f.answer)) n++; }
   return { verified: true, credits: result.credits || 0, fixes: n };
 }
 

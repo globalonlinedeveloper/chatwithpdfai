@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { stripOptionLabel, cleanTitle } from '../../lib/qpaper.js';
+import { stripOptionLabel, cleanTitle, defaultBloom, vApplyOption, vApplyTf, vApplyValue, vApplyMulti, vApplyMatch } from '../../lib/qpaper.js';
 
 describe('stripOptionLabel (fixes the "(a) a) ..." double-label bug)', () => {
   it('strips baked-in option labels of every common style', () => {
@@ -47,5 +47,47 @@ describe('cleanTitle (rejects junk LLM titles, composes a sensible fallback)', (
   });
   it('title-cases the topic head and trims at a dash/colon', () => {
     expect(cleanTitle('Untitled', '', 'algebra: linear equations', '')).toBe('Algebra');
+  });
+});
+
+describe('defaultBloom (always tag a cognitive level)', () => {
+  it('maps types to sensible Bloom levels', () => {
+    expect(defaultBloom('tf')).toBe('Remember');
+    expect(defaultBloom('mcq')).toBe('Understand');
+    expect(defaultBloom('numeric')).toBe('Apply');
+    expect(defaultBloom('case')).toBe('Analyse');
+    expect(defaultBloom('weirdtype')).toBe('Understand');
+  });
+});
+
+describe('verify-pass fix appliers', () => {
+  it('vApplyOption matches by exact text and only changes when different', () => {
+    const q = { options: ['Chlorophyll', 'Carotene', 'Xanthophyll'], answer: 1 };
+    expect(vApplyOption(q, 'Chlorophyll')).toBe(true); expect(q.answer).toBe(0);
+    expect(vApplyOption(q, 'Chlorophyll')).toBe(false); // already correct -> no change
+    expect(vApplyOption(q, 'Not an option')).toBe(false); // unresolved -> no corruption
+  });
+  it('vApplyOption falls back to a numeric index', () => {
+    const q = { options: ['A', 'B', 'C'], answer: 0 };
+    expect(vApplyOption(q, 2)).toBe(true); expect(q.answer).toBe(2);
+  });
+  it('vApplyTf / vApplyValue', () => {
+    const t = { answer: true }; expect(vApplyTf(t, 'false')).toBe(true); expect(t.answer).toBe(false);
+    const v = { answer: '5' }; expect(vApplyValue(v, '6')).toBe(true); expect(v.answer).toBe('6');
+    expect(vApplyValue(v, '6')).toBe(false);
+  });
+  it('vApplyMulti maps an array of texts to a sorted index set', () => {
+    const q = { options: ['W', 'X', 'Y', 'Z'], answers: [0] };
+    expect(vApplyMulti(q, ['X', 'Z', 'W'])).toBe(true); expect(q.answers).toEqual([0, 1, 3]);
+    expect(vApplyMulti(q, ['W', 'X', 'Z'])).toBe(false); // same set -> no change
+  });
+  it('vApplyMatch re-pairs only when the corrected right is in the pool', () => {
+    const q = { pairs: [{ l: 'Dog', r: 'Meow' }, { l: 'Cat', r: 'Bark' }] }; // wrong on purpose
+    expect(vApplyMatch(q, ['Bark', 'Meow'])).toBe(true);
+    expect(q.pairs.map((p) => p.r)).toEqual(['Bark', 'Meow']);
+    // a correction that doesn't match the pool is ignored (never corrupts)
+    const q2 = { pairs: [{ l: 'A', r: 'one' }, { l: 'B', r: 'two' }] };
+    expect(vApplyMatch(q2, ['three', 'four'])).toBe(false);
+    expect(q2.pairs.map((p) => p.r)).toEqual(['one', 'two']);
   });
 });
