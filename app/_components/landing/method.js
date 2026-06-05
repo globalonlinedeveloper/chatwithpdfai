@@ -129,7 +129,7 @@ function LivePreview() {
                 </div>
               ))}
               <div className="eyebrow" style={{ marginTop: 22, marginBottom: 10 }}>Recent</div>
-              {["Kass v. North Am.", "Q3-earnings-NVDA", "HIPAA Audit"].map((n, i) => (
+              {["Class-10 Syllabus", "Lease-Agreement", "Q3-earnings"].map((n, i) => (
                 <div key={n} style={{
                   padding: "6px 10px",
                   fontSize: 12.5,
@@ -223,7 +223,7 @@ function FeaturesGrid() {
     { t: "Folders & history", d: "Organize by case, course, deal, or patient. Pinned forever.", g: "⊞" },
     { t: "Export anywhere", d: "Markdown, Word, Notion, Obsidian, JSON.", g: "↓" },
     { t: "Document diffs", d: "Compare two contracts. Get a clause-by-clause changelog.", g: "≠" },
-    { t: "Private by default", d: "Encrypted at rest. Delete instantly. No training on your files.", g: "⊕" },
+    { t: "Private by default", d: "Served over HTTPS, deleted when you say so, and never used to train AI.", g: "⊕" },
   ];
   return (
     <section id="features" style={{ padding: "100px 0", position: "relative" }}>

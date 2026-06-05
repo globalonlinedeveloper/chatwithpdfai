@@ -1,72 +1,57 @@
 import LongFormPage from '../../_components/LongForm';
 const SECTIONS = [
       { id: "scope", title: "1. Scope & roles", body: [
-        "This Data Processing Agreement (DPA) supplements the Terms of Service between CHATWITHPDFAI, Inc. (\"Processor\") and you (\"Controller\"). It applies whenever we process Personal Data on your behalf in connection with the Service.",
-        "For the purposes of the GDPR and equivalent laws: **you are the Controller**, **we are the Processor**.",
+        "This Data Processing Addendum (DPA) supplements our Terms of Service and applies where we process Personal Data on your behalf in connection with the Service.",
+        "For the purposes of the GDPR and equivalent laws: **you are the Controller**, and **we are the Processor**.",
+        "We are an independent product. We do not currently hold formal certifications (such as SOC 2 or ISO 27001) and do not offer Business Associate Agreements. If your organisation requires those, please do not upload regulated data and contact us first.",
       ]},
       { id: "details", title: "2. Processing details", body: [
         { table: { headers: ["Element", "Value"], rows: [
-          ["Subject matter", "Provision of the Service: storing PDFs, generating chat answers, returning citations"],
-          ["Duration", "Term of the underlying Service agreement, plus the retention windows in our Privacy Policy"],
-          ["Nature & purpose", "Storage, indexing, AI inference, search, export"],
-          ["Categories of data subjects", "Your employees, contractors, customers — anyone whose Personal Data appears in documents you upload"],
-          ["Categories of Personal Data", "Names, contact info, identifiers, professional/financial info, any other categories present in your documents"],
-          ["Special-category data", "Only if you upload documents containing it; the Service is HIPAA-aligned and a BAA is available on Practice and above"],
+          ["Subject matter", "Provision of the Service: storing PDFs, generating answers and question papers, returning citations"],
+          ["Duration", "The term of your use of the Service, plus the retention described in our Privacy Policy"],
+          ["Nature & purpose", "Storage, text extraction, AI inference, search, and export"],
+          ["Categories of data subjects", "Anyone whose Personal Data appears in the documents you upload"],
+          ["Categories of Personal Data", "Whatever is present in your documents — we do not control this"],
+          ["Special-category data", "Only if you choose to upload it. We do not offer BAAs, so please do not upload data that legally requires one"],
         ]} },
       ]},
       { id: "obligations", title: "3. Processor obligations", body: [
         "We will:",
         { ul: [
-          "Process Personal Data only on your documented instructions",
-          "Ensure persons authorized to process the data are bound by confidentiality",
-          "Implement appropriate technical and organizational measures (see Annex II below)",
-          "Engage sub-processors only with prior general authorization (see Annex III)",
-          "Assist you in responding to data subject requests",
-          "Assist you with DPIAs and consultations with supervisory authorities",
-          "Delete or return Personal Data at end of service",
-          "Make available all information necessary to demonstrate compliance",
+          "Process Personal Data only to provide the Service and on your instructions",
+          "Keep the data confidential",
+          "Apply reasonable technical and organisational security measures appropriate to our size (see section 4)",
+          "Use only the sub-processors listed at `/legal/sub-processors`",
+          "Help you respond to data-subject requests where we reasonably can",
+          "Delete the data when you delete it or close your account",
         ]},
       ]},
-      { id: "security", title: "4. Security measures (Annex II)", body: [
-        { h3: "Technical measures" },
+      { id: "security", title: "4. Security measures", body: [
         { ul: [
-          "Encryption in transit (TLS 1.3) and at rest (AES-256)",
-          "Network isolation; production access via bastion + 2FA",
-          "Application-level access controls and per-tenant data isolation",
-          "Continuous vulnerability scanning, weekly dependency review",
-          "Audit logs retained for 12 months",
-          "Annual SOC 2 Type II audit",
-        ]},
-        { h3: "Organizational measures" },
-        { ul: [
-          "Background checks for all engineering personnel",
-          "Mandatory security training on onboarding and annually",
-          "Documented incident response runbook with 24-hour breach notification SLA",
-          "Vendor risk reviews before adding any sub-processor",
+          "Data is encrypted in transit over HTTPS (TLS)",
+          "Access to your documents and chats is scoped to your account",
+          "You can delete a document at any time, which removes it from the app",
+          "We send AI providers only the text needed to answer your request, and they do not train on it under their standard API terms",
         ]},
       ]},
-      { id: "subprocessors", title: "5. Sub-processors (Annex III)", body: [
-        "Current sub-processors are listed at `/legal/sub-processors`. We will give you 30 days notice before adding a new sub-processor; you may object in writing, and we will use commercially reasonable efforts to provide an alternative.",
+      { id: "subprocessors", title: "5. Sub-processors", body: [
+        "Our current sub-processors are listed at `/legal/sub-processors`. If we make a material change, we will update that page.",
       ]},
       { id: "transfers", title: "6. International transfers", body: [
-        "Where Personal Data is transferred outside the EEA / UK / Switzerland to a country without an adequacy decision, we rely on the EU Standard Contractual Clauses (Module 2: Controller-to-Processor) incorporated by reference, along with the UK Addendum and the Swiss DPA addendum.",
-        "Enterprise customers may elect EU data residency.",
+        "Some of our providers (for example the AI and payment providers) are based outside your country. Where they process Personal Data, they do so under their own terms and safeguards.",
       ]},
       { id: "breach", title: "7. Personal data breach", body: [
-        "We will notify you without undue delay (target: 24 hours) of any confirmed Personal Data breach affecting your data, with all available facts and our remediation plan.",
+        "If we become aware of a Personal Data breach affecting your data, we will notify you without undue delay with the information we have.",
       ]},
-      { id: "audits", title: "8. Audits", body: [
-        "Once per year, you may audit our security controls via (a) review of our latest SOC 2 Type II report and penetration test summaries, or (b) on-site audit with 30 days notice during business hours, paid by you and at reasonable cost.",
+      { id: "termination", title: "8. Termination & data return", body: [
+        "When you close your account or ask us to, we will delete the associated Personal Data, except where we are required to keep it by law.",
       ]},
-      { id: "termination", title: "9. Termination & data return", body: [
-        "On termination, we will, at your choice, delete or return all Personal Data within 30 days, except where retention is required by law. Hard-deletion is confirmed by email receipt.",
-      ]},
-      { id: "signing", title: "10. Signing this DPA", body: [
-        "If you need a counter-signed copy, email `dpo@chatwithpdfai.com` from your billing email. We will return a signed PDF within 2 business days. Enterprise customers can request our pre-signed DPA from sales.",
+      { id: "contact", title: "9. Contact", body: [
+        "Questions about this DPA: `support@chatwithpdfai.com`.",
       ]},
     ];
 export const metadata = {
-  alternates: { canonical: '/legal/dpa' }, title: "Data Processing Agreement \u2014 CHATWITHPDFAI" };
+  alternates: { canonical: '/legal/dpa' }, title: "Data Processing Addendum — CHATWITHPDFAI" };
 export default function Page() {
-  return <LongFormPage eyebrow={"Legal \u00b7 DPA"} title={"Data Processing Agreement"} lede={"GDPR Article 28 DPA with standard contractual clauses. Sign-ready for Enterprise customers."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+  return <LongFormPage eyebrow={"Legal · DPA"} title={"Data Processing Addendum"} lede={"How we handle Personal Data that you process through CHATWITHPDFAI."} lastUpdated={"June 5, 2026"} sections={SECTIONS} />;
 }

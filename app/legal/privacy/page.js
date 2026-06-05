@@ -1,86 +1,70 @@
 import LongFormPage from '../../_components/LongForm';
 const SECTIONS = [
       { id: "intro", title: "1. Introduction", body: [
-        "CHATWITHPDFAI, Inc. (\"we\", \"us\", \"our\") provides a service that lets you upload PDF documents and chat with them using AI. This Privacy Policy explains what data we collect, what we do with it, and the rights you have over it.",
-        "This policy is written in plain English. The defined terms are bold; capitalized phrases like **Personal Data** mean the same thing they would in the GDPR.",
-        { quote: "Short version: We collect what we need to run the service. We do not sell your data. We do not train AI models on your files. You can delete your account and your documents at any time." },
+        "CHATWITHPDFAI (\"we\", \"us\", \"our\") lets you upload PDF documents to chat with them and to generate question papers using AI. This Privacy Policy explains what data we collect, what we do with it, and the rights you have over it.",
+        { quote: "Short version: we collect what we need to run the service, we do not sell your data, we do not train AI models on your files, and you can delete your documents and your account at any time." },
       ]},
       { id: "data", title: "2. Data we collect", body: [
         { h3: "2.1 Account data" },
-        "When you create an account, we collect your name, email address, and an encrypted password. If you sign in with Google, Apple, or SSO, we receive your name and email from that provider.",
+        "When you create an account, we collect your name, email address, and a securely hashed password. You sign in with your email and password.",
         { h3: "2.2 Document content" },
-        "We store the PDFs you upload and the chat history you generate. Documents are encrypted at rest (AES-256) and in transit (TLS 1.3). We do not read, scan, or review the contents of your documents except as needed to provide the service (e.g. running OCR, extracting text for the AI model).",
+        "We store the PDFs you upload, the text we extract from them, the chats you have about them, and the question papers you generate. We access this content only to provide the service — for example, extracting text and sending the relevant part to an AI model to answer your question.",
         { h3: "2.3 Usage data" },
-        "We log standard server data: IP address, user agent, request timestamps, and feature usage (e.g. how many credits you have spent). We use this to debug, prevent abuse, and improve the product.",
+        "We log standard server data such as IP address, browser/user agent, request timestamps, and feature usage (for example, how many credits you have spent). We use this to operate the service, prevent abuse, and improve the product.",
         { h3: "2.4 Billing data" },
-        "We use **Razorpay** as our payment processor. Razorpay collects your card number directly — we never see or store it. We receive only the last 4 digits, card brand, and a token we use to charge you.",
+        "We use **Razorpay** as our payment processor. Razorpay handles your card details directly — we never see or store your full card number. We receive only the limited information needed to manage your credits, such as a payment token and transaction record.",
       ]},
       { id: "use", title: "3. How we use your data", body: [
         "We use your data to:",
         { ul: [
-          "Provide the service (process uploads, generate answers, cite sources)",
+          "Provide the service (process uploads, generate answers and papers, cite sources)",
           "Authenticate you and keep your account secure",
-          "Bill you and prevent fraud",
-          "Send transactional emails (receipts, security alerts, password resets)",
-          "Send product emails only if you opt in",
-          "Debug, monitor, and improve the service",
+          "Process payments and prevent fraud",
+          "Send transactional emails (receipts, verification, password resets)",
+          "Operate, debug, and improve the service",
           "Comply with legal obligations",
         ]},
-        "We do **not** use your documents or chat content to train AI models. This is contractual with us and with every third-party model vendor we use (see Sub-processors below).",
+        "We do **not** use your documents or chat content to train AI models, and the AI providers we use do not train on this content under their standard API terms (see Sub-processors).",
       ]},
       { id: "share", title: "4. Who we share it with", body: [
-        "We share data only with sub-processors who help us run the service. The full list is at /legal/sub-processors. The categories are:",
+        "We share data only with the service providers that help us run CHATWITHPDFAI. The full list is at `/legal/sub-processors`. In summary:",
         { table: {
           headers: ["Category", "Vendor", "Purpose"],
           rows: [
-            ["Hosting", "AWS (us-east-1, eu-west-1)", "Compute & encrypted storage"],
-            ["AI inference", "OpenAI, Anthropic", "Generating answers from documents"],
-            ["Payments", "Razorpay", "Processing card payments"],
-            ["Email", "Postmark", "Transactional email delivery"],
-            ["Analytics", "PostHog (self-hosted)", "Product analytics, anonymized"],
-            ["Error tracking", "Sentry", "Crash & error monitoring"],
+            ["Hosting, database & email", "Hostinger", "Running the app, storing your data, and sending transactional email"],
+            ["AI inference", "OpenAI, Anthropic, Google", "Generating answers and question papers from your content"],
+            ["Payments", "Razorpay", "Processing payments"],
           ],
         }},
-        "We will never sell your data. We will only disclose data to law enforcement under a valid legal process and will notify you unless legally prohibited.",
+        "We do not sell your data. We will only disclose data where required by a valid legal process.",
       ]},
       { id: "retention", title: "5. Retention & deletion", body: [
-        "We keep your data for as long as your account is active. When you delete a document or your account:",
-        { ul: [
-          "Hot data is removed within 24 hours",
-          "Encrypted backups are purged within 30 days",
-          "You receive a deletion receipt by email with the timestamps",
-        ]},
-        "Anonymized usage logs (no identifiers, no document content) may be kept up to 24 months for capacity planning.",
+        "We keep your data while your account is active. You can delete a document at any time, which removes it and its extracted text from the app. If you delete your account, the data associated with it is removed; routine backups cycle out over time.",
       ]},
       { id: "rights", title: "6. Your rights", body: [
-        "Depending on where you live (GDPR for EU/UK, CCPA for California, similar laws elsewhere), you have the right to:",
+        "Depending on where you live (for example GDPR in the EU/UK, or CCPA in California), you may have the right to:",
         { ul: [
           "**Access** the data we hold about you",
-          "**Correct** anything that's wrong",
+          "**Correct** anything that is wrong",
           "**Delete** your account and data",
-          "**Export** your data in a machine-readable format",
+          "**Export** your data",
           "**Object to** or **restrict** certain processing",
-          "**Withdraw consent** for optional processing (analytics, marketing)",
+          "**Withdraw consent** for optional processing",
         ]},
-        "To exercise any right, email `privacy@chatwithpdfai.com`. We respond within 30 days, usually faster.",
+        "To exercise any of these, email `support@chatwithpdfai.com`.",
       ]},
-      { id: "intl", title: "7. International transfers", body: [
-        "We are a US company. If you are in the EU, your data may be transferred to the US. We rely on Standard Contractual Clauses (SCCs) approved by the European Commission for these transfers. You can request a copy of the SCCs by emailing `privacy@chatwithpdfai.com`.",
-        "Enterprise customers (Chamber plan and above) can elect EU data residency — your documents and chat history stay in eu-west-1.",
+      { id: "children", title: "7. Children", body: [
+        "CHATWITHPDFAI is not directed at children under 16, and we do not knowingly collect their data. If you believe a child has given us data, contact `support@chatwithpdfai.com` and we will delete it.",
       ]},
-      { id: "children", title: "8. Children", body: [
-        "CHATWITHPDFAI is not directed at children under 16. We do not knowingly collect data from children. If you believe we have collected data from a child, contact `privacy@chatwithpdfai.com` and we will delete it.",
+      { id: "changes", title: "8. Changes to this policy", body: [
+        "If we make material changes, we will update this page and adjust the date below. Please check back from time to time.",
       ]},
-      { id: "changes", title: "9. Changes to this policy", body: [
-        "If we make material changes, we will email you at least 30 days before they take effect. The full change history is published at `chatwithpdfai.com/legal/changelog`.",
-      ]},
-      { id: "contact", title: "10. Contact", body: [
-        "Data controller: **CHATWITHPDFAI, Inc.**, 548 Market St #84219, San Francisco, CA 94104, United States.",
-        "Email: `privacy@chatwithpdfai.com` (privacy requests), `dpo@chatwithpdfai.com` (DPO / GDPR), `support@chatwithpdfai.com` (general).",
+      { id: "contact", title: "9. Contact", body: [
+        "For any privacy question or request, email `support@chatwithpdfai.com`.",
       ]},
     ];
 export const metadata = {
-  alternates: { canonical: '/legal/privacy' }, title: "Privacy Policy \u2014 CHATWITHPDFAI" };
+  alternates: { canonical: '/legal/privacy' }, title: "Privacy Policy — CHATWITHPDFAI" };
 export default function Page() {
-  return <LongFormPage eyebrow={"Legal \u00b7 Privacy"} title={"Privacy Policy"} lede={"We collect what we need to run the service. We do not sell your data. We do not train AI models on your files."} lastUpdated={"May 22, 2026"} sections={SECTIONS} />;
+  return <LongFormPage eyebrow={"Legal · Privacy"} title={"Privacy Policy"} lede={"We collect what we need to run the service. We do not sell your data. We do not train AI models on your files."} lastUpdated={"June 5, 2026"} sections={SECTIONS} />;
 }

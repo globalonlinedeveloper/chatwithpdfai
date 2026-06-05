@@ -62,12 +62,12 @@ function Pricing() {
 
 function Security() {
   const claims = [
-    { t: "Encrypted in flight & at rest", d: "TLS 1.3 inbound; AES-256 at rest. No plaintext intermediates." },
-    { t: "We never train on your documents", d: "Not us, not OpenAI, not Anthropic. Contractually." },
-    { t: "Delete in one click — really gone", d: "Hard-delete propagates to backups within 24 hours. Receipt issued." },
-    { t: "SOC 2 · GDPR · HIPAA", d: "Audited annually. BAAs on Practice and above. EU residency optional." },
-    { t: "Private workspaces for teams", d: "Per-tenant isolation, SSO, audit logs, role-based permissions." },
-    { t: "Sub-processor list, published", d: "Every model and vendor that touches your data, named." },
+    { t: "Encrypted connection", d: "Every page and upload is served over HTTPS (TLS)." },
+    { t: "Not used to train AI", d: "We use OpenAI and Anthropic via their APIs, where your content isn't used to train their models." },
+    { t: "Delete anytime", d: "Remove a document from your workspace whenever you want." },
+    { t: "Only what's needed is sent", d: "We send the model just the text required to answer your question — not your whole library." },
+    { t: "Private to your account", d: "Your documents and chats are tied to your account and aren't shared." },
+    { t: "Sub-processors, named", d: "The vendors that help run the service are listed on our sub-processors page." },
   ];
   return (
     <section id="security" style={{ padding: "100px 0", position: "relative" }}>
@@ -83,7 +83,7 @@ function Security() {
               Lawyers, doctors, and analysts brought us here. The bar is the bar.
             </p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {["SOC 2", "HIPAA", "GDPR", "ISO 27001"].map(b => (
+              {["HTTPS / TLS", "No AI training", "Delete anytime", "Pay-per-use"].map(b => (
                 <span key={b} className="pill" style={{ padding: "7px 14px", fontSize: 12 }}>{b}</span>
               ))}
             </div>
@@ -115,14 +115,14 @@ function Security() {
 function FAQ() {
   const [open, setOpen] = uS4(0);
   const items = [
-    { q: "How accurate are the citations?", a: "Every claim in an answer is footnoted to a page and a paragraph in the source document. If we cannot ground a claim, we say so — we will not invent a citation. We measure this; the false-citation rate in our last audit was below 0.4%." },
+    { q: "How accurate are the citations?", a: "Every claim in an answer is footnoted to a page and a paragraph in the source document. If we cannot ground a claim, we say so — we will not invent a citation." },
     { q: "What counts as one credit?", a: "One credit lets you upload and chat with one document, however many questions you ask. A 12-page contract and a 1,200-page filing both cost one credit. We extract and index the document's text." },
     { q: "Do credits expire?", a: "No. Credits never expire. We do not run a subscription you have to remember to cancel. If you walk away for two years and come back, your unused credits will still be there." },
-    { q: "Will my documents be used to train models?", a: "No. Not ours, not OpenAI's, not Anthropic's, not anyone's. This is in our contract and in the sub-processor agreements we hold with every model vendor we use." },
+    { q: "Will my documents be used to train models?", a: "No. We use OpenAI and Anthropic through their APIs, where — by default — your prompts and documents are not used to train their models. We don't train on your files either, and we only send the text needed to answer your current question." },
     { q: "How big a PDF can I upload?", a: "Up to 500 pages or 50 MB per document on Reader and Practice, up to 10,000 pages on Chamber. We do not chunk away context — you can ask questions that span the whole document." },
     { q: "What languages are supported?", a: "Over 70 input languages, including documents that mix scripts. You can read a Japanese filing and ask questions in English; we will quote the original verbatim in a footnote when we translate." },
     { q: "Can I use it via API?", a: "Yes. REST and streaming endpoints, deterministic citations, webhooks for upload / summary / citation events, and SDKs for TypeScript, Python, and Go. Per-document pricing maps cleanly to your customers." },
-    { q: "What happens when I delete a document?", a: "It is removed from your workspace immediately. Hard-deletion propagates to encrypted backups within 24 hours. We send you a deletion receipt with the timestamp." },
+    { q: "What happens when I delete a document?", a: "It is removed from your workspace immediately, along with its extracted text and your chats about it." },
   ];
   return (
     <section style={{ padding: "60px 0 100px", position: "relative" }}>
@@ -200,7 +200,7 @@ function Footer() {
                 A research assistant in the margin of every document. Pay-per-doc. No subscription. No nonsense.
               </p>
               <div style={{ display: "flex", gap: 8 }}>
-                {["SOC 2", "HIPAA", "GDPR"].map(b => <span key={b} className="pill" style={{ padding: "4px 10px", fontSize: 10.5 }}>{b}</span>)}
+                {["Pay-per-use", "No AI training", "Delete anytime"].map(b => <span key={b} className="pill" style={{ padding: "4px 10px", fontSize: 10.5 }}>{b}</span>)}
               </div>
             </div>
             {[

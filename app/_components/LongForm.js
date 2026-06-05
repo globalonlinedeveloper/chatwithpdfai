@@ -33,8 +33,7 @@ function LongFormPage({ eyebrow, title, lede, lastUpdated, sections, downloadLab
             <hr />
             <p style={{ fontSize: 13.5, color: "var(--text-3)" }}>
               Questions? Email{" "}
-              <a href="mailto:support@chatwithpdfai.com">support@chatwithpdfai.com</a>{" "}
-              or write to: CHATWITHPDFAI, Inc., 548 Market St #84219, San Francisco, CA 94104.
+              <a href="mailto:support@chatwithpdfai.com">support@chatwithpdfai.com</a>.
             </p>
           </div>
           <aside className="glass toc" style={{ borderRadius: "var(--r-lg)" }}>

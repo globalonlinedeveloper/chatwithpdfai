@@ -57,7 +57,7 @@ export function Footer() {
               A research assistant in the margin of every document. Pay-per-doc. No subscription.
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {['SOC 2', 'HIPAA', 'GDPR'].map((b) => <span key={b} className="pill" style={{ padding: '4px 10px', fontSize: 10.5 }}>{b}</span>)}
+              {['Pay-per-use', 'No AI training', 'Delete anytime'].map((b) => <span key={b} className="pill" style={{ padding: '4px 10px', fontSize: 10.5 }}>{b}</span>)}
             </div>
           </div>
           {cols.map((col) => (

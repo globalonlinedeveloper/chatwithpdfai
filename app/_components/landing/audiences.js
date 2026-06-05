@@ -276,7 +276,7 @@ function Testimonials() {
   const quotes = [
     { q: "Every answer is pinned to the exact page it came from — so you can verify it, not just trust it.", a: "Cited, always", r: "Receipts on every answer", big: true },
     { q: "Pay per document. Credits never expire, and there's no subscription to cancel.", a: "No subscription", r: "₹ pricing" },
-    { q: "Your files stay private — encrypted at rest, deleted on request, never used to train models.", a: "Private by default", r: "" },
+    { q: "Your files stay private — deleted on request, and never used to train AI models.", a: "Private by default", r: "" },
     { q: "Two tools, one account: chat with any PDF, and generate exam-ready question papers.", a: "One account", r: "PDF chat + question papers", iris: true },
     { q: "Read in one language and ask in another — translations stay footnoted to the source.", a: "70+ languages", r: "" },
     { q: "Bring a contract, a textbook, a filing, or a syllabus — up to 500 pages per document.", a: "Any document", r: "" },
