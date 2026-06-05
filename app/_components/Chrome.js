@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const NAV = [
   { label: 'Features', href: '/#features', k: 'features' },
@@ -99,11 +99,19 @@ export function Footer() {
 
 export function CookieBanner() {
   const [show, setShow] = useState(false);
+  const barRef = useRef(null);
   useEffect(() => { try { setShow(!localStorage.getItem('cwpa_cookies_v1')); } catch { setShow(true); } }, []);
+  useEffect(() => {
+    if (!show) return undefined;
+    const apply = () => { if (barRef.current) document.body.style.paddingBottom = (barRef.current.offsetHeight + 24) + 'px'; };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => { window.removeEventListener('resize', apply); document.body.style.paddingBottom = ''; };
+  }, [show]);
   if (!show) return null;
-  const accept = (level) => { try { localStorage.setItem('cwpa_cookies_v1', level); } catch {} setShow(false); };
+  const accept = (level) => { try { localStorage.setItem('cwpa_cookies_v1', level); } catch {} document.body.style.paddingBottom = ''; setShow(false); };
   return (
-    <div className="no-print" style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 28px)', maxWidth: 580, zIndex: 100 }}>
+    <div ref={barRef} className="no-print" style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 28px)', maxWidth: 580, zIndex: 100 }}>
       <div className="glass" style={{ padding: '10px 14px', borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <p style={{ flex: 1, minWidth: 200, fontSize: 12.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.45 }}>
           We use essential cookies to keep you signed in. We never sell your data. <a href="/legal/cookies" style={{ color: 'var(--violet-2)', textDecoration: 'underline' }}>Cookie policy</a>.
