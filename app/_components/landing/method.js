@@ -217,7 +217,7 @@ function FeaturesGrid() {
     { t: "Multi-PDF chat", d: "Ask across a folder. We tell you which document said what.", g: "≡" },
     { t: "Cited answers", d: "Scanned filings, faxes, photos of pages — all readable.", g: "⌖" },
     { t: "Auto-summaries", d: "Executive, technical, or one-paragraph — on upload.", g: "§" },
-    { t: "Flashcards & quizzes", d: "Turn any document into a study set. Export to Anki.", g: "♢" },
+    { t: "Question papers & quizzes", d: "Generate exam-ready question papers with answer keys — or flashcards from any document.", g: "♢" },
     { t: "70+ languages", d: "Read in one language, ask in another. Footnoted translations.", g: "ℒ" },
     { t: "Shareable links", d: "Send a read-only conversation. Recipient sees the doc.", g: "↗" },
     { t: "Folders & history", d: "Organize by case, course, deal, or patient. Pinned forever.", g: "⊞" },

@@ -87,10 +87,14 @@ function Hero() {
 
             {/* Animated prompt input */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Upload a PDF to get started"
               onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
               onDragLeave={() => setDrag(false)}
               onDrop={onDrop}
               onClick={() => fileRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
               className="glass hover-glow"
               style={{
                 marginTop: 36,
@@ -140,9 +144,9 @@ function Hero() {
 
             {/* Trust strip */}
             <div style={{ marginTop: 56 }}>
-              <div className="eyebrow" style={{ marginBottom: 16 }}>Trusted by professionals at</div>
+              <div className="eyebrow" style={{ marginBottom: 16 }}>Built for every kind of document</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 32, alignItems: "center" }}>
-                {["MERIDIAN", "ARKHAM CAPITAL", "STANFORD GSB", "MAYO CLINIC", "WESTLAW", "GOLDMAN"].map(n => (
+                {["CONTRACTS", "RESEARCH PAPERS", "TEXTBOOKS", "FINANCIAL FILINGS", "CASE FILES", "QUESTION PAPERS"].map(n => (
                   <span key={n} className="mono" style={{ fontSize: 12, color: "var(--text-3)", letterSpacing: "0.14em", fontWeight: 500 }}>{n}</span>
                 ))}
               </div>

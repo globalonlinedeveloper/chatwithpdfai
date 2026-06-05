@@ -18,9 +18,23 @@ function UseCases() {
         "Ask the textbook 'why' and get worked examples in plain English.",
         "Translate a dense paper without losing the citations.",
       ],
-      stat: { n: "73%", l: "time saved on first-pass reading" },
-      who: "Iris L., MS3 · Columbia P&S",
-      q: "I dropped in 600 pages of Robbins Pathology and chatted through boards prep. It's the only study partner that's read everything I have.",
+      stat: { n: "500 pp", l: "drop a whole textbook into one chat" },
+      who: "Students · example workflow",
+      q: "Drop a chapter and get a clean summary, the key definitions, and a ready-to-study flashcard set — with every answer pinned to the page it came from.",
+      href: "/signup", cta: "Try it free →",
+    },
+    {
+      tab: "Teachers", icon: "✎",
+      title: "From syllabus to exam-ready in minutes.",
+      bullets: [
+        "Pick a board blueprint or build sections yourself; set marks per question.",
+        "Generate from scratch, or ground every question in your uploaded textbook.",
+        "Print, export to Moodle / QTI / CSV, or assign as a self-grading online test.",
+      ],
+      stat: { n: "11 types", l: "MCQ, short, long, match, and more" },
+      who: "Teachers · example workflow",
+      q: "Turn a chapter or syllabus into an exam-ready question paper — multiple sections, an answer key, and a printable layout — then share it online and auto-grade the results.",
+      href: "/question-paper-generator", cta: "Open the question paper generator →",
     },
     {
       tab: "Legal", icon: "⚖",
@@ -30,9 +44,10 @@ function UseCases() {
         "Build a closing checklist from a 200-page filing in five minutes.",
         "Every answer footnoted to the page; export the chat as a memo.",
       ],
-      stat: { n: "1.8M", l: "pages reviewed monthly by Chamber-tier firms" },
-      who: "Daniel R., Senior Associate · Latham",
-      q: "We use it as a junior associate that never sleeps. Paragraph-level citations are the only reason a partner trusts the output.",
+      stat: { n: "Cited", l: "every answer footnoted to the exact page" },
+      who: "Legal · example workflow",
+      q: "Redline two contracts clause by clause, or build a closing checklist from a long filing — and every answer is footnoted to the exact page so it holds up to review.",
+      href: "/signup", cta: "Try it free →",
     },
     {
       tab: "Finance", icon: "📈",
@@ -42,9 +57,10 @@ function UseCases() {
         "Surface footnotes, table changes, and quiet revisions you'd miss.",
         "Export to Markdown or push to Notion in one click.",
       ],
-      stat: { n: "11 min", l: "median: filing dropped → memo in Slack" },
-      who: "Maya K., Equity Research · Arkham Capital",
-      q: "The diff view across two consecutive 10-Qs is the feature I'd pay alone for. It catches what humans skim past.",
+      stat: { n: "Multi", l: "10-K, transcript, and notes in one thread" },
+      who: "Finance · example workflow",
+      q: "Chat across a 10-K, a transcript, and a research note at once, surface the quiet footnote and table changes, then export the whole thread as a memo.",
+      href: "/signup", cta: "Try it free →",
     },
     {
       tab: "Research", icon: "🔬",
@@ -54,21 +70,23 @@ function UseCases() {
         "Methodology comparison tables with citations — ready for your draft.",
         "Save searches as Threads, re-run when new papers arrive.",
       ],
-      stat: { n: "40+", l: "papers per Thread, all chattable as one library" },
-      who: "Dr. Hugo P., Principal Investigator",
-      q: "I'd given up on lit-review tools that hallucinate. This one tells me when papers conflict and shows me both sides.",
+      stat: { n: "One lib", l: "all your papers, chattable together" },
+      who: "Research · example workflow",
+      q: "Load dozens of papers and ask where they agree and disagree — with a methodology table and citations you can paste straight into your draft.",
+      href: "/signup", cta: "Try it free →",
     },
     {
       tab: "Healthcare", icon: "✚",
       title: "Faster decisions on the floor.",
       bullets: [
         "Chat with a clinical trial PDF and the guideline at the same time.",
-        "HIPAA-aligned private workspaces; documents deleted on request.",
+        "Private workspaces; documents deleted on request.",
         "Translate consent forms; quote the original verbatim with a footnote.",
       ],
-      stat: { n: "HIPAA", l: "aligned · BAAs available on Practice plan" },
-      who: "Dr. Aanya P., Hospitalist",
-      q: "The translated consent form quotes the original Spanish in a footnote. It's the only product I trust at the bedside.",
+      stat: { n: "Verbatim", l: "source quotes with a page footnote" },
+      who: "Healthcare · example workflow",
+      q: "Read a clinical trial PDF and the guideline side by side, and quote the source verbatim with a footnote so nothing is paraphrased away.",
+      href: "/signup", cta: "Try it free →",
     },
     {
       tab: "Developers", icon: "⌘",
@@ -78,9 +96,10 @@ function UseCases() {
         "Webhooks for ocr_completed, summary_ready, citation_verified events.",
         "SDKs for TS, Python, Go; per-doc billing maps to your customers.",
       ],
-      stat: { n: "500", l: "pages per PDF, with page-level citations" },
-      who: "Theo S., Eng Lead · Meridian Legal",
-      q: "We replaced three vendors and our internal RAG stack in a week. Deterministic citations are what convinced compliance.",
+      stat: { n: "API", l: "REST + streaming, deterministic citations" },
+      who: "Developers · example workflow",
+      q: "Bring our API into your stack — long-document context, deterministic page-level citations, and per-document billing that maps cleanly to your customers.",
+      href: "/signup", cta: "Try it free →",
     },
   ];
   const c = cases[active];
@@ -91,7 +110,7 @@ function UseCases() {
       <div className="spread">
         <div className="section-eyebrow">Readers</div>
         <h2 className="section-title">Built for people whose work <span className="iris">lives inside PDFs.</span></h2>
-        <p className="section-lede">Six trades, one tool. Switch the tab; the workflow changes underneath.</p>
+        <p className="section-lede">Seven kinds of work, one tool. Switch the tab; the workflow changes underneath.</p>
 
         {/* Tab bar */}
         <div className="glass" style={{
@@ -138,6 +157,7 @@ function UseCases() {
               <span style={{ fontSize: 48, fontWeight: 500, lineHeight: 1, letterSpacing: "-0.03em" }} className="iris">{c.stat.n}</span>
               <span style={{ fontSize: 13, color: "var(--text-3)" }}>{c.stat.l}</span>
             </div>
+            {c.href && <a href={c.href} className="btn btn-iris btn-sm" style={{ marginTop: 20, display: "inline-flex" }}>{c.cta}</a>}
           </div>
 
           {/* Quote card */}
@@ -156,7 +176,7 @@ function UseCases() {
               fontSize: 11, fontWeight: 600, color: "#fff",
               letterSpacing: "0.04em",
               boxShadow: "0 6px 18px -6px oklch(0.55 0.22 290 / 0.6)",
-            }}>Field note</div>
+            }}>In practice</div>
 
             <div style={{ fontSize: 60, lineHeight: 0.4, marginBottom: 6 }} className="iris">"</div>
             <p style={{
@@ -167,7 +187,6 @@ function UseCases() {
 
             <div style={{ marginTop: "auto", paddingTop: 24, borderTop: "1px solid var(--stroke-1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="mono" style={{ fontSize: 11, color: "var(--text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{c.who}</span>
-              <span className="mono" style={{ fontSize: 10, color: "var(--green)", letterSpacing: "0.12em" }}>✓ VERIFIED</span>
             </div>
           </div>
         </div>
@@ -237,7 +256,7 @@ function CompareTable() {
           </div>
         </div>
         <div className="mono" style={{ marginTop: 14, fontSize: 10, color: "var(--text-4)", letterSpacing: "0.1em" }}>
-          † COMPILED FROM PUBLIC DOCUMENTATION, MAY 2026. COMPETITORS ANONYMIZED PER NDA OBLIGATIONS.
+          † COMPILED FROM PUBLIC DOCUMENTATION, MAY 2026. COMPETITOR NAMES OMITTED; CAPABILITIES COMPARED, NOT BRANDS.
         </div>
       </div>
     </section>
@@ -255,20 +274,20 @@ function td(align, extra = {}) {
 // ============================================================
 function Testimonials() {
   const quotes = [
-    { q: "It's the only product I trust at the bedside. Translated consent quotes the original verbatim, with a footnote.", a: "Dr. Aanya P.", r: "Hospitalist · Mayo Clinic", big: true },
-    { q: "We replaced three vendors and our internal RAG stack in a week.", a: "Theo S.", r: "Eng Lead, Meridian Legal" },
-    { q: "I ran my entire boards prep through this. Every page was footnoted; nothing was made up.", a: "Iris L.", r: "Columbia P&S" },
-    { q: "11 minutes from 10-K drop to a memo on Slack.", a: "Maya K.", r: "Arkham Capital", iris: true },
-    { q: "The clause diff is the only feature I actually beg my deal team to use.", a: "Daniel R.", r: "Latham & Watkins" },
-    { q: "Finally a research tool that says 'I don't know' instead of inventing a paper.", a: "Dr. Hugo P.", r: "Principal Investigator" },
+    { q: "Every answer is pinned to the exact page it came from — so you can verify it, not just trust it.", a: "Cited, always", r: "Receipts on every answer", big: true },
+    { q: "Pay per document. Credits never expire, and there's no subscription to cancel.", a: "No subscription", r: "₹ pricing" },
+    { q: "Your files stay private — encrypted at rest, deleted on request, never used to train models.", a: "Private by default", r: "" },
+    { q: "Two tools, one account: chat with any PDF, and generate exam-ready question papers.", a: "One account", r: "PDF chat + question papers", iris: true },
+    { q: "Read in one language and ask in another — translations stay footnoted to the source.", a: "70+ languages", r: "" },
+    { q: "Bring a contract, a textbook, a filing, or a syllabus — up to 500 pages per document.", a: "Any document", r: "" },
   ];
 
   return (
     <section style={{ padding: "60px 0 100px", position: "relative" }}>
       <div className="spread">
-        <div className="section-eyebrow">Correspondence</div>
-        <h2 className="section-title">From the readers' <span className="iris">desks.</span></h2>
-        <p className="section-lede">Sent to us. Permission to publish, granted.</p>
+        <div className="section-eyebrow">Why it’s different</div>
+        <h2 className="section-title">What you can <span className="iris">count on.</span></h2>
+        <p className="section-lede">No fine print — these hold on every plan.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }} className="test-grid">
           {quotes.map((q, i) => (

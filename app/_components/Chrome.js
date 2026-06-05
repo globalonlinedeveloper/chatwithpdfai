@@ -90,7 +90,7 @@ export function CookieBanner() {
   if (!show) return null;
   const accept = (level) => { try { localStorage.setItem('cwpa_cookies_v1', level); } catch {} setShow(false); };
   return (
-    <div className="no-print" style={{ position: 'fixed', bottom: 18, left: 18, right: 18, maxWidth: 520, zIndex: 100 }}>
+    <div className="no-print" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 36px)', maxWidth: 520, zIndex: 100 }}>
       <div className="glass" style={{ padding: 18, borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <div style={{ fontSize: 22, lineHeight: 1 }}>🍪</div>
