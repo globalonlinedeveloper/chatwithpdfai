@@ -27,7 +27,7 @@ function HowItWorks() {
     <section id="how" style={{ padding: "100px 0", position: "relative" }}>
       <div className="spread">
         <div className="section-eyebrow">How it works</div>
-        <h2 className="section-title">Three steps. <span className="iris">No ceremony.</span></h2>
+        <h2 className="section-title">Three steps. <span className="iris">No setup.</span></h2>
         <p className="section-lede">Most tools ask you to organize a library, sign up, pick a plan. We ask you to drop a file.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }} className="how-grid">

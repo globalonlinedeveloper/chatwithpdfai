@@ -104,7 +104,7 @@ export function CookieBanner() {
   const accept = (level) => { try { localStorage.setItem('cwpa_cookies_v1', level); } catch {} setShow(false); };
   return (
     <div className="no-print" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 36px)', maxWidth: 520, zIndex: 100 }}>
-      <div className="glass" style={{ padding: 18, borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)' }}>
+      <div className="glass" style={{ padding: 14, borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <div style={{ fontSize: 22, lineHeight: 1 }}>🍪</div>
           <div style={{ flex: 1 }}>
@@ -114,7 +114,7 @@ export function CookieBanner() {
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
           <button onClick={() => accept('all')} className="btn btn-iris btn-sm" style={{ flex: 1 }}>Accept all</button>
           <button onClick={() => accept('essential')} className="btn btn-glass btn-sm" style={{ flex: 1 }}>Essential only</button>
         </div>

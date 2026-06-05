@@ -60,6 +60,19 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <SiteShell active="features">
         <Hero />
+        <section style={{ padding: '0 0 26px', position: 'relative' }}>
+          <div className="spread">
+            <div className="glass" style={{ borderRadius: 'var(--r-lg)', padding: '18px 24px', display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+              {[['No subscription', 'Pay only for the documents you use'], ['Credits never expire', 'Top up once — come back anytime'], ['Cited to the page', 'Every answer footnoted to its source']].map(([t, d]) => (
+                <div key={t} style={{ minWidth: 170, flex: 1 }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--text)' }}>{t}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginTop: 2 }}>{d}</div>
+                </div>
+              ))}
+              <span className="mono" style={{ fontSize: 10, letterSpacing: '0.12em', color: 'var(--text-4)' }}>POWERED BY OPENAI · ANTHROPIC · GOOGLE</span>
+            </div>
+          </div>
+        </section>
         <HowItWorks />
         <LivePreview />
         <FeaturesGrid />

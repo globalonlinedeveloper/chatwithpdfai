@@ -22,7 +22,7 @@ function Pricing() {
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--teal), transparent 60%)", right: 0, top: 0 }}></div>
       <div className="spread">
         <div className="section-eyebrow">Pricing</div>
-        <h2 className="section-title">Buy credits. <span className="iris">Spend them slowly.</span></h2>
+        <h2 className="section-title">Buy credits. <span className="iris">They never expire.</span></h2>
         <p className="section-lede">One credit covers one document — ask it as many questions as you like. Credits never expire. No subscription.</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }} className="price-grid">
           {packs.map(p => (

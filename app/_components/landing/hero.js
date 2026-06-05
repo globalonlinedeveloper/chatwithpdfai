@@ -141,7 +141,7 @@ function Hero() {
               <a href="/signup" className="btn btn-iris btn-lg">Start free →</a>
               <a href="#pricing" style={{ color: "var(--text-2)", fontSize: 14.5, textDecoration: "none", borderBottom: "1px solid var(--stroke-2)", paddingBottom: 2 }}>or see credit pricing</a>
             </div>
-            <div className="mono" style={{ marginTop: 12, fontSize: 11.5, color: "var(--text-4)", letterSpacing: "0.04em" }}>Free credits on signup · no card required · Powered by OpenAI, Anthropic and Google</div>
+            <div className="mono" style={{ marginTop: 12, fontSize: 11.5, color: "var(--text-4)", letterSpacing: "0.04em" }}>Start with 15 free credits · no card required</div>
 
             {/* Trust strip */}
             <div style={{ marginTop: 56 }}>
