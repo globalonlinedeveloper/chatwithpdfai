@@ -1,7 +1,8 @@
 import ToolsShell from '../_components/ToolsShell';
 import { PageHeader } from '../_components/Chrome';
 import ToolCardClient from '../_components/ToolCardClient';
-import { TOOLS, CATEGORIES } from '@/lib/tools';
+import ToolsCta from '../_components/ToolsCta';
+import { TOOLS } from '@/lib/tools';
 
 export const metadata = {
   alternates: { canonical: '/tools' },
@@ -14,18 +15,11 @@ export default function ToolsPage() {
     <ToolsShell active="tools">
       <PageHeader eyebrow="Tools" title="Every PDF tool in one place" lede="Read, understand and create from your documents. Pay per use — no subscription." />
       <section className="spread" style={{ paddingBottom: 80 }}>
-        {CATEGORIES.map((cat) => {
-          const list = TOOLS.filter((t) => t.category === cat);
-          if (!list.length) return null;
-          return (
-            <div key={cat} style={{ marginBottom: 40 }}>
-              <div className="section-eyebrow">{cat}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginTop: 14 }}>
-                {list.map((t) => <ToolCardClient key={t.slug} tool={t} />)}
-              </div>
-            </div>
-          );
-        })}
+        <div className="tools-grid" style={{ display: 'grid', gap: 18 }}>
+          {TOOLS.map((t) => <ToolCardClient key={t.slug} tool={t} />)}
+        </div>
+        <ToolsCta />
+        <style dangerouslySetInnerHTML={{ __html: '.tools-grid{grid-template-columns:repeat(2,minmax(0,1fr))} @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}' }} />
       </section>
     </ToolsShell>
   );
