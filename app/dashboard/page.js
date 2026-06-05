@@ -45,16 +45,20 @@ export default function HomePage() {
   const [tests, setTests] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState('');
+  const [banks, setBanks] = useState([]);
+  const [templates, setTemplates] = useState([]);
   useEffect(() => {
     fetch('/api/credits').then((r) => { if (r.status === 401) { window.location.href = '/signin?next=' + encodeURIComponent(window.location.pathname + window.location.search); return null; } return r.json(); }).then((j) => { if (j && typeof j.balance === 'number') setCredits(j.balance); }).catch(() => {});
     const a = fetch('/api/auth/me').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.user) { const _nm = String(j.user.name || '').trim(); setName(_nm); setVerified(!!j.user.emailVerified); } }).catch(() => {});
     const b = fetch('/api/documents').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.documents)) setDocs(j.documents); }).catch(() => {});
     const c = fetch('/api/papers/library').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.papers)) setPapers(j.papers); }).catch(() => {});
     const d = fetch('/api/papers/assignments').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.assignments)) setTests(j.assignments); }).catch(() => {});
-    Promise.allSettled([a, b, c, d]).then(() => setLoaded(true));
+    const e = fetch('/api/papers/bank').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.items)) setBanks(j.items); }).catch(() => {});
+    const f = fetch('/api/papers/templates').then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && Array.isArray(j.templates)) setTemplates(j.templates); }).catch(() => {});
+    Promise.allSettled([a, b, c, d, e, f]).then(() => setLoaded(true));
   }, []);
   const readyDocs = docs.filter((d) => d.status === 'ready');
-  const hasData = readyDocs.length > 0 || papers.length > 0 || tests.length > 0;
+  const hasData = readyDocs.length > 0 || papers.length > 0 || tests.length > 0 || banks.length > 0 || templates.length > 0;
   const steps = [
     { done: verified, label: 'Verify your email', href: '/account', cta: 'Verify' },
     { done: readyDocs.length > 0, label: 'Upload your first PDF', href: '/chat-with-pdf', cta: 'Upload' },
@@ -82,6 +86,8 @@ export default function HomePage() {
     { label: 'Documents', value: readyDocs.length, href: '/library?tab=docs' },
     { label: 'Question papers', value: papers.length, href: '/library?tab=papers' },
     { label: 'Shared tests', value: tests.length, href: '/library?tab=tests' },
+    ...(banks.length ? [{ label: 'Question bank', value: banks.length, href: '/library?tab=bank' }] : []),
+    ...(templates.length ? [{ label: 'Templates', value: templates.length, href: '/library?tab=templates' }] : []),
     { label: 'Credits', value: credits == null ? '…' : credits.toLocaleString('en-IN'), href: '/buy' },
   ];
   return (
