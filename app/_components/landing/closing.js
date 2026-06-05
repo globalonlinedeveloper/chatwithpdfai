@@ -21,9 +21,9 @@ function Pricing() {
     <section id="pricing" style={{ padding: "100px 0", position: "relative" }}>
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--teal), transparent 60%)", right: 0, top: 0 }}></div>
       <div className="spread">
-        <div className="section-eyebrow">The ledger</div>
+        <div className="section-eyebrow">Pricing</div>
         <h2 className="section-title">Buy credits. <span className="iris">Spend them slowly.</span></h2>
-        <p className="section-lede">One credit answers one question against your documents. Credits never expire. No subscription.</p>
+        <p className="section-lede">One credit covers one document — ask it as many questions as you like. Credits never expire. No subscription.</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }} className="price-grid">
           {packs.map(p => (
             <div key={p.code} className={`glass ${p.featured ? "glass-iris-border" : ""}`} style={{ padding: "30px 24px", borderRadius: "var(--r-xl)", background: p.featured ? "linear-gradient(180deg, rgba(183,106,255,0.12), rgba(78,163,255,0.06))" : "var(--glass-1)", borderColor: p.featured ? "transparent" : "var(--stroke-2)", position: "relative", display: "flex", flexDirection: "column" }}>
@@ -75,9 +75,9 @@ function Security() {
       <div className="spread">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 48, alignItems: "start" }} className="sec-grid">
           <div>
-            <div className="section-eyebrow">Chain of custody</div>
+            <div className="section-eyebrow">Your data</div>
             <h2 className="section-title" style={{ marginTop: 14 }}>
-              Treated like <span className="iris">privileged documents.</span>
+              Your documents <span className="iris">stay private.</span>
             </h2>
             <p style={{ fontSize: 15, lineHeight: 1.55, color: "var(--text-3)", margin: "0 0 28px", maxWidth: 380 }}>
               Lawyers, doctors, and analysts brought us here. The bar is the bar.
@@ -127,8 +127,8 @@ function FAQ() {
   return (
     <section style={{ padding: "60px 0 100px", position: "relative" }}>
       <div className="spread">
-        <div className="section-eyebrow">Inquiries</div>
-        <h2 className="section-title">Anticipated <span className="iris">questions.</span></h2>
+        <div className="section-eyebrow">FAQ</div>
+        <h2 className="section-title">Questions, <span className="iris">answered.</span></h2>
         <p className="section-lede">If yours isn't here, the email is in the footer.</p>
 
         <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden" }}>

@@ -108,7 +108,7 @@ function UseCases() {
     <section id="cases" style={{ padding: "100px 0", position: "relative" }}>
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--blue), transparent 60%)", left: 0, bottom: 100 }}></div>
       <div className="spread">
-        <div className="section-eyebrow">Readers</div>
+        <div className="section-eyebrow">Who it’s for</div>
         <h2 className="section-title">Built for people whose work <span className="iris">lives inside PDFs.</span></h2>
         <p className="section-lede">Seven kinds of work, one tool. Switch the tab; the workflow changes underneath.</p>
 

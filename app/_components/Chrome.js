@@ -11,6 +11,7 @@ const NAV = [
 export function Masthead({ active }) {
   const [scrolled, setScrolled] = useState(false);
   const [authed, setAuthed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => { fetch('/api/auth/state').then((r) => (r.ok ? r.json() : null)).then((j) => setAuthed(!!(j && j.authed))).catch(() => {}); }, []);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -30,9 +31,21 @@ export function Masthead({ active }) {
           ))}
         </nav>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {authed ? <a href="/dashboard" className="btn btn-iris btn-sm">Go to app →</a> : <><a href="/signin" className="btn btn-ghost btn-sm">Sign in</a><a href="/signup" className="btn btn-iris btn-sm">Try free →</a></>}
+          {authed ? <a href="/dashboard" className="btn btn-iris btn-sm">Go to app →</a> : <><a href="/signin" className="btn btn-ghost btn-sm auth-desktop">Sign in</a><a href="/signup" className="btn btn-iris btn-sm">Try free →</a></>}
+          <button type="button" className="nav-toggle" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} style={{ background: 'transparent', border: '1px solid var(--stroke-2)', borderRadius: 8, color: 'var(--text)', width: 36, height: 32, fontSize: 15, lineHeight: 1, cursor: 'pointer', padding: 0 }}>{menuOpen ? '✕' : '☰'}</button>
         </div>
       </div>
+      {menuOpen && (
+        <nav className="mobile-menu" aria-label="Mobile navigation">
+          <div className="masthead-inner" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 0, paddingTop: 4, paddingBottom: 10 }}>
+            {NAV.map((n) => (
+              <a key={n.k} href={n.href} onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 2px', fontSize: 15, color: active === n.k ? 'var(--text)' : 'var(--text-2)', borderTop: '1px solid var(--stroke-1)' }}>{n.label}</a>
+            ))}
+            {!authed && <a href="/signin" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 2px', fontSize: 15, color: 'var(--text-2)', borderTop: '1px solid var(--stroke-1)' }}>Sign in</a>}
+          </div>
+        </nav>
+      )}
+      <style dangerouslySetInnerHTML={{ __html: `.nav-toggle{display:none;} .mobile-menu{display:none;} @media (max-width:980px){.nav-toggle{display:inline-flex;align-items:center;justify-content:center;} .mobile-menu{display:block;} .auth-desktop{display:none;}}` }} />
     </header>
   );
 }

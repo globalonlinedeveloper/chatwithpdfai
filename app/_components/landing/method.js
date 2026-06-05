@@ -229,8 +229,8 @@ function FeaturesGrid() {
     <section id="features" style={{ padding: "100px 0", position: "relative" }}>
       <div className="section-blob" style={{ background: "radial-gradient(circle, var(--pink), transparent 60%)", top: 100, right: 100 }}></div>
       <div className="spread">
-        <div className="section-eyebrow">Apparatus</div>
-        <h2 className="section-title">Twelve <span className="iris">working parts.</span></h2>
+        <div className="section-eyebrow">Features</div>
+        <h2 className="section-title">Everything <span className="iris">you get.</span></h2>
         <p className="section-lede">A short catalog of what's inside, in the order you'll meet them.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }} className="feat-grid">

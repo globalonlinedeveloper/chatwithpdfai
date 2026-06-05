@@ -71,7 +71,7 @@ function Hero() {
           <div style={{ animation: "fadeUp .6s ease both" }}>
             <span className="pill" style={{ marginBottom: 28 }}>
               <span className="dot"></span>
-              New · Multi-PDF chat across folders
+              Chat with PDFs · Generate question papers
               <span className="tag-new">LIVE</span>
             </span>
 
@@ -81,8 +81,8 @@ function Hero() {
             </h1>
 
             <p style={{ fontSize: 18, lineHeight: 1.55, color: "var(--text-3)", marginTop: 24, maxWidth: 520 }}>
-              Drop a contract, a 200-page filing, a thesis. Ask anything in plain language —
-              get cited answers in seconds. <strong style={{ color: "var(--text)", fontWeight: 600 }}>Pay per document, no subscription.</strong>
+              Chat with any PDF for cited answers in seconds — and turn a topic or textbook into an
+              exam-ready question paper. <strong style={{ color: "var(--text)", fontWeight: 600 }}>Pay per document, no subscription.</strong>
             </p>
 
             {/* Animated prompt input */}
@@ -137,10 +137,11 @@ function Hero() {
               }}>⏎</kbd>
             </div>
 
-            <div style={{ marginTop: 22, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-              <a href="/signup" className="btn btn-iris btn-lg">Get started — drop a PDF →</a>
-              <a href="#pricing" className="btn btn-glass btn-lg">See credit pricing</a>
+            <div style={{ marginTop: 22, display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+              <a href="/signup" className="btn btn-iris btn-lg">Start free →</a>
+              <a href="#pricing" style={{ color: "var(--text-2)", fontSize: 14.5, textDecoration: "none", borderBottom: "1px solid var(--stroke-2)", paddingBottom: 2 }}>or see credit pricing</a>
             </div>
+            <div className="mono" style={{ marginTop: 12, fontSize: 11.5, color: "var(--text-4)", letterSpacing: "0.04em" }}>Free credits on signup · no card required · Powered by OpenAI, Anthropic and Google</div>
 
             {/* Trust strip */}
             <div style={{ marginTop: 56 }}>
