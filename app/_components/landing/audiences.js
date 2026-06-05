@@ -224,7 +224,7 @@ function CompareTable() {
       <div className="spread">
         <div className="section-eyebrow">Comparison</div>
         <h2 className="section-title">How we stack up <span className="iris">against the rest.</span></h2>
-        <p className="section-lede">Ten things that matter. We checked.</p>
+        <p className="section-lede">How we compare on the things that matter.</p>
 
         <div className="glass" style={{ borderRadius: "var(--r-xl)", overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>

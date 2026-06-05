@@ -231,7 +231,7 @@ function FeaturesGrid() {
       <div className="spread">
         <div className="section-eyebrow">Features</div>
         <h2 className="section-title">Everything <span className="iris">you get.</span></h2>
-        <p className="section-lede">A short catalog of what's inside, in the order you'll meet them.</p>
+        <p className="section-lede">A quick tour of what's included.</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }} className="feat-grid">
           {features.map((f, i) => (

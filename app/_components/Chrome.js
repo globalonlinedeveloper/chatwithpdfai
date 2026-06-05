@@ -103,20 +103,14 @@ export function CookieBanner() {
   if (!show) return null;
   const accept = (level) => { try { localStorage.setItem('cwpa_cookies_v1', level); } catch {} setShow(false); };
   return (
-    <div className="no-print" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 36px)', maxWidth: 520, zIndex: 100 }}>
-      <div className="glass" style={{ padding: 14, borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)' }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          <div style={{ fontSize: 22, lineHeight: 1 }}>🍪</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>We use cookies</div>
-            <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
-              Essential cookies keep you signed in. We never sell your data. <a href="/legal/cookies" style={{ color: 'var(--violet-2)', textDecoration: 'underline' }}>Read the policy</a>.
-            </p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-          <button onClick={() => accept('all')} className="btn btn-iris btn-sm" style={{ flex: 1 }}>Accept all</button>
-          <button onClick={() => accept('essential')} className="btn btn-glass btn-sm" style={{ flex: 1 }}>Essential only</button>
+    <div className="no-print" style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 28px)', maxWidth: 580, zIndex: 100 }}>
+      <div className="glass" style={{ padding: '10px 14px', borderRadius: 'var(--r-lg)', border: '1px solid var(--stroke-3)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <p style={{ flex: 1, minWidth: 200, fontSize: 12.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.45 }}>
+          We use essential cookies to keep you signed in. We never sell your data. <a href="/legal/cookies" style={{ color: 'var(--violet-2)', textDecoration: 'underline' }}>Cookie policy</a>.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <button onClick={() => accept('essential')} className="btn btn-glass btn-sm">Essential only</button>
+          <button onClick={() => accept('all')} className="btn btn-iris btn-sm">Accept all</button>
         </div>
       </div>
     </div>
