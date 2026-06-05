@@ -85,3 +85,6 @@ test-results/
 playwright-report/
 playwright/.cache/
 /tests/fixtures/*.pdf
+
+# stray local test/screenshot scripts (never commit)
+_*.mjs
