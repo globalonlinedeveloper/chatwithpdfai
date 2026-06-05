@@ -47,7 +47,7 @@ export default function AppNav({ active, credits: creditsProp, actions }) {
         <button onClick={() => { setMenu((v) => !v); setNavMenu(false); }} aria-label="Account menu" aria-haspopup="true" aria-expanded={menu} style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--grad-iris-2)', color: '#fff', border: 'none', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>{initials || '·'}</button>
         {menu && <div className="glass" role="menu" style={{ position: 'absolute', right: 0, top: 40, minWidth: 152, borderRadius: 'var(--r)', padding: 5, zIndex: 50 }}><a href="/account" role="menuitem" style={mItem}>Account</a><a href="/buy" role="menuitem" style={mItem}>Buy credits</a><button onClick={signOut} role="menuitem" style={mItem} data-testid="signout">Sign out</button></div>}
       </div>
-      <style>{`.appnav-burger{ display:none } @media (max-width: 560px){ .appnav{ gap:8px !important } .appnav .domain{ display:none } .appnav-links{ display:none } .appnav-burger{ display:inline-flex } }`}</style>
+      <style>{`.appnav-burger{ display:none } @media (max-width: 560px){ .appnav{ gap:8px !important } .appnav .domain{ display:none } .appnav-links{ display:none !important } .appnav-burger{ display:inline-flex } }`}</style>
     </header>
   );
 }
