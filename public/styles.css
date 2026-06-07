@@ -486,3 +486,13 @@ select option, select optgroup { background-color: #0b0c1f; color: #e8e8f0; }
 
 /* Loading skeleton */
 .skel { background: linear-gradient(90deg, var(--glass-1) 25%, var(--glass-2) 50%, var(--glass-1) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; border-radius: var(--r); display: block; }
+
+/* Respect reduced-motion preference (accessibility + low-end-device perf). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

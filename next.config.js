@@ -1,4 +1,20 @@
 /** @type {import('next').NextConfig} */
+const CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.razorpay.com https://lumberjack.razorpay.com",
+  "frame-src 'self' https://*.razorpay.com https://checkout.razorpay.com https://api.razorpay.com",
+  "worker-src 'self' blob:",
+  'upgrade-insecure-requests',
+].join('; ');
+
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -32,6 +48,7 @@ const nextConfig = {
 
   async redirects() {
     return [
+      { source: '/:path*', has: [{ type: 'host', value: 'www.chatwithpdfai.com' }], destination: 'https://chatwithpdfai.com/:path*', permanent: true },
       { source: '/studio', destination: '/question-paper-generator', permanent: true },
       { source: '/papers', destination: '/question-paper-generator', permanent: true },
       { source: '/workspace', destination: '/chat-with-pdf', permanent: true },
@@ -82,7 +99,8 @@ const nextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' },
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Content-Security-Policy', value: CSP },
         ],
       },
     ];

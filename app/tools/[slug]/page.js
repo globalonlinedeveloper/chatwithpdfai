@@ -7,7 +7,13 @@ import { notFound } from 'next/navigation';
 export function generateMetadata({ params }) {
   const t = toolBySlug(params.slug);
   if (!t) return { title: 'Tool — CHATWITHPDFAI' };
-  return { title: t.seoTitle + ' | CHATWITHPDFAI', description: t.seoDesc, alternates: { canonical: '/tools/' + t.slug } };
+  const url = 'https://chatwithpdfai.com/tools/' + t.slug;
+  const img = 'https://chatwithpdfai.com/og-image.png';
+  return {
+    title: t.seoTitle + ' | CHATWITHPDFAI', description: t.seoDesc, alternates: { canonical: '/tools/' + t.slug },
+    openGraph: { title: t.seoTitle, description: t.seoDesc, url, type: 'website', siteName: 'CHATWITHPDFAI', images: [{ url: img, width: 1200, height: 630 }] },
+    twitter: { card: 'summary_large_image', title: t.seoTitle, description: t.seoDesc, images: [img] },
+  };
 }
 
 export default function ToolPage({ params }) {

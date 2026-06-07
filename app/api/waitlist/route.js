@@ -6,11 +6,13 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { isEmail, clip, getClientIp } from '@/lib/validate';
+import { rateLimit } from '@/lib/ratelimit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
+  if (!(await rateLimit({ bucket: 'waitlist', ip: getClientIp(req), max: 8, windowMin: 60 }))) return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
   let body;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });

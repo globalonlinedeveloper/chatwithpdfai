@@ -3,10 +3,11 @@ import { routeChat } from '@/lib/llm/router';
 import { getReadyDocuments, retrievePagesMulti, cacheKey, cacheGet, cachePut, ensureConversation, addMessage, logUsage } from '@/lib/store/chat';
 import { getCurrentUser } from '@/lib/auth';
 import { getBalance, chargeCredits, creditsEnforced } from '@/lib/credits';
+import { rateLimit } from '@/lib/ratelimit';
+import { getClientIp } from '@/lib/validate';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-const STUB_USER_ID = Number(process.env.STUB_USER_ID || 1);
 const MAX_DOCS = 5;
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 
@@ -21,6 +22,7 @@ function normalizeIds(body) {
 
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!(await rateLimit({ bucket: 'chat', ip: getClientIp(req), max: 40, windowMin: 1 }))) return NextResponse.json({ error: 'Too many requests. Please slow down a moment.' }, { status: 429 });
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
   const ids = normalizeIds(body);

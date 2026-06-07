@@ -11,7 +11,6 @@ import { getCurrentUser } from '@/lib/auth';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const STUB_USER_ID = Number(process.env.STUB_USER_ID || 1);
 
 function flagOn() {
   return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1';

@@ -3,7 +3,6 @@ import { getCurrentUser } from '@/lib/auth';
 import { getBalance, listPacks, creditsEnforced } from '@/lib/credits';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-const STUB_USER_ID = Number(process.env.STUB_USER_ID || 1);
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 export async function GET(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });

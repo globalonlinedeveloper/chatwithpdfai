@@ -1,0 +1,57 @@
+name: DB backup (mysqldump -> artifact)
+
+# Free off-site backup: SSH into Hostinger, mysqldump over the wire (CLI handles
+# the native VECTOR column that phpMyAdmin cannot), gzip on the runner, and keep
+# it as a downloadable workflow artifact. No paid storage. Restore with the mysql
+# CLI only (never phpMyAdmin).
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   HOSTINGER_SSH_HOST, HOSTINGER_SSH_PORT, HOSTINGER_SSH_USER, HOSTINGER_SSH_PASSWORD,
+#   DB_NAME, DB_USER, DB_PASSWORD
+# (values are in your local .cowork-private/credentials.env)
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # daily at 02:00 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+
+      - name: Dump database over SSH
+        env:
+          SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          STAMP="$(date -u +%Y-%m-%d_%H%M)"
+          OUT="backup/chatwithpdfai_${STAMP}.sql.gz"
+          # MYSQL_PWD keeps the DB password out of the server process list (ps).
+          sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+            -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+            "MYSQL_PWD='${DB_PASSWORD}' mysqldump --single-transaction --quick --no-tablespaces --routines --triggers --default-character-set=utf8mb4 -u'${{ secrets.DB_USER }}' '${{ secrets.DB_NAME }}'" \
+            | gzip -9 > "${OUT}"
+          SIZE="$(stat -c%s "${OUT}")"
+          echo "Wrote ${OUT} (${SIZE} bytes)"
+          # Sanity: a real dump is well over 1 KB gzipped; fail the run if it isn't.
+          test "${SIZE}" -gt 1024
+          echo "STAMP=${STAMP}" >> "$GITHUB_ENV"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: backup/*.sql.gz
+          retention-days: 30
+          if-no-files-found: error

@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
+import { rateLimit } from '@/lib/ratelimit';
+import { getClientIp } from '@/lib/validate';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 function flagOn() { return process.env.PRODUCT_MVP_ENABLED === '1' || process.env.TEST_MODE === '1'; }
 export async function POST(req) {
   if (!flagOn()) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!(await rateLimit({ bucket: 'pwreset', ip: getClientIp(req), max: 10, windowMin: 60 }))) return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
   let body; try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
   const token = typeof body.token === 'string' ? body.token : '';
   const password = typeof body.password === 'string' ? body.password : '';
