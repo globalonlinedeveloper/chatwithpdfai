@@ -1,18 +1,18 @@
 name: DB backup (mysqldump -> artifact)
 
-# Free off-site backup: SSH into Hostinger, mysqldump over the wire (CLI handles
-# the native VECTOR column that phpMyAdmin cannot), gzip on the runner, and keep
-# it as a downloadable workflow artifact. No paid storage. Restore with the mysql
-# CLI only (never phpMyAdmin).
+# Free off-site backup of the live MariaDB. SSH into Hostinger, read DB creds
+# straight from the running app's /proc/<pid>/environ (so NO database password
+# is stored in GitHub — only SSH access is), mysqldump, gzip on the runner,
+# write a .sha256 sidecar, and keep both as a 90-day artifact. Restore: see
+# docs/RESTORE.md (mysql CLI only — the pdf_pages VECTOR column breaks phpMyAdmin).
 #
 # Required repo secrets (Settings -> Secrets and variables -> Actions):
-#   HOSTINGER_SSH_HOST, HOSTINGER_SSH_PORT, HOSTINGER_SSH_USER, HOSTINGER_SSH_PASSWORD,
-#   DB_NAME, DB_USER, DB_PASSWORD
-# (values are in your local .cowork-private/credentials.env)
+#   HOSTINGER_SSH_HOST, HOSTINGER_SSH_PORT, HOSTINGER_SSH_USER, HOSTINGER_SSH_PASSWORD
+# (DB_NAME / DB_USER / DB_PASSWORD are no longer needed — delete them.)
 
 on:
   schedule:
-    - cron: '0 2 * * *'   # daily at 02:00 UTC
+    - cron: '0 2 * * *'   # daily at 02:00 UTC (~07:30 IST)
   workflow_dispatch: {}
 
 concurrency:
@@ -27,31 +27,60 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
 
-      - name: Dump database over SSH
+      - name: Dump database over SSH (creds read from /proc on the server)
+        shell: bash
         env:
           SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p backup
           STAMP="$(date -u +%Y-%m-%d_%H%M)"
           OUT="backup/chatwithpdfai_${STAMP}.sql.gz"
-          # MYSQL_PWD keeps the DB password out of the server process list (ps).
-          sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
-            -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
-            "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
-            "MYSQL_PWD='${DB_PASSWORD}' mysqldump --single-transaction --quick --no-tablespaces --routines --triggers --default-character-set=utf8mb4 -u'${{ secrets.DB_USER }}' '${{ secrets.DB_NAME }}'" \
-            | gzip -9 > "${OUT}"
-          SIZE="$(stat -c%s "${OUT}")"
-          echo "Wrote ${OUT} (${SIZE} bytes)"
-          # Sanity: a real dump is well over 1 KB gzipped; fail the run if it isn't.
-          test "${SIZE}" -gt 1024
+
+          # Remote script: find the live app process, read DB_* from its environ,
+          # and mysqldump to stdout. Quoted heredoc => the server expands $vars,
+          # not the runner. MYSQL_PWD keeps the password out of the server's `ps`.
+          cat > remote-dump.sh <<'EOS'
+          set -euo pipefail
+          PID="$(ps -fu "$(id -u)" | grep 'next-server (v14.2.5)' | grep -v grep | head -1 | awk '{print $2}')"
+          [ -n "$PID" ] || { echo "no chatwithpdfai app process found" >&2; exit 3; }
+          ENVF="/proc/$PID/environ"
+          U="$(tr '\0' '\n' < "$ENVF" | grep '^DB_USER='     | head -1 | cut -d= -f2-)"
+          P="$(tr '\0' '\n' < "$ENVF" | grep '^DB_PASSWORD=' | head -1 | cut -d= -f2-)"
+          D="$(tr '\0' '\n' < "$ENVF" | grep '^DB_NAME='     | head -1 | cut -d= -f2-)"
+          [ -n "$U" ] && [ -n "$D" ] || { echo "could not read DB creds from app environ" >&2; exit 4; }
+          MYSQL_PWD="$P" mysqldump --single-transaction --quick --no-tablespaces \
+            --routines --triggers --events --default-character-set=utf8mb4 \
+            -h 127.0.0.1 -u"$U" "$D"
+          EOS
+
+          run_dump() {
+            sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+              -p "${{ secrets.HOSTINGER_SSH_PORT }}" \
+              "${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}" \
+              'bash -s' < remote-dump.sh | gzip -9 > "$OUT"
+          }
+
+          ok=0
+          for attempt in 1 2 3; do
+            if run_dump && [ "$(stat -c%s "$OUT" 2>/dev/null || echo 0)" -gt 1024 ]; then
+              ok=1; break
+            fi
+            echo "::warning::backup attempt ${attempt} failed (SSH timeout or short dump); retrying in 20s"
+            sleep 20
+          done
+          [ "$ok" = 1 ] || { echo "::error::DB backup failed after 3 attempts"; exit 1; }
+
+          sha256sum "$OUT" > "${OUT}.sha256"
+          echo "Wrote $(ls -la "$OUT" | awk '{print $5}') bytes -> ${OUT}"
           echo "STAMP=${STAMP}" >> "$GITHUB_ENV"
 
       - name: Upload backup artifact
         uses: actions/upload-artifact@v4
         with:
           name: db-backup-${{ env.STAMP }}
-          path: backup/*.sql.gz
-          retention-days: 30
+          path: |
+            backup/*.sql.gz
+            backup/*.sql.gz.sha256
+          retention-days: 90
           if-no-files-found: error
